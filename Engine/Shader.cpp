@@ -30,9 +30,6 @@ void Shader::CreateGraphicsShader(const wstring &path, ShaderInfo shaderInfo, Sh
         _graphicsPipelineDesc.NumRenderTargets = 1;
         _graphicsPipelineDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
         break;
-    case SHADER_TYPE::COMPUTE:
-        _graphicsPipelineDesc.NumRenderTargets = 0;
-        break;
     }
 
     switch (shaderInfo.rasterizerType) {

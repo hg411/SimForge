@@ -25,12 +25,29 @@ class GraphicsMaterial : public Object {
         _textures[index] = texture;
         //_params.SetTexOn(index, (texture == nullptr ? 0 : 1));
     }
-    void SetAlbedo(const Vec3 &albedo) { _params.albedo = albedo; }
-    void SetMetallic(const float metallic) { _params.metallic = metallic; }
-    void SetRoughness(const float roughness) { _params.roughness = roughness; }
+    void SetAlbedo(const Vec3 &albedo) { _materialParams.albedo = albedo; }
+    void SetMetallic(const float metallic) { _materialParams.metallic = metallic; }
+    void SetRoughness(const float roughness) { _materialParams.roughness = roughness; }
 
   private:
     shared_ptr<Shader> _shader;
-    MaterialParams _params;
+    MaterialParams _materialParams;
     array<shared_ptr<Texture>, MATERIAL_ARG_COUNT> _textures;
+};
+
+class ComputeMaterial : public Object {
+  public:
+    ComputeMaterial();
+    virtual ~ComputeMaterial();
+
+    void PushData();
+
+  public:
+    void SetSRV(SRV_REGISTER reg, shared_ptr<Texture> texture);
+    void SetUAV(UAV_REGISTER reg, shared_ptr<Texture> texture);
+
+  private:
+    shared_ptr<Shader> _shader;
+    array<shared_ptr<Texture>, SRV_REGISTER_COUNT> _srvs;
+    array<shared_ptr<Texture>, UAV_REGISTER_COUNT> _uavs;
 };
