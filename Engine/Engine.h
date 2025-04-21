@@ -8,6 +8,7 @@ class RootSignature;
 class GraphicsDescriptorHeap;
 class ComputeDescriptorHeap;
 class RenderTargetGroup;
+class ConstantBuffer;
 
 class Engine {
   public:
@@ -25,6 +26,9 @@ class Engine {
     shared_ptr<RootSignature> GetRootSignature() { return _rootSignature; }
     shared_ptr<GraphicsDescriptorHeap> GetGraphicsDescHeap() { return _graphicsDescHeap; }
     shared_ptr<ComputeDescriptorHeap> GetComputeDescHeap() { return _computeDescHeap; }
+    shared_ptr<ConstantBuffer> GetGlobalParamsCB() { return _globalParamsCB; }
+    shared_ptr<ConstantBuffer> GetTransformParamsCB() { return _transformParamsCB; }
+    shared_ptr<ConstantBuffer> GetMaterialParamsCB() { return _materialParamsCB; }
 
   private:
     void CreateRenderTargetGroups();
@@ -42,7 +46,9 @@ class Engine {
     shared_ptr<RootSignature> _rootSignature;
     shared_ptr<GraphicsDescriptorHeap> _graphicsDescHeap;
     shared_ptr<ComputeDescriptorHeap> _computeDescHeap;
-
     array<shared_ptr<RenderTargetGroup>, 1> _rtGroups;
+    shared_ptr<ConstantBuffer> _globalParamsCB;
+    shared_ptr<ConstantBuffer> _transformParamsCB;
+    shared_ptr<ConstantBuffer> _materialParamsCB;
     ////vector<shared_ptr<ConstantBuffer>> _constantBuffers;
 };

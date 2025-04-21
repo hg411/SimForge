@@ -16,6 +16,9 @@
     <Filter Include="Object\Component">
       <UniqueIdentifier>{30a93014-9a98-439f-89bc-98fbb73007b0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Object\Component\Base">
+      <UniqueIdentifier>{357c60b8-dfc0-4b2b-aa99-db2ffd4b3a63}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -51,7 +54,33 @@
     <ClCompile Include="Texture.cpp">
       <Filter>Object\Resource</Filter>
     </ClCompile>
-    <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Camera.cpp">
+      <Filter>Object\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="Transform.cpp">
+      <Filter>Object\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="Object.cpp">
+      <Filter>Object</Filter>
+    </ClCompile>
+    <ClCompile Include="SimulationObject.cpp">
+      <Filter>Object</Filter>
+    </ClCompile>
+    <ClCompile Include="Component.cpp">
+      <Filter>Object\Component\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="MonoBehaviour.cpp">
+      <Filter>Object\Component\Base</Filter>
+    </ClCompile>
+    <ClCompile Include="MeshRenderer.cpp">
+      <Filter>Object\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="Material.cpp">
+      <Filter>Object\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Shader.cpp">
+      <Filter>Object\Resource</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -90,7 +119,36 @@
     <ClInclude Include="Texture.h">
       <Filter>Object\Resource</Filter>
     </ClInclude>
-    <ClInclude Include="Camera.h" />
+    <ClInclude Include="Camera.h">
+      <Filter>Object\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="Transform.h">
+      <Filter>Object\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="Object.h">
+      <Filter>Object</Filter>
+    </ClInclude>
+    <ClInclude Include="SimulationObject.h">
+      <Filter>Object</Filter>
+    </ClInclude>
+    <ClInclude Include="Component.h">
+      <Filter>Object\Component\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="MonoBehaviour.h">
+      <Filter>Object\Component\Base</Filter>
+    </ClInclude>
+    <ClInclude Include="CBufferStructs.h">
+      <Filter>Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="MeshRenderer.h">
+      <Filter>Object\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="Material.h">
+      <Filter>Object\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Shader.h">
+      <Filter>Object\Resource</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include=".clang-format" />

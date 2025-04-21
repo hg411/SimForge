@@ -7,6 +7,8 @@
 #include "TableDescriptorHeap.h"
 #include "RenderTargetGroup.h"
 #include "Texture.h"
+#include "ConstantBuffer.h"
+#include "CBufferStructs.h"
 
 void Engine::Init(const WindowInfo &windowInfo) {
     _windowInfo = windowInfo;
@@ -43,9 +45,14 @@ void Engine::Init(const WindowInfo &windowInfo) {
     _computeDescHeap = make_shared<ComputeDescriptorHeap>();
     _computeDescHeap->Init(_device->GetDevice());
 
-    // CreateConstantBuffer(CBV_REGISTER::b0, sizeof(LightParams), 1);
-    // CreateConstantBuffer(CBV_REGISTER::b1, sizeof(TransformParams), 256);
-    // CreateConstantBuffer(CBV_REGISTER::b2, sizeof(MaterialParams), 256);
+    _globalParamsCB = make_shared<ConstantBuffer>(); 
+    _globalParamsCB->Init(CBV_REGISTER::b0, sizeof(GlobalParams), 256);
+
+    _transformParamsCB = make_shared<ConstantBuffer>();
+    _transformParamsCB->Init(CBV_REGISTER::b1, sizeof(TransformParams), 256);
+
+    _materialParamsCB = make_shared<ConstantBuffer>();
+    _materialParamsCB->Init(CBV_REGISTER::b2, sizeof(MaterialParams), 256);
 
     CreateRenderTargetGroups();
 

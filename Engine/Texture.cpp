@@ -3,7 +3,7 @@
 #include "Engine.h"
 #include "Device.h"
 
-Texture::Texture() {}
+Texture::Texture() : Object(OBJECT_TYPE::TEXTURE) {}
 
 Texture::~Texture() {}
 

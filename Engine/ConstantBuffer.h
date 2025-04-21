@@ -5,12 +5,12 @@ class ConstantBuffer {
     ConstantBuffer();
     ~ConstantBuffer();
 
-    void Init(uint32 size, uint32 count);
+    void Init(CBV_REGISTER reg, uint32 size, uint32 count);
 
     void Clear();
     void SetGraphicsGlobalData(void *buffer, uint32 size);
-    void PushGraphicsData(void *buffer, uint32 size, CBV_REGISTER reg);
-    void PushComputeData(void *buffer, uint32 size, CBV_REGISTER reg);
+    void PushGraphicsData(void *buffer, uint32 size);
+    void PushComputeData(void *buffer, uint32 size);
 
     D3D12_GPU_VIRTUAL_ADDRESS GetGpuVirtualAddress(uint32 index);
     D3D12_CPU_DESCRIPTOR_HANDLE GetCpuHandle(uint32 index);
@@ -30,4 +30,6 @@ class ConstantBuffer {
     uint32 _handleIncrementSize = 0;
 
     uint32 _currentIndex = 0;
+
+    CBV_REGISTER _reg = {};
 };
