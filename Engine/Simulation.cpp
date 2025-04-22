@@ -14,12 +14,6 @@ Simulation::Simulation() {}
 
 Simulation::~Simulation() {}
 
-void Simulation::Init() {
-    InitImgui();
-    InitShaders();
-    InitSimulationObjects();
-}
-
 void Simulation::Awake() {
     for (const shared_ptr<SimulationObject> &simulationObject : _simulationObjects) {
         simulationObject->Awake();

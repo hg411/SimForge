@@ -118,8 +118,8 @@ void ComputeDescriptorHeap::SetUAV(D3D12_CPU_DESCRIPTOR_HANDLE srcHandle, UAV_RE
 
 void ComputeDescriptorHeap::CommitTable() {
     // compute shader를 쓰기전에(Update 시작시점에서 실행시켜 줘야함) 나중에 수정필요!!!
-    // ID3D12DescriptorHeap *descHeap = _descHeap.Get();
-    // cmdList->SetDescriptorHeaps(1, &descHeap);
+    ID3D12DescriptorHeap *descHeap = _descHeap.Get();
+    COMPUTE_CMD_LIST->SetDescriptorHeaps(1, &descHeap);
 
     D3D12_GPU_DESCRIPTOR_HANDLE handle = _descHeap.Get()->GetGPUDescriptorHandleForHeapStart();
 

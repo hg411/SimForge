@@ -24,7 +24,7 @@ void Resources::CreateLineShader() {
     Add<Shader>(L"LineShader", shader);
 }
 
-shared_ptr<Mesh> Resources::LoadRectangleLineMesh(const float width, const float height) { 
+shared_ptr<Mesh> Resources::LoadRectangleLineMesh(const float width, const float height) {
     float halfW = width * 0.5f;
     float halfH = height * 0.5f;
 

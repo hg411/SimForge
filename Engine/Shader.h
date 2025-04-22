@@ -61,7 +61,7 @@ class Shader : public Object {
     virtual ~Shader();
 
     void CreateGraphicsShader(ShaderInfo info = ShaderInfo());
-    void CreateComputeShader(const wstring &fileName, const string &name, const string &version);
+    void CreateComputeShader(const wstring &fileName, const string &name = "main", const string &version = "cs_5_0");
 
     void Update();
 

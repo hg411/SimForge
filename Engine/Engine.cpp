@@ -50,13 +50,13 @@ void Engine::Init(const WindowInfo &windowInfo) {
     _computeDescHeap->Init(_device->GetDevice());
 
     _globalParamsCB = make_shared<ConstantBuffer>();
-    _globalParamsCB->Init(CBV_REGISTER::b0, sizeof(GlobalParams), 256);
+    _globalParamsCB->Init(sizeof(GlobalParams), 256);
 
     _transformParamsCB = make_shared<ConstantBuffer>();
-    _transformParamsCB->Init(CBV_REGISTER::b1, sizeof(TransformParams), 256);
+    _transformParamsCB->Init(sizeof(TransformParams), 256);
 
     _materialParamsCB = make_shared<ConstantBuffer>();
-    _materialParamsCB->Init(CBV_REGISTER::b2, sizeof(MaterialParams), 256);
+    _materialParamsCB->Init(sizeof(MaterialParams), 256);
 
     CreateRenderTargetGroups();
 

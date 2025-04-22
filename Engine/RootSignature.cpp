@@ -1,5 +1,7 @@
 #include "pch.h"
 #include "RootSignature.h"
+#include "Engine.h"
+#include "CommandQueue.h"
 
 void RootSignature::Init(ComPtr<ID3D12Device> device) {
     CreateGraphicsRootSignature(device);
@@ -80,5 +82,5 @@ void RootSignature::CreateComputeRootSignature(ComPtr<ID3D12Device> device) {
     device->CreateRootSignature(0, blobSignature->GetBufferPointer(), blobSignature->GetBufferSize(),
                                 IID_PPV_ARGS(&_computeRootSignature));
 
-    // COMPUTE_CMD_LIST->SetComputeRootSignature(_computeRootSignature.Get()); 꼭 수정필요!!!!
+    COMPUTE_CMD_LIST->SetComputeRootSignature(_computeRootSignature.Get()); //꼭 수정필요!!!!
 }

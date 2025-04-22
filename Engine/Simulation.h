@@ -9,7 +9,7 @@ class Simulation : public enable_shared_from_this<Simulation> {
     Simulation();
     virtual ~Simulation();
 
-    void Init();
+    virtual void Init() {}
 
     virtual void Awake();
     virtual void Start();
@@ -32,6 +32,8 @@ class Simulation : public enable_shared_from_this<Simulation> {
   protected:
     void InitImgui();
     virtual void InitShaders() {}
+    virtual void InitConstantBuffers() {}
+    virtual void InitStructuredBuffers() {}
     virtual void InitSimulationObjects() {}
 
   protected:

@@ -34,6 +34,12 @@
     <Filter Include="Shaders">
       <UniqueIdentifier>{5ddf050b-6d6c-45ac-9853-9f5ec35f2d8b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders\SPHFluid">
+      <UniqueIdentifier>{a2d27284-6ee7-417a-add7-ec6d66f71730}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders\SPHFluid\SPH2DFluid">
+      <UniqueIdentifier>{b27d0315-fd04-41e6-aec5-495c1aee1658}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -230,13 +236,34 @@
     <None Include="..\Resources\Shaders\Common.hlsli">
       <Filter>Shaders</Filter>
     </None>
+    <None Include="..\Resources\Shaders\Constants.hlsli">
+      <Filter>Shaders</Filter>
+    </None>
+    <None Include="..\Resources\Shaders\SPHFluidCommon.hlsli">
+      <Filter>Shaders\SPHFluid</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="..\Resources\Shaders\BasicVS.hlsl">
-      <Filter>Shaders</Filter>
+    <FxCompile Include="..\Resources\Shaders\SPHHashCS.hlsl">
+      <Filter>Shaders\SPHFluid</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\SPH2DFluidActivateCS.hlsl">
+      <Filter>Shaders\SPHFluid\SPH2DFluid</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\ParticleVS.hlsl">
+      <Filter>Shaders\SPHFluid</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\ParticlePS.hlsl">
+      <Filter>Shaders\SPHFluid</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\BillboardGS.hlsl">
+      <Filter>Shaders\SPHFluid</Filter>
     </FxCompile>
     <FxCompile Include="..\Resources\Shaders\BasicPS.hlsl">
-      <Filter>Shaders</Filter>
+      <Filter>Shaders\SPHFluid</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\BasicVS.hlsl">
+      <Filter>Shaders\SPHFluid</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>

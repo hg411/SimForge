@@ -16,9 +16,7 @@ ConstantBuffer::~ConstantBuffer() {
     }
 }
 
-void ConstantBuffer::Init(CBV_REGISTER reg, uint32 size, uint32 count) {
-    _reg = reg;
-
+void ConstantBuffer::Init(uint32 size, uint32 count) {
     // 상수 버퍼는 256 바이트 배수로 만들어야 함.
     // 0 256 512 768
     _elementSize = (size + 255) & ~255;
@@ -36,7 +34,7 @@ void ConstantBuffer::SetGraphicsGlobalData(void *buffer, uint32 size) {
     GRAPHICS_CMD_LIST->SetGraphicsRootConstantBufferView(0, GetGpuVirtualAddress(0));
 }
 
-void ConstantBuffer::PushGraphicsData(void *buffer, uint32 size) {
+void ConstantBuffer::PushGraphicsData(void *buffer, uint32 size, CBV_REGISTER reg) {
     assert(_currentIndex < _elementCount);
     assert(_elementSize == ((size + 255) & ~255));
 
@@ -44,19 +42,19 @@ void ConstantBuffer::PushGraphicsData(void *buffer, uint32 size) {
 
     D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle = GetCpuHandle(_currentIndex);
 
-    GEngine->GetGraphicsDescHeap()->SetCBV(cpuHandle, _reg);
+    GEngine->GetGraphicsDescHeap()->SetCBV(cpuHandle, reg);
 
     _currentIndex++;
 }
 
-void ConstantBuffer::PushComputeData(void *buffer, uint32 size) {
+void ConstantBuffer::PushComputeData(void *buffer, uint32 size, CBV_REGISTER reg) {
     assert(_currentIndex < _elementCount);
     assert(_elementSize == ((size + 255) & ~255));
 
     ::memcpy(&_mappedBuffer[_currentIndex * _elementSize], buffer, size);
 
     D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle = GetCpuHandle(_currentIndex);
-    GEngine->GetComputeDescHeap()->SetCBV(cpuHandle, _reg);
+    GEngine->GetComputeDescHeap()->SetCBV(cpuHandle, reg);
 
     _currentIndex++;
 }
