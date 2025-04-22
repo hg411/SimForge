@@ -50,6 +50,11 @@ void SPH2DFluid::FinalUpdate() {
     ActivateParticles();
     HashingParticles();
     SortParticles();
+    ComputeCellRange();
+    ComputeDensity();
+    PredictPositionVelocity();
+    IterativeEOS(5);
+    FinalEOS();
 }
 
 void SPH2DFluid::Render() {
@@ -59,8 +64,10 @@ void SPH2DFluid::Render() {
     _velocityBuffer->PushGraphicsData(SRV_REGISTER::t1);
     _aliveBuffer->PushGraphicsData(SRV_REGISTER::t2);
 
+    //_simulationParamsCB->Clear(); // 삭제
+    //_simulationParamsCB->PushGraphicsData(&_sph2DFluidParams, sizeof(_sph2DFluidParams), CBV_REGISTER::b3); //삭제
     _simulationParamsCB->Clear();
-    _simulationParamsCB->PushGraphicsData(&_sph2DFluidParams, sizeof(_sph2DFluidParams), CBV_REGISTER::b3);
+    _simulationParamsCB->BindToGraphics(CBV_REGISTER::b3);
 
     GEngine->GetGraphicsDescHeap()->CommitTable();
 
@@ -80,6 +87,30 @@ void SPH2DFluid::InitShaders() {
 
     _hashShader = make_shared<Shader>();
     _hashShader->CreateComputeShader(L"SPHHashCS.hlsl");
+
+    _bitonicSortShader = make_shared<Shader>();
+    _bitonicSortShader->CreateComputeShader(L"SPHBitonicSortCS.hlsl");
+
+    _cellRangeShader = make_shared<Shader>();
+    _cellRangeShader->CreateComputeShader(L"SPHCellRangeCS.hlsl");
+
+    _densityShader = make_shared<Shader>();
+    _densityShader->CreateComputeShader(L"SPHDensityCS.hlsl");
+
+    _predictShader = make_shared<Shader>();
+    _predictShader->CreateComputeShader(L"SPHPredictCS.hlsl");
+
+    _iterativeEOS1Shader = make_shared<Shader>();
+    _iterativeEOS1Shader->CreateComputeShader(L"SPHIterativeEOS1CS.hlsl");
+
+    _iterativeEOS2Shader = make_shared<Shader>();
+    _iterativeEOS2Shader->CreateComputeShader(L"SPHIterativeEOS2CS.hlsl");
+
+    _iterativeEOS3Shader = make_shared<Shader>();
+    _iterativeEOS3Shader->CreateComputeShader(L"SPHIterativeEOS3CS.hlsl");
+
+    _finalEOSShader = make_shared<Shader>();
+    _finalEOSShader->CreateComputeShader(L"SPHFinalCS.hlsl");
 
     ShaderInfo info = {
         SHADER_TYPE::FORWARD, RASTERIZER_TYPE::CULL_NONE,       DEPTH_STENCIL_TYPE::LESS,
@@ -104,11 +135,12 @@ void SPH2DFluid::InitConstantBuffers() {
             c.k = k;
             constsCPU.push_back(c);
         }
-    _bitonicSortCBs.resize(constsCPU.size());
+
+    _bitonicSortCB = make_shared<ConstantBuffer>();
+    _bitonicSortCB->Init(sizeof(BitonicSortConsts), constsCPU.size());
+
     for (size_t i = 0; i < constsCPU.size(); i++) {
-        _bitonicSortCBs[i] = make_shared<ConstantBuffer>();
-        _bitonicSortCBs[i]->Init(sizeof(BitonicSortConsts), 1);
-        _bitonicSortCBs[i]->PushComputeData(&constsCPU[i], sizeof(BitonicSortConsts), CBV_REGISTER::b0);
+        _bitonicSortCB->SetData(&constsCPU[i], sizeof(BitonicSortConsts));
     }
 }
 
@@ -219,11 +251,15 @@ void SPH2DFluid::PushSimulationParams() {
     _sph2DFluidParams.addCount = 1;
     _sph2DFluidParams.radius = _radius;
 
+    //_simulationParamsCB->PushComputeData(&_sph2DFluidParams, sizeof(_sph2DFluidParams), CBV_REGISTER::b0); // 삭제
     _simulationParamsCB->Clear();
-    _simulationParamsCB->PushComputeData(&_sph2DFluidParams, sizeof(_sph2DFluidParams), CBV_REGISTER::b0);
+    _simulationParamsCB->SetData(&_sph2DFluidParams, sizeof(_sph2DFluidParams));
 }
 
 void SPH2DFluid::ActivateParticles() {
+    _simulationParamsCB->Clear();
+    _simulationParamsCB->BindToCompute(CBV_REGISTER::b0);
+
     _positionBuffer->PushComputeUAVData(UAV_REGISTER::u0);
     _velocityBuffer->PushComputeUAVData(UAV_REGISTER::u1);
     _aliveBuffer->PushComputeUAVData(UAV_REGISTER::u2);
@@ -240,12 +276,15 @@ void SPH2DFluid::ActivateParticles() {
 }
 
 void SPH2DFluid::HashingParticles() {
+    _simulationParamsCB->Clear();
+    _simulationParamsCB->BindToCompute(CBV_REGISTER::b0);
+
     _positionBuffer->PushComputeSRVData(SRV_REGISTER::t0);
     _aliveBuffer->PushComputeSRVData(SRV_REGISTER::t1);
     _hashBuffer->PushComputeUAVData(UAV_REGISTER::u0);
 
     // Shader Set
-    _activateShader->Update();
+    _hashShader->Update();
 
     // dispatch
     GEngine->GetComputeDescHeap()->CommitTable();
@@ -256,23 +295,158 @@ void SPH2DFluid::HashingParticles() {
 }
 
 void SPH2DFluid::SortParticles() {
-    _positionBuffer->PushComputeUAVData(UAV_REGISTER::u0);
-    _velocityBuffer->PushComputeUAVData(UAV_REGISTER::u1);
-    _aliveBuffer->PushComputeUAVData(UAV_REGISTER::u2);
-    _hashBuffer->PushComputeUAVData(UAV_REGISTER::u3);
+    // Shader Set + Dispatch
+    _bitonicSortCB->Clear();
 
-    // Shader Set
     _bitonicSortShader->Update();
 
-    // dispatch
-    for (uint32_t k = 2; k <= _maxParticles; k *= 2)
+    for (uint32_t k = 2; k <= _maxParticles; k *= 2) {
         for (uint32_t j = k / 2; j > 0; j /= 2) {
-            CONTEXT->CSSetConstantBuffers(0, 1, _constsGpu[constCount++]->GetBuffer().GetAddressOf());
-            CONTEXT->Dispatch(threadGroupCountX, 1, 1);
+            _bitonicSortCB->BindToCompute(CBV_REGISTER::b0);
+
+            _positionBuffer->PushComputeUAVData(UAV_REGISTER::u0);
+            _velocityBuffer->PushComputeUAVData(UAV_REGISTER::u1);
+            _aliveBuffer->PushComputeUAVData(UAV_REGISTER::u2);
+            _hashBuffer->PushComputeUAVData(UAV_REGISTER::u3);
+            
+            GEngine->GetComputeDescHeap()->CommitTable();
+            COMPUTE_CMD_LIST->Dispatch(_threadGroupCountX, 1, 1);
         }
+    }
+
+    GEngine->GetComputeCmdQueue()->FlushComputeCommandQueue();
+}
+
+void SPH2DFluid::ComputeCellRange() {
+    _simulationParamsCB->Clear();
+    _simulationParamsCB->BindToCompute(CBV_REGISTER::b0);
+
+    _hashBuffer->PushComputeSRVData(SRV_REGISTER::t0);
+    _cellRangeBuffer->PushComputeUAVData(UAV_REGISTER::u0);
+
+    _cellRangeShader->Update();
+
     GEngine->GetComputeDescHeap()->CommitTable();
-
     COMPUTE_CMD_LIST->Dispatch(_threadGroupCountX, 1, 1);
+    GEngine->GetComputeCmdQueue()->FlushComputeCommandQueue();
+}
 
+void SPH2DFluid::ComputeDensity() {
+    _simulationParamsCB->Clear();
+    _simulationParamsCB->BindToCompute(CBV_REGISTER::b0);
+
+    _positionBuffer->PushComputeSRVData(SRV_REGISTER::t0);
+    _aliveBuffer->PushComputeSRVData(SRV_REGISTER::t1);
+    _cellRangeBuffer->PushComputeSRVData(SRV_REGISTER::t2);
+    _densityBuffer->PushComputeUAVData(UAV_REGISTER::u0);
+
+    _densityShader->Update();
+
+    GEngine->GetComputeDescHeap()->CommitTable();
+    COMPUTE_CMD_LIST->Dispatch(_threadGroupCountX, 1, 1);
+    GEngine->GetComputeCmdQueue()->FlushComputeCommandQueue();
+}
+
+void SPH2DFluid::PredictPositionVelocity() {
+    _simulationParamsCB->Clear();
+    _simulationParamsCB->BindToCompute(CBV_REGISTER::b0);
+
+    _positionBuffer->PushComputeSRVData(SRV_REGISTER::t0);
+    _velocityBuffer->PushComputeSRVData(SRV_REGISTER::t1);
+    _densityBuffer->PushComputeSRVData(SRV_REGISTER::t2);
+    _aliveBuffer->PushComputeSRVData(SRV_REGISTER::t3);
+    _cellRangeBuffer->PushComputeSRVData(SRV_REGISTER::t4);
+
+    _predPositionBuffer->PushComputeUAVData(UAV_REGISTER::u0);
+    _predVelocityBuffer->PushComputeUAVData(UAV_REGISTER::u1);
+
+    _predictShader->Update();
+
+    GEngine->GetComputeDescHeap()->CommitTable();
+    COMPUTE_CMD_LIST->Dispatch(_threadGroupCountX, 1, 1);
+    GEngine->GetComputeCmdQueue()->FlushComputeCommandQueue();
+}
+
+void SPH2DFluid::IterativeEOS(uint32 iterationCount) {
+    for (uint32 i = 0; i < iterationCount; ++i) {
+        IterativeEOS1();
+        IterativeEOS2();
+        IterativeEOS3();
+    }
+}
+
+void SPH2DFluid::IterativeEOS1() {
+    _simulationParamsCB->Clear();
+    _simulationParamsCB->BindToCompute(CBV_REGISTER::b0);
+
+    _positionBuffer->PushComputeSRVData(SRV_REGISTER::t0);
+    _predPositionBuffer->PushComputeSRVData(SRV_REGISTER::t1);
+    _aliveBuffer->PushComputeSRVData(SRV_REGISTER::t2);
+    _cellRangeBuffer->PushComputeSRVData(SRV_REGISTER::t3);
+
+    _densityBuffer->PushComputeUAVData(UAV_REGISTER::u0);
+    _pressureBuffer->PushComputeUAVData(UAV_REGISTER::u1);
+    _nearPressureBuffer->PushComputeUAVData(UAV_REGISTER::u2);
+
+    _iterativeEOS1Shader->Update();
+
+    GEngine->GetComputeDescHeap()->CommitTable();
+    COMPUTE_CMD_LIST->Dispatch(_threadGroupCountX, 1, 1);
+    GEngine->GetComputeCmdQueue()->FlushComputeCommandQueue();
+}
+
+void SPH2DFluid::IterativeEOS2() {
+    _simulationParamsCB->Clear();
+    _simulationParamsCB->BindToCompute(CBV_REGISTER::b0);
+
+    _positionBuffer->PushComputeSRVData(SRV_REGISTER::t0);
+    _predPositionBuffer->PushComputeSRVData(SRV_REGISTER::t1);
+    _aliveBuffer->PushComputeSRVData(SRV_REGISTER::t2);
+    _cellRangeBuffer->PushComputeSRVData(SRV_REGISTER::t3);
+    _densityBuffer->PushComputeSRVData(SRV_REGISTER::t4);
+    _pressureBuffer->PushComputeSRVData(SRV_REGISTER::t5);
+    _nearPressureBuffer->PushComputeSRVData(SRV_REGISTER::t6);
+
+    _forceBuffer->PushComputeUAVData(UAV_REGISTER::u0);
+
+    _iterativeEOS2Shader->Update();
+
+    GEngine->GetComputeDescHeap()->CommitTable();
+    COMPUTE_CMD_LIST->Dispatch(_threadGroupCountX, 1, 1);
+    GEngine->GetComputeCmdQueue()->FlushComputeCommandQueue();
+}
+
+void SPH2DFluid::IterativeEOS3() {
+    _simulationParamsCB->Clear();
+    _simulationParamsCB->BindToCompute(CBV_REGISTER::b0);
+
+    _forceBuffer->PushComputeSRVData(SRV_REGISTER::t0);
+    _aliveBuffer->PushComputeSRVData(SRV_REGISTER::t1);
+
+    _predPositionBuffer->PushComputeUAVData(UAV_REGISTER::u0);
+    _predVelocityBuffer->PushComputeUAVData(UAV_REGISTER::u1);
+
+    _iterativeEOS3Shader->Update();
+
+    GEngine->GetComputeDescHeap()->CommitTable();
+    COMPUTE_CMD_LIST->Dispatch(_threadGroupCountX, 1, 1);
+    GEngine->GetComputeCmdQueue()->FlushComputeCommandQueue();
+}
+
+void SPH2DFluid::FinalEOS() {
+    _simulationParamsCB->Clear();
+    _simulationParamsCB->BindToCompute(CBV_REGISTER::b0);
+
+    _predPositionBuffer->PushComputeSRVData(SRV_REGISTER::t0);
+    _predVelocityBuffer->PushComputeSRVData(SRV_REGISTER::t1);
+    _aliveBuffer->PushComputeSRVData(SRV_REGISTER::t2);
+
+    _positionBuffer->PushComputeUAVData(UAV_REGISTER::u0);
+    _velocityBuffer->PushComputeUAVData(UAV_REGISTER::u1);
+
+    _finalEOSShader->Update();
+
+    GEngine->GetComputeDescHeap()->CommitTable();
+    COMPUTE_CMD_LIST->Dispatch(_threadGroupCountX, 1, 1);
     GEngine->GetComputeCmdQueue()->FlushComputeCommandQueue();
 }

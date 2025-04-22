@@ -47,7 +47,7 @@ void Engine::Init(const WindowInfo &windowInfo) {
     _graphicsDescHeap->Init(_device->GetDevice(), 256);
 
     _computeDescHeap = make_shared<ComputeDescriptorHeap>();
-    _computeDescHeap->Init(_device->GetDevice());
+    _computeDescHeap->Init(_device->GetDevice(), 256);
 
     _globalParamsCB = make_shared<ConstantBuffer>();
     _globalParamsCB->Init(sizeof(GlobalParams), 256);

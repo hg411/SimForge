@@ -177,4 +177,6 @@ void ComputeCommandQueue::FlushComputeCommandQueue() {
     _cmdList->Reset(_cmdAlloc.Get(), nullptr);
 
     _cmdList->SetComputeRootSignature(COMPUTE_ROOT_SIGNATURE.Get());
+
+    GEngine->GetComputeDescHeap()->Clear(); // ¼öÁ¤
 }

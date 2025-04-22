@@ -265,5 +265,29 @@
     <FxCompile Include="..\Resources\Shaders\BasicVS.hlsl">
       <Filter>Shaders\SPHFluid</Filter>
     </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\SPHBitonicSortCS.hlsl">
+      <Filter>Shaders\SPHFluid</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\SPHCellRangeCS.hlsl">
+      <Filter>Shaders\SPHFluid</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\SPHDensityCS.hlsl">
+      <Filter>Shaders\SPHFluid</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\SPHPredictCS.hlsl">
+      <Filter>Shaders\SPHFluid</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\SPHIterativeEOS3CS.hlsl">
+      <Filter>Shaders\SPHFluid</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\SPHIterativeEOS1CS.hlsl">
+      <Filter>Shaders\SPHFluid</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\SPHIterativeEOS2CS.hlsl">
+      <Filter>Shaders\SPHFluid</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\SPHFinalCS.hlsl">
+      <Filter>Shaders\SPHFluid</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

@@ -65,11 +65,19 @@ class SPH2DFluid : public Simulation {
     void ActivateParticles();
     void HashingParticles();
     void SortParticles();
+    void ComputeCellRange();
+    void ComputeDensity();
+    void PredictPositionVelocity();
+    void IterativeEOS(uint32 iterationCount);
+    void IterativeEOS1();
+    void IterativeEOS2();
+    void IterativeEOS3();
+    void FinalEOS();
 
   private:
     // Constant Buffer
     shared_ptr<ConstantBuffer> _simulationParamsCB;
-    vector<shared_ptr<ConstantBuffer>> _bitonicSortCBs;
+    shared_ptr<ConstantBuffer> _bitonicSortCB;
 
     // Structured Buffer
     shared_ptr<StructuredBuffer> _positionBuffer;
@@ -88,6 +96,13 @@ class SPH2DFluid : public Simulation {
     shared_ptr<Shader> _activateShader;
     shared_ptr<Shader> _hashShader;
     shared_ptr<Shader> _bitonicSortShader;
+    shared_ptr<Shader> _cellRangeShader;
+    shared_ptr<Shader> _densityShader;
+    shared_ptr<Shader> _predictShader;
+    shared_ptr<Shader> _iterativeEOS1Shader;
+    shared_ptr<Shader> _iterativeEOS2Shader;
+    shared_ptr<Shader> _iterativeEOS3Shader;
+    shared_ptr<Shader> _finalEOSShader;
 
     shared_ptr<Shader> _particleRenderShader;
 
