@@ -2,6 +2,11 @@
 #include "CommandQueue.h"
 #include "Engine.h"
 #include "SwapChain.h"
+#include "RenderTargetGroup.h"
+#include "Texture.h"
+#include "RootSignature.h"
+#include "ConstantBuffer.h"
+#include "TableDescriptorHeap.h"
 
 // ************************
 // GraphicsCommandQueue
@@ -62,32 +67,68 @@ void GraphicsCommandQueue::WaitSync() {
 }
 
 void GraphicsCommandQueue::RenderBegin() {
-    //_cmdAlloc->Reset();
-    //_cmdList->Reset(_cmdAlloc.Get(), nullptr);
+    _cmdAlloc->Reset();
+    _cmdList->Reset(_cmdAlloc.Get(), nullptr);
 
-    //int8 backIndex = _swapChain->GetBackBufferIndex();
+    int8 backIndex = _swapChain->GetBackBufferIndex();
 
-    //D3D12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
-    //    GEngine->GetRTGroup(RENDER_TARGET_GROUP_TYPE::SWAP_CHAIN)
-    //        ->GetRTTexture(backIndex)
-    //        ->GetTex2D()
-    //        .Get(),
-    //    D3D12_RESOURCE_STATE_PRESENT,        // 화면 출력
-    //    D3D12_RESOURCE_STATE_RENDER_TARGET); // 외주 결과물
+    D3D12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
+        GEngine->GetRTGroup(RENDER_TARGET_GROUP_TYPE::SWAP_CHAIN)
+            ->GetRTTexture(backIndex)
+            ->GetTex2D()
+            .Get(),
+        D3D12_RESOURCE_STATE_PRESENT,        // 화면 출력
+        D3D12_RESOURCE_STATE_RENDER_TARGET); // 외주 결과물
 
-    //_cmdList->SetGraphicsRootSignature(GRAPHICS_ROOT_SIGNATURE.Get());
+    _cmdList->SetGraphicsRootSignature(GRAPHICS_ROOT_SIGNATURE.Get());
 
-    //GEngine->GetConstantBuffer(CONSTANT_BUFFER_TYPE::TRANSFORM)->Clear();
-    //GEngine->GetConstantBuffer(CONSTANT_BUFFER_TYPE::MATERIAL)->Clear();
+    GEngine->GetTransformParamsCB()->Clear();
+    GEngine->GetMaterialParamsCB()->Clear();
 
-    //GEngine->GetGraphicsDescHeap()->Clear();
+    GEngine->GetGraphicsDescHeap()->Clear();
 
-    //ID3D12DescriptorHeap *descHeap = GEngine->GetGraphicsDescHeap()->GetDescriptorHeap().Get();
-    //_cmdList->SetDescriptorHeaps(1, &descHeap);
+    ID3D12DescriptorHeap *descHeap = GEngine->GetGraphicsDescHeap()->GetDescriptorHeap().Get();
+    _cmdList->SetDescriptorHeaps(1, &descHeap);
 
-    //_cmdList->ResourceBarrier(1, &barrier);
+    _cmdList->ResourceBarrier(1, &barrier);
 }
 
+void GraphicsCommandQueue::RenderEnd() {
+    int8 backIndex = _swapChain->GetBackBufferIndex();
+
+    D3D12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
+        GEngine->GetRTGroup(RENDER_TARGET_GROUP_TYPE::SWAP_CHAIN)->GetRTTexture(backIndex)->GetTex2D().Get(),
+        D3D12_RESOURCE_STATE_RENDER_TARGET, // 외주 결과물
+        D3D12_RESOURCE_STATE_PRESENT);      // 화면 출력
+
+    _cmdList->ResourceBarrier(1, &barrier);
+    _cmdList->Close();
+
+    // 커맨드 리스트 수행
+    ID3D12CommandList *cmdListArr[] = {_cmdList.Get()};
+    _cmdQueue->ExecuteCommandLists(_countof(cmdListArr), cmdListArr);
+
+    _swapChain->Present();
+
+    // Wait until frame commands are complete.  This waiting is inefficient and is
+    // done for simplicity.  Later we will show how to organize our rendering code
+    // so we do not have to wait per frame.
+    WaitSync();
+
+    _swapChain->SwapIndex();
+}
+
+void GraphicsCommandQueue::FlushResourceCommandQueue() {
+    _resCmdList->Close();
+
+    ID3D12CommandList *cmdListArr[] = {_resCmdList.Get()};
+    _cmdQueue->ExecuteCommandLists(_countof(cmdListArr), cmdListArr);
+
+    WaitSync();
+
+    _resCmdAlloc->Reset();
+    _resCmdList->Reset(_resCmdAlloc.Get(), nullptr);
+}
 
 // ************************
 // ComputeCommandQueue
@@ -122,4 +163,18 @@ void ComputeCommandQueue::WaitSync() {
         _fence->SetEventOnCompletion(_fenceValue, _fenceEvent);
         ::WaitForSingleObject(_fenceEvent, INFINITE);
     }
+}
+
+void ComputeCommandQueue::FlushComputeCommandQueue() {
+    _cmdList->Close();
+
+    ID3D12CommandList *cmdListArr[] = {_cmdList.Get()};
+    _cmdQueue->ExecuteCommandLists(_countof(cmdListArr), cmdListArr);
+
+    WaitSync();
+
+    _cmdAlloc->Reset();
+    _cmdList->Reset(_cmdAlloc.Get(), nullptr);
+
+    _cmdList->SetComputeRootSignature(COMPUTE_ROOT_SIGNATURE.Get());
 }

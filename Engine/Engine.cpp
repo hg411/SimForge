@@ -9,6 +9,10 @@
 #include "Texture.h"
 #include "ConstantBuffer.h"
 #include "CBufferStructs.h"
+#include "Input.h"
+#include "Timer.h"
+#include "SimulationManager.h"
+#include "Resources.h"
 
 void Engine::Init(const WindowInfo &windowInfo) {
     _windowInfo = windowInfo;
@@ -45,7 +49,7 @@ void Engine::Init(const WindowInfo &windowInfo) {
     _computeDescHeap = make_shared<ComputeDescriptorHeap>();
     _computeDescHeap->Init(_device->GetDevice());
 
-    _globalParamsCB = make_shared<ConstantBuffer>(); 
+    _globalParamsCB = make_shared<ConstantBuffer>();
     _globalParamsCB->Init(CBV_REGISTER::b0, sizeof(GlobalParams), 256);
 
     _transformParamsCB = make_shared<ConstantBuffer>();
@@ -58,12 +62,29 @@ void Engine::Init(const WindowInfo &windowInfo) {
 
     ResizeWindow(windowInfo.width, windowInfo.height);
 
-    // GET_SINGLE(Input)->Init(info.hwnd);
-    // GET_SINGLE(Timer)->Init();
-    // GET_SINGLE(Resources)->Init();
+    GET_SINGLE(Input)->Init(windowInfo.hwnd);
+    GET_SINGLE(Timer)->Init();
 }
 
-void Engine::Update() {}
+void Engine::Update() {
+    GET_SINGLE(Input)->Update();
+    GET_SINGLE(Timer)->Update();
+    GET_SINGLE(SimulationManager)->Update();
+
+    Render();
+}
+
+void Engine::Render() {
+    RenderBegin();
+
+    GET_SINGLE(SimulationManager)->Render();
+
+    RenderEnd();
+}
+
+void Engine::RenderBegin() { _graphicsCmdQueue->RenderBegin(); }
+
+void Engine::RenderEnd() { _graphicsCmdQueue->RenderEnd(); }
 
 void Engine::ResizeWindow(int32 width, int32 height) {
     _windowInfo.width = width;
@@ -73,6 +94,10 @@ void Engine::ResizeWindow(int32 width, int32 height) {
     ::AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, false);
     //::SetWindowPos(_windowInfo.hwnd, 0, 100, 100, width, height, 0);
     ::SetWindowPos(_windowInfo.hwnd, 0, 100, 100, rect.right - rect.left, rect.bottom - rect.top, 0);
+}
+
+shared_ptr<RenderTargetGroup> Engine::GetRTGroup(RENDER_TARGET_GROUP_TYPE type) {
+    return _rtGroups[static_cast<uint8>(type)];
 }
 
 void Engine::CreateRenderTargetGroups() {

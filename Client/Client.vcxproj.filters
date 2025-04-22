@@ -59,5 +59,8 @@
     <ClCompile Include="pch.cpp">
       <Filter>소스 파일\Utils</Filter>
     </ClCompile>
+    <ClCompile Include="..\external\imgui\backends\imgui_impl_dx12.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

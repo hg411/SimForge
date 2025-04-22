@@ -47,6 +47,8 @@ void ComputeMaterial::PushData() {
             computeHeap->SetUAV(_uavs[i]->GetUAVHandle(), reg);
         }
     }
+
+    _shader->Update();
 }
 
 void ComputeMaterial::SetSRV(SRV_REGISTER reg, shared_ptr<Texture> texture) {

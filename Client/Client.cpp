@@ -8,6 +8,19 @@
 
 #define MAX_LOADSTRING 100
 
+#ifdef _DEBUG
+void CreateDebugConsole() {
+    AllocConsole();
+    freopen_s(reinterpret_cast<FILE**>(stdout), "CONOUT$", "w",
+        stdout); // stdout 리디렉션
+    freopen_s(reinterpret_cast<FILE**>(stderr), "CONOUT$", "w",
+        stderr); // stderr 리디렉션
+    freopen_s(reinterpret_cast<FILE**>(stdin), "CONIN$", "r",
+        stdin); // stdin 리디렉션
+    std::cout << "Debug Mode: Console Window Activated" << std::endl;
+}
+#endif
+
 // 전역 변수:
 WindowInfo GWindowInfo;
 
@@ -30,6 +43,11 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     UNREFERENCED_PARAMETER(lpCmdLine);
 
     // TODO: 여기에 코드를 입력합니다.
+
+    // DEBUG라면 콘솔창
+#ifdef _DEBUG
+    CreateDebugConsole();
+#endif
 
     // 전역 문자열을 초기화합니다.
     LoadStringW(hInstance, IDS_APP_TITLE, szTitle, MAX_LOADSTRING);
@@ -143,8 +161,17 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
 //  WM_DESTROY  - 종료 메시지를 게시하고 반환합니다.
 //
 //
+// Forward declare message handler from imgui_impl_win32.cpp
+extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd,
+    UINT msg,
+    WPARAM wParam,
+    LPARAM lParam);
+
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
+    if (ImGui_ImplWin32_WndProcHandler(hWnd, message, wParam, lParam))
+        return DefWindowProc(hWnd, message, wParam, lParam);
+
     switch (message)
     {
     case WM_COMMAND:

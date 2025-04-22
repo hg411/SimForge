@@ -9,6 +9,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <iostream>
 #include <array>
 #include <list>
 #include <map>
@@ -36,6 +37,12 @@ using namespace Microsoft::WRL;
 #include <DirectXTexEXr.h> // EXR 형식 HDRI 읽기
 //
 // #include "FBX/fbxsdk.h"
+
+// Imgui
+// imgui ,SimpleMath 추가
+#include <imgui.h>
+#include "imgui_impl_dx12.h"
+#include <imgui_impl_win32.h>
 
 // 각종 lib
 #pragma comment(lib, "d3d12")
@@ -142,14 +149,13 @@ struct WindowInfo {
 struct Vertex {
     Vertex() {}
 
-    Vertex(Vec3 p, Vec2 u, Vec3 n, Vec3 t) : pos(p), uv(u), normal(n), tangent(t) {}
+    Vertex(Vec3 p, Vec2 u = Vec2(0.0f), Vec3 n = Vec3(0.0f), Vec3 t = Vec3(0.0f))
+        : position(p), uv(u), normal(n), tangent(t) {}
 
-    Vec3 pos;
-    Vec2 uv;
-    Vec3 normal;
-    Vec3 tangent;
-    Vec4 weights; // 본 가중치 (큰 가중치 4개만 활용)
-    Vec4 indices; // 몇번째 본(weights와 같이 쓰임)
+    Vec3 position = Vec3(0.0f);
+    Vec2 uv = Vec2(0.0f);
+    Vec3 normal = Vec3(0.0f);
+    Vec3 tangent = Vec3(0.0f);
 };
 
 #define DECLARE_SINGLE(type)                                                                                           \
@@ -178,14 +184,6 @@ struct Vertex {
 
 #define CONST_BUFFER(type) GEngine->GetConstantBuffer(type)
 
-struct TransformParams {
-    Matrix matWorld;
-    Matrix matView;
-    Matrix matProjection;
-    Matrix matWV;
-    Matrix matWVP;
-    Matrix matViewInv;
-};
 
 struct AnimFrameParams {
     Vec4 sacle;

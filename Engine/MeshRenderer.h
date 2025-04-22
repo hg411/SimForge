@@ -3,7 +3,7 @@
 #include "Component.h"
 
 class Mesh;
-class Material;
+class GraphicsMaterial;
 
 class MeshRenderer : public Component {
   public:
@@ -17,7 +17,7 @@ class MeshRenderer : public Component {
     shared_ptr<GraphicsMaterial> GetMaterial(uint32 idx = 0) { return _materials[idx]; }
 
     void SetMesh(shared_ptr<Mesh> mesh) { _mesh = mesh; }
-    void SetMaterial(shared_ptr<GraphicsMaterial> material, uint32 idx);
+    void SetMaterial(shared_ptr<GraphicsMaterial> material, uint32 idx = 0);
 
   private:
     shared_ptr<Mesh> _mesh;

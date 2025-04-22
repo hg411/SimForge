@@ -18,6 +18,9 @@ class Camera : public Component {
     void PushData(GlobalParams &globalParams);
 
   public:
+
+
+  public:
     PROJECTION_TYPE GetProjectionType() { return _type; }
     const Matrix &GetViewMatrix() const { return _matView; }
     const Matrix &GetProjectionMatrix() const { return _matProjection; }

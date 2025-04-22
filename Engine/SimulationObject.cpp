@@ -2,15 +2,37 @@
 #include "SimulationObject.h"
 #include "Monobehaviour.h"
 #include "Transform.h"
-//#include "MeshRenderer.h"
+#include "MeshRenderer.h"
 #include "Camera.h"
-//#include "CameraController.h"
+#include "CameraController.h"
 
 
 
 SimulationObject::SimulationObject() : Object(OBJECT_TYPE::SIMULATION_OBJECT) {}
 
 SimulationObject::~SimulationObject() {}
+
+void SimulationObject::Awake() {
+    for (shared_ptr<Component> &component : _components) {
+        if (component)
+            component->Awake();
+    }
+
+    for (shared_ptr<MonoBehaviour> &script : _scripts) {
+        script->Awake();
+    }
+}
+
+void SimulationObject::Start() {
+    for (shared_ptr<Component> &component : _components) {
+        if (component)
+            component->Start();
+    }
+
+    for (shared_ptr<MonoBehaviour> &script : _scripts) {
+        script->Start();
+    }
+}
 
 void SimulationObject::Update() {
     for (shared_ptr<Component> &component : _components) {

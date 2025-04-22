@@ -10,10 +10,16 @@ class ComputeDescriptorHeap;
 class RenderTargetGroup;
 class ConstantBuffer;
 
+enum class RENDER_TARGET_GROUP_TYPE : uint8;
+
 class Engine {
   public:
     void Init(const WindowInfo &windowInfo);
     void Update();
+
+    void Render();
+    void RenderBegin();
+    void RenderEnd();
 
     void ResizeWindow(int32 width, int32 height);
 
@@ -26,6 +32,7 @@ class Engine {
     shared_ptr<RootSignature> GetRootSignature() { return _rootSignature; }
     shared_ptr<GraphicsDescriptorHeap> GetGraphicsDescHeap() { return _graphicsDescHeap; }
     shared_ptr<ComputeDescriptorHeap> GetComputeDescHeap() { return _computeDescHeap; }
+    shared_ptr<RenderTargetGroup> GetRTGroup(RENDER_TARGET_GROUP_TYPE type);
     shared_ptr<ConstantBuffer> GetGlobalParamsCB() { return _globalParamsCB; }
     shared_ptr<ConstantBuffer> GetTransformParamsCB() { return _transformParamsCB; }
     shared_ptr<ConstantBuffer> GetMaterialParamsCB() { return _materialParamsCB; }

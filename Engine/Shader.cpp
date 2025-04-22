@@ -9,7 +9,7 @@ Shader::Shader() : Object(OBJECT_TYPE::SHADER) {}
 
 Shader::~Shader() {}
 
-void Shader::CreateGraphicsShader(const wstring &path, ShaderInfo shaderInfo, ShaderArg shaderArg) {
+void Shader::CreateGraphicsShader(ShaderInfo shaderInfo) {
     _shaderInfo = shaderInfo;
 
     _graphicsPipelineDesc.InputLayout = {shaderInfo.inputLayout.data(),
@@ -111,10 +111,10 @@ void Shader::CreateGraphicsShader(const wstring &path, ShaderInfo shaderInfo, Sh
     DEVICE->CreateGraphicsPipelineState(&_graphicsPipelineDesc, IID_PPV_ARGS(&_pipelineState));
 }
 
-void Shader::CreateComputeShader(const wstring &path, const string &name, const string &version) {
+void Shader::CreateComputeShader(const wstring &fileName, const string &name, const string &version) {
     _shaderInfo.shaderType = SHADER_TYPE::COMPUTE;
 
-    CreateShader(path, name, version, _csBlob, _computePipelineDesc.CS);
+    CreateShader(fileName, name, version, _csBlob, _computePipelineDesc.CS);
     _computePipelineDesc.pRootSignature = COMPUTE_ROOT_SIGNATURE.Get();
 
     HRESULT hr = DEVICE->CreateComputePipelineState(&_computePipelineDesc, IID_PPV_ARGS(&_pipelineState));
@@ -182,32 +182,34 @@ D3D12_PRIMITIVE_TOPOLOGY_TYPE Shader::GetTopologyType(D3D_PRIMITIVE_TOPOLOGY top
     }
 }
 
-void Shader::CreateVertexShader(const wstring &path, const string &name, const string &version) {
-    CreateShader(path, name, version, _vsBlob, _graphicsPipelineDesc.VS);
+void Shader::CreateVertexShader(const wstring &fileName, const string &name, const string &version) {
+    CreateShader(fileName, name, version, _vsBlob, _graphicsPipelineDesc.VS);
 }
 
-void Shader::CreatePixelShader(const wstring &path, const string &name, const string &version) {
-    CreateShader(path, name, version, _psBlob, _graphicsPipelineDesc.PS);
+void Shader::CreatePixelShader(const wstring &fileName, const string &name, const string &version) {
+    CreateShader(fileName, name, version, _psBlob, _graphicsPipelineDesc.PS);
 }
 
-void Shader::CreateHullShader(const wstring &path, const string &name, const string &version) {
-    CreateShader(path, name, version, _hsBlob, _graphicsPipelineDesc.HS);
+void Shader::CreateHullShader(const wstring &fileName, const string &name, const string &version) {
+    CreateShader(fileName, name, version, _hsBlob, _graphicsPipelineDesc.HS);
 }
 
-void Shader::CreateDomainShader(const wstring &path, const string &name, const string &version) {
-    CreateShader(path, name, version, _dsBlob, _graphicsPipelineDesc.DS);
+void Shader::CreateDomainShader(const wstring &fileName, const string &name, const string &version) {
+    CreateShader(fileName, name, version, _dsBlob, _graphicsPipelineDesc.DS);
 }
 
-void Shader::CreateGeometryShader(const wstring &path, const string &name, const string &version) {
-    CreateShader(path, name, version, _gsBlob, _graphicsPipelineDesc.GS);
+void Shader::CreateGeometryShader(const wstring &fileName, const string &name, const string &version) {
+    CreateShader(fileName, name, version, _gsBlob, _graphicsPipelineDesc.GS);
 }
 
-void Shader::CreateShader(const wstring &path, const string &name, const string &version, ComPtr<ID3DBlob> &blob,
+void Shader::CreateShader(const wstring &fileName, const string &name, const string &version, ComPtr<ID3DBlob> &blob,
                           D3D12_SHADER_BYTECODE &shaderByteCode) {
     uint32 compileFlag = 0;
 #ifdef _DEBUG
     compileFlag = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
 #endif
+
+    wstring path = L"../Resources/Shaders/" + fileName;
 
     if (FAILED(::D3DCompileFromFile(path.c_str(), nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, name.c_str(),
                                     version.c_str(), compileFlag, 0, &blob, &_errBlob))) {

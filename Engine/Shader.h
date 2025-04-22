@@ -60,8 +60,8 @@ class Shader : public Object {
     Shader();
     virtual ~Shader();
 
-    void CreateGraphicsShader(const wstring &path, ShaderInfo info = ShaderInfo(), ShaderArg arg = ShaderArg());
-    void CreateComputeShader(const wstring &path, const string &name, const string &version);
+    void CreateGraphicsShader(ShaderInfo info = ShaderInfo());
+    void CreateComputeShader(const wstring &fileName, const string &name, const string &version);
 
     void Update();
 
@@ -70,11 +70,11 @@ class Shader : public Object {
     static D3D12_PRIMITIVE_TOPOLOGY_TYPE GetTopologyType(D3D_PRIMITIVE_TOPOLOGY topology);
 
   public:
-    void CreateVertexShader(const wstring &path, const string &name = "main", const string &version = "vs_5_0");
-    void CreatePixelShader(const wstring &path, const string &name = "main", const string &version = "ps_5_0");
-    void CreateHullShader(const wstring &path, const string &name = "main", const string &version = "hs_5_0");
-    void CreateDomainShader(const wstring &path, const string &name = "main", const string &version = "ds_5_0");
-    void CreateGeometryShader(const wstring &path, const string &name = "main", const string &version = "gs_5_0");
+    void CreateVertexShader(const wstring &fileName, const string &name = "main", const string &version = "vs_5_0");
+    void CreatePixelShader(const wstring &fileName, const string &name = "main", const string &version = "ps_5_0");
+    void CreateHullShader(const wstring &fileName, const string &name = "main", const string &version = "hs_5_0");
+    void CreateDomainShader(const wstring &fileName, const string &name = "main", const string &version = "ds_5_0");
+    void CreateGeometryShader(const wstring &fileName, const string &name = "main", const string &version = "gs_5_0");
 
   private:
     void CreateShader(const wstring &path, const string &name, const string &version, ComPtr<ID3DBlob> &blob,

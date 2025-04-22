@@ -18,6 +18,8 @@ class SimulationObject : public Object, public enable_shared_from_this<Simulatio
     SimulationObject();
     virtual ~SimulationObject();
 
+    void Awake();
+    void Start();
     void Update();
     void LateUpdate();
     void FinalUpdate();

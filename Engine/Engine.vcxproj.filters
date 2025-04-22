@@ -19,6 +19,21 @@
     <Filter Include="Object\Component\Base">
       <UniqueIdentifier>{357c60b8-dfc0-4b2b-aa99-db2ffd4b3a63}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Object\Component\FixedComponent">
+      <UniqueIdentifier>{92d1be0b-5a43-44e2-a6b5-ce1a99c5b5a6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Object\Component\MonoBehaviour">
+      <UniqueIdentifier>{7313d942-e08c-4530-936c-0753e113d242}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Manager">
+      <UniqueIdentifier>{91e20d8b-b056-4695-9c42-015a0edc11ee}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Manager\Simulation">
+      <UniqueIdentifier>{94b46cc1-1087-4163-8099-f268032a0e4d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Shaders">
+      <UniqueIdentifier>{5ddf050b-6d6c-45ac-9853-9f5ec35f2d8b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -54,12 +69,6 @@
     <ClCompile Include="Texture.cpp">
       <Filter>Object\Resource</Filter>
     </ClCompile>
-    <ClCompile Include="Camera.cpp">
-      <Filter>Object\Component</Filter>
-    </ClCompile>
-    <ClCompile Include="Transform.cpp">
-      <Filter>Object\Component</Filter>
-    </ClCompile>
     <ClCompile Include="Object.cpp">
       <Filter>Object</Filter>
     </ClCompile>
@@ -72,14 +81,50 @@
     <ClCompile Include="MonoBehaviour.cpp">
       <Filter>Object\Component\Base</Filter>
     </ClCompile>
-    <ClCompile Include="MeshRenderer.cpp">
-      <Filter>Object\Component</Filter>
-    </ClCompile>
     <ClCompile Include="Material.cpp">
       <Filter>Object\Resource</Filter>
     </ClCompile>
     <ClCompile Include="Shader.cpp">
       <Filter>Object\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Mesh.cpp">
+      <Filter>Object\Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>Object\Component\FixedComponent</Filter>
+    </ClCompile>
+    <ClCompile Include="MeshRenderer.cpp">
+      <Filter>Object\Component\FixedComponent</Filter>
+    </ClCompile>
+    <ClCompile Include="Transform.cpp">
+      <Filter>Object\Component\FixedComponent</Filter>
+    </ClCompile>
+    <ClCompile Include="CameraController.cpp">
+      <Filter>Object\Component\MonoBehaviour</Filter>
+    </ClCompile>
+    <ClCompile Include="Input.cpp">
+      <Filter>Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="Timer.cpp">
+      <Filter>Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="SimulationManager.cpp">
+      <Filter>Manager\Simulation</Filter>
+    </ClCompile>
+    <ClCompile Include="Simulation.cpp">
+      <Filter>Manager\Simulation</Filter>
+    </ClCompile>
+    <ClCompile Include="SPH2DFluid.cpp">
+      <Filter>Manager\Simulation</Filter>
+    </ClCompile>
+    <ClCompile Include="Resources.cpp">
+      <Filter>Manager</Filter>
+    </ClCompile>
+    <ClCompile Include="Imgui.cpp">
+      <Filter>Engine</Filter>
+    </ClCompile>
+    <ClCompile Include="StructuredBuffer.cpp">
+      <Filter>Engine</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -119,12 +164,6 @@
     <ClInclude Include="Texture.h">
       <Filter>Object\Resource</Filter>
     </ClInclude>
-    <ClInclude Include="Camera.h">
-      <Filter>Object\Component</Filter>
-    </ClInclude>
-    <ClInclude Include="Transform.h">
-      <Filter>Object\Component</Filter>
-    </ClInclude>
     <ClInclude Include="Object.h">
       <Filter>Object</Filter>
     </ClInclude>
@@ -140,17 +179,64 @@
     <ClInclude Include="CBufferStructs.h">
       <Filter>Engine</Filter>
     </ClInclude>
-    <ClInclude Include="MeshRenderer.h">
-      <Filter>Object\Component</Filter>
-    </ClInclude>
     <ClInclude Include="Material.h">
       <Filter>Object\Resource</Filter>
     </ClInclude>
     <ClInclude Include="Shader.h">
       <Filter>Object\Resource</Filter>
     </ClInclude>
+    <ClInclude Include="Mesh.h">
+      <Filter>Object\Resource</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>Object\Component\FixedComponent</Filter>
+    </ClInclude>
+    <ClInclude Include="MeshRenderer.h">
+      <Filter>Object\Component\FixedComponent</Filter>
+    </ClInclude>
+    <ClInclude Include="Transform.h">
+      <Filter>Object\Component\FixedComponent</Filter>
+    </ClInclude>
+    <ClInclude Include="CameraController.h">
+      <Filter>Object\Component\MonoBehaviour</Filter>
+    </ClInclude>
+    <ClInclude Include="Input.h">
+      <Filter>Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="Timer.h">
+      <Filter>Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="SimulationManager.h">
+      <Filter>Manager\Simulation</Filter>
+    </ClInclude>
+    <ClInclude Include="Simulation.h">
+      <Filter>Manager\Simulation</Filter>
+    </ClInclude>
+    <ClInclude Include="SPH2DFluid.h">
+      <Filter>Manager\Simulation</Filter>
+    </ClInclude>
+    <ClInclude Include="Resources.h">
+      <Filter>Manager</Filter>
+    </ClInclude>
+    <ClInclude Include="Imgui.h">
+      <Filter>Engine</Filter>
+    </ClInclude>
+    <ClInclude Include="StructuredBuffer.h">
+      <Filter>Engine</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include=".clang-format" />
+    <None Include="..\Resources\Shaders\Common.hlsli">
+      <Filter>Shaders</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="..\Resources\Shaders\BasicVS.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\BasicPS.hlsl">
+      <Filter>Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>
