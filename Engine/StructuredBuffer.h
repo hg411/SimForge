@@ -11,6 +11,8 @@ class StructuredBuffer {
     void PushComputeSRVData(SRV_REGISTER reg);
     void PushComputeUAVData(UAV_REGISTER reg);
 
+    void InsertUAVBarrier();
+
     ComPtr<ID3D12DescriptorHeap> GetSRV() { return _srvHeap; }
     ComPtr<ID3D12DescriptorHeap> GetUAV() { return _uavHeap; }
 

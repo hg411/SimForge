@@ -55,6 +55,8 @@ void SPH2DFluid::FinalUpdate() {
     PredictPositionVelocity();
     IterativeEOS(5);
     FinalEOS();
+
+    GEngine->GetComputeCmdQueue()->FlushComputeCommandQueue();
 }
 
 void SPH2DFluid::Render() {
@@ -272,7 +274,8 @@ void SPH2DFluid::ActivateParticles() {
 
     COMPUTE_CMD_LIST->Dispatch(_threadGroupCountX, 1, 1);
 
-    GEngine->GetComputeCmdQueue()->FlushComputeCommandQueue();
+    D3D12_RESOURCE_BARRIER uavBarrier = CD3DX12_RESOURCE_BARRIER::UAV(_positionBuffer->GetBuffer().Get());
+    COMPUTE_CMD_LIST->ResourceBarrier(1, &uavBarrier);
 }
 
 void SPH2DFluid::HashingParticles() {
@@ -291,7 +294,8 @@ void SPH2DFluid::HashingParticles() {
 
     COMPUTE_CMD_LIST->Dispatch(_threadGroupCountX, 1, 1);
 
-    GEngine->GetComputeCmdQueue()->FlushComputeCommandQueue();
+    D3D12_RESOURCE_BARRIER uavBarrier = CD3DX12_RESOURCE_BARRIER::UAV(_hashBuffer->GetBuffer().Get());
+    COMPUTE_CMD_LIST->ResourceBarrier(1, &uavBarrier);
 }
 
 void SPH2DFluid::SortParticles() {
@@ -311,10 +315,11 @@ void SPH2DFluid::SortParticles() {
             
             GEngine->GetComputeDescHeap()->CommitTable();
             COMPUTE_CMD_LIST->Dispatch(_threadGroupCountX, 1, 1);
+
+            D3D12_RESOURCE_BARRIER uavBarrier = CD3DX12_RESOURCE_BARRIER::UAV(_positionBuffer->GetBuffer().Get());
+            COMPUTE_CMD_LIST->ResourceBarrier(1, &uavBarrier);
         }
     }
-
-    GEngine->GetComputeCmdQueue()->FlushComputeCommandQueue();
 }
 
 void SPH2DFluid::ComputeCellRange() {
@@ -328,7 +333,9 @@ void SPH2DFluid::ComputeCellRange() {
 
     GEngine->GetComputeDescHeap()->CommitTable();
     COMPUTE_CMD_LIST->Dispatch(_threadGroupCountX, 1, 1);
-    GEngine->GetComputeCmdQueue()->FlushComputeCommandQueue();
+    
+    D3D12_RESOURCE_BARRIER uavBarrier = CD3DX12_RESOURCE_BARRIER::UAV(_cellRangeBuffer->GetBuffer().Get());
+    COMPUTE_CMD_LIST->ResourceBarrier(1, &uavBarrier);
 }
 
 void SPH2DFluid::ComputeDensity() {
@@ -344,7 +351,9 @@ void SPH2DFluid::ComputeDensity() {
 
     GEngine->GetComputeDescHeap()->CommitTable();
     COMPUTE_CMD_LIST->Dispatch(_threadGroupCountX, 1, 1);
-    GEngine->GetComputeCmdQueue()->FlushComputeCommandQueue();
+    
+    D3D12_RESOURCE_BARRIER uavBarrier = CD3DX12_RESOURCE_BARRIER::UAV(_densityBuffer->GetBuffer().Get());
+    COMPUTE_CMD_LIST->ResourceBarrier(1, &uavBarrier);
 }
 
 void SPH2DFluid::PredictPositionVelocity() {
@@ -364,7 +373,9 @@ void SPH2DFluid::PredictPositionVelocity() {
 
     GEngine->GetComputeDescHeap()->CommitTable();
     COMPUTE_CMD_LIST->Dispatch(_threadGroupCountX, 1, 1);
-    GEngine->GetComputeCmdQueue()->FlushComputeCommandQueue();
+    
+    D3D12_RESOURCE_BARRIER uavBarrier = CD3DX12_RESOURCE_BARRIER::UAV(_predPositionBuffer->GetBuffer().Get());
+    COMPUTE_CMD_LIST->ResourceBarrier(1, &uavBarrier);
 }
 
 void SPH2DFluid::IterativeEOS(uint32 iterationCount) {
@@ -392,7 +403,9 @@ void SPH2DFluid::IterativeEOS1() {
 
     GEngine->GetComputeDescHeap()->CommitTable();
     COMPUTE_CMD_LIST->Dispatch(_threadGroupCountX, 1, 1);
-    GEngine->GetComputeCmdQueue()->FlushComputeCommandQueue();
+    
+    D3D12_RESOURCE_BARRIER uavBarrier = CD3DX12_RESOURCE_BARRIER::UAV(_densityBuffer->GetBuffer().Get());
+    COMPUTE_CMD_LIST->ResourceBarrier(1, &uavBarrier);
 }
 
 void SPH2DFluid::IterativeEOS2() {
@@ -413,7 +426,9 @@ void SPH2DFluid::IterativeEOS2() {
 
     GEngine->GetComputeDescHeap()->CommitTable();
     COMPUTE_CMD_LIST->Dispatch(_threadGroupCountX, 1, 1);
-    GEngine->GetComputeCmdQueue()->FlushComputeCommandQueue();
+    
+    D3D12_RESOURCE_BARRIER uavBarrier = CD3DX12_RESOURCE_BARRIER::UAV(_forceBuffer->GetBuffer().Get());
+    COMPUTE_CMD_LIST->ResourceBarrier(1, &uavBarrier);
 }
 
 void SPH2DFluid::IterativeEOS3() {
@@ -430,7 +445,9 @@ void SPH2DFluid::IterativeEOS3() {
 
     GEngine->GetComputeDescHeap()->CommitTable();
     COMPUTE_CMD_LIST->Dispatch(_threadGroupCountX, 1, 1);
-    GEngine->GetComputeCmdQueue()->FlushComputeCommandQueue();
+    
+    D3D12_RESOURCE_BARRIER uavBarrier = CD3DX12_RESOURCE_BARRIER::UAV(_predPositionBuffer->GetBuffer().Get());
+    COMPUTE_CMD_LIST->ResourceBarrier(1, &uavBarrier);
 }
 
 void SPH2DFluid::FinalEOS() {
@@ -448,5 +465,7 @@ void SPH2DFluid::FinalEOS() {
 
     GEngine->GetComputeDescHeap()->CommitTable();
     COMPUTE_CMD_LIST->Dispatch(_threadGroupCountX, 1, 1);
-    GEngine->GetComputeCmdQueue()->FlushComputeCommandQueue();
+    
+    D3D12_RESOURCE_BARRIER uavBarrier = CD3DX12_RESOURCE_BARRIER::UAV(_positionBuffer->GetBuffer().Get());
+    COMPUTE_CMD_LIST->ResourceBarrier(1, &uavBarrier);
 }
