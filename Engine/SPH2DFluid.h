@@ -125,4 +125,8 @@ class SPH2DFluid : public Simulation {
     Vec3 _boxCenter = Vec3(0.0f, 0.0f, 1.0f);
     float _boxWidth = 3.4f;
     float _boxHeight = 1.7f;
+
+    // 프레임고정
+    float _accumulatedTime = 0.0f;
+    float _timeStep = 1.0f / 100.0f;
 };

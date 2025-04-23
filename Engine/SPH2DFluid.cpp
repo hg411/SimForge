@@ -13,6 +13,7 @@
 #include "TableDescriptorHeap.h"
 #include "CommandQueue.h"
 #include "Engine.h"
+#include "Timer.h"
 
 SPH2DFluid::SPH2DFluid() {}
 
@@ -45,18 +46,27 @@ void SPH2DFluid::Update() {
 void SPH2DFluid::FinalUpdate() {
     Simulation::FinalUpdate();
 
-    PushSimulationParams();
+    _accumulatedTime += DELTA_TIME;
 
-    ActivateParticles();
-    HashingParticles();
-    SortParticles();
-    ComputeCellRange();
-    ComputeDensity();
-    PredictPositionVelocity();
-    IterativeEOS(5);
-    FinalEOS();
+    // 초기 프레임 안정화
+    if (_accumulatedTime > 1.0f)
+        _accumulatedTime = 0.0f;
 
-    GEngine->GetComputeCmdQueue()->FlushComputeCommandQueue();
+    while (_accumulatedTime >= _timeStep) {
+        PushSimulationParams();
+        ActivateParticles();
+        HashingParticles();
+        SortParticles();
+        ComputeCellRange();
+        ComputeDensity();
+        PredictPositionVelocity();
+        IterativeEOS(5);
+        FinalEOS();
+
+        GEngine->GetComputeCmdQueue()->FlushComputeCommandQueue();
+
+        _accumulatedTime -= _timeStep;
+    }
 }
 
 void SPH2DFluid::Render() {
