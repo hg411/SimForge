@@ -109,7 +109,6 @@ void SPH3DFluid::FinalUpdate() {
     AnimateParticles();
 
     GEngine->GetComputeCmdQueue()->FlushComputeCommandQueue();
-    //GEngine->GetComputeDescHeap()->Clear();
 }
 
 void SPH3DFluid::Render() {
@@ -413,6 +412,8 @@ void SPH3DFluid::SortParticles() {
             COMPUTE_CMD_LIST->ResourceBarrier(1, &uavBarrier);
         }
     }
+
+    
 }
 
 void SPH3DFluid::ComputeCellRange() {

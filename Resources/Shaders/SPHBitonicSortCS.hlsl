@@ -10,7 +10,7 @@ cbuffer Const : register(b0)
     uint j;
 }
 
-[numthreads(256, 1, 1)]
+[numthreads(128, 1, 1)]
 void main(uint3 dtID : SV_DispatchThreadID)
 {
     uint i = dtID.x;

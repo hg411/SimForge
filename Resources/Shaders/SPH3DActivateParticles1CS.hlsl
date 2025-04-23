@@ -6,7 +6,7 @@ RWStructuredBuffer<int> g_aliveFlagsRW : register(u2);
 
 groupshared uint localAddCount;
 
-[numthreads(256, 1, 1)]
+[numthreads(128, 1, 1)]
 void main(uint3 dtID : SV_DispatchThreadID, int3 gtID : SV_GroupThreadID, int3 gID : SV_GroupID)
 {
     uint i = dtID.x;
