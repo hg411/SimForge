@@ -5,17 +5,17 @@ void SwapChain::Init(const WindowInfo &windowInfo, ComPtr<IDXGIFactory> dxgi, Co
     CreateSwapChain(windowInfo, dxgi, cmdQueue);
 }
 
-void SwapChain::Present() { _swapChain->Present(1, 0); }
+void SwapChain::Present() { _swapChain->Present(0, 0); }
 
 void SwapChain::SwapIndex() { _backBufferIndex = (_backBufferIndex + 1) % SWAP_CHAIN_BUFFER_COUNT; }
 
-void SwapChain::Resize(int32 width, int32 height) {
+void SwapChain::Resize(const WindowInfo &windowInfo) {
     if (_swapChain) {
         DXGI_SWAP_CHAIN_DESC desc = {};
         _swapChain->GetDesc(&desc);
 
-        _swapChain->ResizeBuffers(SWAP_CHAIN_BUFFER_COUNT, static_cast<uint32>(width), static_cast<uint32>(height),
-                                  desc.BufferDesc.Format, desc.Flags);
+        _swapChain->ResizeBuffers(SWAP_CHAIN_BUFFER_COUNT, static_cast<uint32>(windowInfo.width),
+                                  static_cast<uint32>(windowInfo.height), desc.BufferDesc.Format, desc.Flags);
 
         _backBufferIndex = 0;
     }

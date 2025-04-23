@@ -44,10 +44,10 @@ void Engine::Init(const WindowInfo &windowInfo) {
 
     // Descriptor Heap
     _graphicsDescHeap = make_shared<GraphicsDescriptorHeap>();
-    _graphicsDescHeap->Init(_device->GetDevice(), 256);
+    _graphicsDescHeap->Init(256);
 
     _computeDescHeap = make_shared<ComputeDescriptorHeap>();
-    _computeDescHeap->Init(_device->GetDevice(), 256);
+    _computeDescHeap->Init(256);
 
     _globalParamsCB = make_shared<ConstantBuffer>();
     _globalParamsCB->Init(sizeof(GlobalParams), 256);
@@ -65,6 +65,7 @@ void Engine::Init(const WindowInfo &windowInfo) {
 }
 
 void Engine::Update() {
+    CheckResizeByClientRect();
     GET_SINGLE(Input)->Update();
     GET_SINGLE(Timer)->Update();
     GET_SINGLE(SimulationManager)->Update();
@@ -84,12 +85,11 @@ void Engine::RenderBegin() { _graphicsCmdQueue->RenderBegin(); }
 
 void Engine::RenderEnd() { _graphicsCmdQueue->RenderEnd(); }
 
-void Engine::ResizeWindow(int32 width, int32 height) {
-    if (_swapChain)
-    {
-        _windowInfo.width = width;
-        _windowInfo.height = height;
+void Engine::ResizeWindow(const WindowInfo &windowInfo) {
+    if (windowInfo.width <= 0 || windowInfo.height <= 0)
+        return;
 
+    if (_swapChain) {
         _viewport = {0, 0, static_cast<FLOAT>(_windowInfo.width), static_cast<FLOAT>(_windowInfo.height), 0.0f, 1.0f};
         _scissorRect = CD3DX12_RECT(0, 0, _windowInfo.width, _windowInfo.height);
 
@@ -103,9 +103,45 @@ void Engine::ResizeWindow(int32 width, int32 height) {
         GetGraphicsCmdQueue()->WaitSync();
 
         _rtGroups[static_cast<uint8>(RENDER_TARGET_GROUP_TYPE::SWAP_CHAIN)].reset();
-        _swapChain->Resize(width, height);
+        _swapChain->Resize(_windowInfo);
 
         CreateRenderTargetGroups();
+    }
+}
+
+void Engine::CheckResizeByClientRect() {
+    RECT clientRect;
+    ::GetClientRect(_windowInfo.hwnd, &clientRect);
+    int32 width = clientRect.right - clientRect.left;
+    int32 height = clientRect.bottom - clientRect.top;
+
+    // === [전체화면 여부 판단] ===
+    RECT winRect;
+    GetWindowRect(_windowInfo.hwnd, &winRect);
+
+    HMONITOR hMonitor = MonitorFromWindow(_windowInfo.hwnd, MONITOR_DEFAULTTONEAREST);
+    MONITORINFO mi = {sizeof(MONITORINFO)};
+    GetMonitorInfo(hMonitor, &mi);
+
+    LONG style = GetWindowLong(_windowInfo.hwnd, GWL_STYLE);
+    bool isBorderless = (style & WS_OVERLAPPEDWINDOW) == 0;
+    bool isFullscreen = isBorderless && EqualRect(&winRect, &mi.rcMonitor);
+
+    // 전체화면이면 모니터 해상도로 강제 설정
+    if (isFullscreen) {
+        width = mi.rcMonitor.right - mi.rcMonitor.left;
+        height = mi.rcMonitor.bottom - mi.rcMonitor.top;
+    }
+
+    // 새 windowInfo 생성
+    WindowInfo newInfo = _windowInfo;
+    newInfo.width = width;
+    newInfo.height = height;
+    newInfo.windowed = !isFullscreen;
+
+    if (_windowInfo.width != width || _windowInfo.height != height || _windowInfo.windowed != newInfo.windowed) {
+        _windowInfo = newInfo;
+        ResizeWindow(_windowInfo);
     }
 }
 

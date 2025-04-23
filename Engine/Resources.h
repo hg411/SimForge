@@ -23,6 +23,7 @@ class Resources {
 
     // Mesh
     shared_ptr<Mesh> LoadRectangleLineMesh(const float width = 1.0f, const float height = 1.0f);
+    shared_ptr<Mesh> LoadCubeLineMesh(const float width = 1.0f, const float height = 1.0f, const float depth = 1.0f);
 
   private:
     using KeyObjMap = std::map<wstring /*key*/, shared_ptr<Object>>;

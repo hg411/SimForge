@@ -1,14 +1,14 @@
 #include "pch.h"
 #include "TableDescriptorHeap.h"
 #include "Engine.h"
+#include "Device.h"
 #include "CommandQueue.h"
 
 // ************************
 // GraphicsDescriptorHeap
 // ************************
 
-void GraphicsDescriptorHeap::Init(ComPtr<ID3D12Device> device, uint32 count) {
-    _device = device;
+void GraphicsDescriptorHeap::Init(uint32 count) {
     _groupCount = count;
 
     D3D12_DESCRIPTOR_HEAP_DESC desc = {};
@@ -16,9 +16,9 @@ void GraphicsDescriptorHeap::Init(ComPtr<ID3D12Device> device, uint32 count) {
     desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
     desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 
-    _device->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&_descHeap));
+    DEVICE->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&_descHeap));
 
-    _handleSize = device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+    _handleSize = DEVICE->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
     _groupSize = _handleSize * (CBV_SRV_REGISTER_COUNT - 1); // b0´Â Àü¿ª
 }
 
@@ -29,7 +29,7 @@ void GraphicsDescriptorHeap::SetCBV(D3D12_CPU_DESCRIPTOR_HANDLE srcHandle, CBV_R
 
     uint32 destRange = 1;
     uint32 srcRange = 1;
-    _device->CopyDescriptors(1, &destHandle, &destRange, 1, &srcHandle, &srcRange,
+    DEVICE->CopyDescriptors(1, &destHandle, &destRange, 1, &srcHandle, &srcRange,
                              D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 }
 
@@ -38,7 +38,7 @@ void GraphicsDescriptorHeap::SetSRV(D3D12_CPU_DESCRIPTOR_HANDLE srcHandle, SRV_R
 
     uint32 destRange = 1;
     uint32 srcRange = 1;
-    _device->CopyDescriptors(1, &destHandle, &destRange, 1, &srcHandle, &srcRange,
+    DEVICE->CopyDescriptors(1, &destHandle, &destRange, 1, &srcHandle, &srcRange,
                              D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 }
 
@@ -76,8 +76,7 @@ D3D12_CPU_DESCRIPTOR_HANDLE GraphicsDescriptorHeap::GetCPUHandle(uint8 reg) {
 // ComputeDescriptorHeap
 // ************************
 
-void ComputeDescriptorHeap::Init(ComPtr<ID3D12Device> device, uint32 count) {
-    _device = device;
+void ComputeDescriptorHeap::Init(uint32 count) {
     _groupCount = count;
 
     D3D12_DESCRIPTOR_HEAP_DESC desc = {};
@@ -85,9 +84,9 @@ void ComputeDescriptorHeap::Init(ComPtr<ID3D12Device> device, uint32 count) {
     desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
     desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 
-    _device->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&_descHeap));
+    DEVICE->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&_descHeap));
 
-    _handleSize = _device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+    _handleSize = DEVICE->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
     _groupSize = _handleSize * (TOTAL_REGISTER_COUNT);
 }
 
@@ -98,7 +97,7 @@ void ComputeDescriptorHeap::SetCBV(D3D12_CPU_DESCRIPTOR_HANDLE srcHandle, CBV_RE
 
     uint32 destRange = 1;
     uint32 srcRange = 1;
-    _device->CopyDescriptors(1, &destHandle, &destRange, 1, &srcHandle, &srcRange,
+    DEVICE->CopyDescriptors(1, &destHandle, &destRange, 1, &srcHandle, &srcRange,
                              D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 }
 
@@ -107,7 +106,7 @@ void ComputeDescriptorHeap::SetSRV(D3D12_CPU_DESCRIPTOR_HANDLE srcHandle, SRV_RE
 
     uint32 destRange = 1;
     uint32 srcRange = 1;
-    _device->CopyDescriptors(1, &destHandle, &destRange, 1, &srcHandle, &srcRange,
+    DEVICE->CopyDescriptors(1, &destHandle, &destRange, 1, &srcHandle, &srcRange,
                              D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 }
 
@@ -116,7 +115,7 @@ void ComputeDescriptorHeap::SetUAV(D3D12_CPU_DESCRIPTOR_HANDLE srcHandle, UAV_RE
 
     uint32 destRange = 1;
     uint32 srcRange = 1;
-    _device->CopyDescriptors(1, &destHandle, &destRange, 1, &srcHandle, &srcRange,
+    DEVICE->CopyDescriptors(1, &destHandle, &destRange, 1, &srcHandle, &srcRange,
                              D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 }
 

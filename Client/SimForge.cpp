@@ -14,8 +14,3 @@ void SimForge::Update()
 {
 	GEngine->Update();
 }
-
-void SimForge::ResizeWindow(int32 width, int32 height)
-{
-	GEngine->ResizeWindow(width, height);
-}

@@ -16,7 +16,7 @@ class Transform : public Component {
     const Quaternion &GetLocalRotation() const { return _localRotation; }
     const Vec3 &GetLocalScale() const { return _localScale; }
 
-    const Vec3 &GetWorldPosition() const { return _matWorld.Translation(); }
+    Vec3 GetWorldPosition() const { return _matWorld.Translation(); }
 
     const Matrix &GetLocalMatrix() const { return _matLocal; }
     const Matrix &GetWorldMatrix() const { return _matWorld; }

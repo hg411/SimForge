@@ -23,12 +23,15 @@ void Camera::FinalUpdate() {
     _matView = ::XMMatrixLookToLH(GetTransform()->GetWorldPosition(), GetTransform()->GetForward(), GetTransform()->GetUp());
 
     if (_type == PROJECTION_TYPE::PERSPECTIVE) {
-        _matProjection = XMMatrixPerspectiveFovLH(_fov, aspectRatio, _far, _near); // Reverse-Z
+        _matProjection = XMMatrixPerspectiveFovLH(_fov, aspectRatio, _near, _far);
     } else {
         //_matProjection =
         //    ::XMMatrixOrthographicOffCenterLH(-aspectRatio, aspectRatio, -1.0f, 1.0f, _far, _near);
-        _matProjection = ::XMMatrixOrthographicLH(2.0f * aspectRatio, 2.0f, _far, _near);
+        _matProjection = ::XMMatrixOrthographicLH(2.0f * aspectRatio, 2.0f, _near, _far);
     }
+
+    _matVP = _matView * _matProjection;
+    _matInvProj = _matProjection.Invert();
 }
 
 void Camera::PushData(GlobalParams &globalParams) {

@@ -6,7 +6,7 @@ class SwapChain {
     void Present();
     void SwapIndex();
 
-    void Resize(int32 width, int32 height);
+    void Resize(const WindowInfo &windowInfo);
 
     ComPtr<IDXGISwapChain> GetSwapChain() { return _swapChain; }
     uint8 GetBackBufferIndex() { return _backBufferIndex; }

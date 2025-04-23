@@ -6,7 +6,7 @@
 
 class GraphicsDescriptorHeap {
   public:
-    void Init(ComPtr<ID3D12Device> device, uint32 count);
+    void Init(uint32 count);
 
     void Clear();
     void SetCBV(D3D12_CPU_DESCRIPTOR_HANDLE srcHandle, CBV_REGISTER reg);
@@ -22,7 +22,6 @@ class GraphicsDescriptorHeap {
     D3D12_CPU_DESCRIPTOR_HANDLE GetCPUHandle(uint8 reg);
 
   private:
-    ComPtr<ID3D12Device> _device;
     ComPtr<ID3D12DescriptorHeap> _descHeap;
     uint64 _handleSize = 0;
     uint64 _groupSize = 0;
@@ -37,7 +36,7 @@ class GraphicsDescriptorHeap {
 
 class ComputeDescriptorHeap {
   public:
-    void Init(ComPtr<ID3D12Device> device, uint32 count);
+    void Init(uint32 count);
 
     void Clear();
     void SetCBV(D3D12_CPU_DESCRIPTOR_HANDLE srcHandle, CBV_REGISTER reg);
@@ -56,7 +55,6 @@ class ComputeDescriptorHeap {
     D3D12_CPU_DESCRIPTOR_HANDLE GetCPUHandle(uint8 reg);
 
   private:
-    ComPtr<ID3D12Device> _device;
     ComPtr<ID3D12DescriptorHeap> _descHeap;
     uint64 _handleSize = 0;
     uint64 _groupSize = 0;

@@ -6,7 +6,7 @@ class Shader;
 class ConstantBuffer;
 class StructuredBuffer;
 
-struct SPH2DFluidParams {
+struct SPH3DFluidParams {
     uint32 maxParticles = 0;
     float deltaTime = 0.0f;
     float totalTime = 0.0f;
@@ -32,8 +32,7 @@ struct SPH2DFluidParams {
     float padding = 0.0f;
 };
 
-class SPH2DFluid : public Simulation {
-  public:
+class SPH3DFluid : public Simulation {
     struct BitonicSortConsts {
         uint32 k;
         uint32 j;
@@ -45,8 +44,8 @@ class SPH2DFluid : public Simulation {
     };
 
   public:
-    SPH2DFluid();
-    virtual ~SPH2DFluid();
+    SPH3DFluid();
+    virtual ~SPH3DFluid();
 
     void Init() override;
 
@@ -63,7 +62,8 @@ class SPH2DFluid : public Simulation {
     void BuildUI() override;
 
     void PushSimulationParams();
-    void ActivateParticles();
+    void ActivateParticles1();
+    void ActivateParticles2();
     void HashingParticles();
     void SortParticles();
     void ComputeCellRange();
@@ -95,7 +95,8 @@ class SPH2DFluid : public Simulation {
     shared_ptr<StructuredBuffer> _predVelocityBuffer;
 
     // Shaders
-    shared_ptr<Shader> _activateShader;
+    shared_ptr<Shader> _activate1Shader;
+    shared_ptr<Shader> _activate2Shader;
     shared_ptr<Shader> _hashShader;
     shared_ptr<Shader> _bitonicSortShader;
     shared_ptr<Shader> _cellRangeShader;
@@ -111,27 +112,30 @@ class SPH2DFluid : public Simulation {
 
     shared_ptr<Shader> _particleRenderShader;
 
-    uint32 _maxParticles = 4096;
+    uint32 _maxParticles = 8192 * 64;
     uint32 _threadGroupCountX = 0;
     float _numThreadsX = 256.0f;
     float _deltaTime = 0.006f;
-    float _radius = 1.0f / 128.0f; // dx = radius * 2.0f
-    float _pressureCoeff = 1.0f;
-    float _nearPressureCoeff = 0.2f;
-    float _viscosity = 0.0005f;
+    float _radius = 1.0f / 128.0f;
+    float _pressureCoeff = 2.0f;
+    float _nearPressureCoeff = 0.0020f;
+    float _viscosity = 0.001f;
     float _density0 = 1000.0f;
-    float _smoothingLength = 2.6f * _radius * 2.0f; // smoothing length = dx * 1.5f
-    float _cellSize = _smoothingLength * 1.1f;      //
-    float _mass = 0.35f;                            // mass = dx * dx * density0
-    uint32 _hashCount = 8192 * 4;
-    SPH2DFluidParams _sph2DFluidParams;
+    float _smoothingLength = 1.5f * _radius * 2.0f; 
+    float _cellSize = _smoothingLength * 1.2f; 
+    float _mass = 0.0030f; 
+    uint32 _hashCount = 8192 * 128;
+    SPH3DFluidParams _sph3DFluidParams;
 
     // Bounding Box
-    Vec3 _boxCenter = Vec3(0.0f, 0.0f, 1.0f);
-    float _boxWidth = 3.4f;
-    float _boxHeight = 1.7f;
+    Vec3 _boxCenter = Vec3(0.0f, 0.0f, 1.5f);
+    float _boxWidth = 3.0f;
+    float _boxHeight = 1.6f;
+    float _boxDepth = 1.5f;
 
     // 프레임고정
     float _accumulatedTime = 0.0f;
     float _timeStep = 1.0f / 100.0f;
+
+    bool isRunning = false;
 };

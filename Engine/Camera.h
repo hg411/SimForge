@@ -24,8 +24,8 @@ class Camera : public Component {
     PROJECTION_TYPE GetProjectionType() { return _type; }
     const Matrix &GetViewMatrix() const { return _matView; }
     const Matrix &GetProjectionMatrix() const { return _matProjection; }
-    const Matrix &GetViewProjMatrix() const { return _matView * _matProjection; }
-    const Matrix &GetInverseProjMatrix() const { return _matProjection.Invert(); }
+    const Matrix &GetViewProjMatrix() const { return _matVP; }
+    const Matrix &GetInverseProjMatrix() const { return _matInvProj; }
 
     void SetProjectionType(PROJECTION_TYPE type) { _type = type; }
     void SetNear(float value) { _near = value; }
@@ -47,4 +47,6 @@ class Camera : public Component {
 
     Matrix _matView = {};
     Matrix _matProjection = {};
+    Matrix _matVP = {};
+    Matrix _matInvProj = {};
 };

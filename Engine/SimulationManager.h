@@ -11,6 +11,7 @@ class SimulationManager {
     void LoadSimulation();
 
     shared_ptr<Simulation> LoadSPH2DFluid();
+    shared_ptr<Simulation> LoadSPH3DFluid();
 
     shared_ptr<Simulation> GetActiveSimulation() { return _activeSimulation; }
 

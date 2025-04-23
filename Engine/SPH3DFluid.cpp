@@ -1,5 +1,5 @@
 #include "pch.h"
-#include "SPH2DFluid.h"
+#include "SPH3DFluid.h"
 #include "Resources.h"
 #include "Transform.h"
 #include "Camera.h"
@@ -16,11 +16,11 @@
 #include "Timer.h"
 #include "Input.h"
 
-SPH2DFluid::SPH2DFluid() {}
+SPH3DFluid::SPH3DFluid() {}
 
-SPH2DFluid::~SPH2DFluid() {}
+SPH3DFluid::~SPH3DFluid() {}
 
-void SPH2DFluid::Init() {
+void SPH3DFluid::Init() {
     _threadGroupCountX = static_cast<uint32>(ceil(_maxParticles / _numThreadsX));
 
     InitImgui();
@@ -28,50 +28,91 @@ void SPH2DFluid::Init() {
     InitConstantBuffers();
     InitStructuredBuffers();
     InitSimulationObjects();
+
+    PushSimulationParams();
+    ActivateParticles1();
+    GEngine->GetComputeCmdQueue()->FlushComputeCommandQueue();
 }
 
-void SPH2DFluid::Update() {
+void SPH3DFluid::Update() {
     Simulation::Update();
 
     for (auto &obj : _simulationObjects) {
         if (obj->GetName() == L"BoundingBox") {
             auto transform = obj->GetTransform();
             if (transform) {
-                transform->SetLocalScale(Vec3(_boxWidth, _boxHeight, 1.0f));
+                transform->SetLocalScale(Vec3(_boxWidth, _boxHeight, _boxDepth));
                 transform->SetLocalPosition(_boxCenter);
             }
         }
     }
-}
 
-void SPH2DFluid::FinalUpdate() {
-    Simulation::FinalUpdate();
-
-    _accumulatedTime += DELTA_TIME;
-
-    // 초기 프레임 안정화
-    if (_accumulatedTime > 1.0f)
-        _accumulatedTime = 0.0f;
-
-    while (_accumulatedTime >= _timeStep) {
-        PushSimulationParams();
-        ActivateParticles();
-        HashingParticles();
-        SortParticles();
-        ComputeCellRange();
-        ComputeDensity();
-        PredictPositionVelocity();
-        IterativeEOS(5);
-        FinalEOS();
-        AnimateParticles();
-     
-        _accumulatedTime -= _timeStep;
-
-         GEngine->GetComputeCmdQueue()->FlushComputeCommandQueue();
+    if (INPUT->GetButtonDown(KEY_TYPE::SPACE)) {
+        isRunning = !isRunning;
     }
 }
 
-void SPH2DFluid::Render() {
+void SPH3DFluid::FinalUpdate() {
+    Simulation::FinalUpdate();
+
+    if (!isRunning)
+        return;
+
+    //_accumulatedTime += DELTA_TIME;
+
+    //// 초기 프레임 안정화
+    //if (_accumulatedTime > 1.0f)
+    //    _accumulatedTime = 0.0f;
+
+    //while (_accumulatedTime >= _timeStep) {
+    //    PushSimulationParams();
+
+    //    if (INPUT->GetButtonDown(KEY_TYPE::KEY_1)) {
+    //        ActivateParticles1();
+    //    }
+
+    //    if (INPUT->GetButtonDown(KEY_TYPE::KEY_2)) {
+    //        ActivateParticles2();
+    //    }
+
+    //    HashingParticles();
+    //    SortParticles();
+    //    ComputeCellRange();
+    //    ComputeDensity();
+    //    PredictPositionVelocity();
+    //    IterativeEOS(3);
+    //    FinalEOS();
+    //    AnimateParticles();
+
+    //    _accumulatedTime -= _timeStep;
+
+    //    GEngine->GetComputeCmdQueue()->FlushComputeCommandQueue();
+    //}
+
+    PushSimulationParams();
+
+    if (INPUT->GetButtonDown(KEY_TYPE::KEY_1)) {
+        ActivateParticles1();
+    }
+
+    if (INPUT->GetButtonDown(KEY_TYPE::KEY_2)) {
+        ActivateParticles2();
+    }
+
+    HashingParticles();
+    SortParticles();
+    ComputeCellRange();
+    ComputeDensity();
+    PredictPositionVelocity();
+    IterativeEOS(3);
+    FinalEOS();
+    AnimateParticles();
+
+    GEngine->GetComputeCmdQueue()->FlushComputeCommandQueue();
+    //GEngine->GetComputeDescHeap()->Clear();
+}
+
+void SPH3DFluid::Render() {
     Simulation::Render();
 
     _positionBuffer->PushGraphicsData(SRV_REGISTER::t0);
@@ -90,12 +131,15 @@ void SPH2DFluid::Render() {
     _imgui->Render();
 }
 
-void SPH2DFluid::InitShaders() {
+void SPH3DFluid::InitShaders() {
     // Line Mesh
     GET_SINGLE(Resources)->CreateLineShader();
 
-    _activateShader = make_shared<Shader>();
-    _activateShader->CreateComputeShader(L"SPH2DFluidActivateCS.hlsl");
+    _activate1Shader = make_shared<Shader>();
+    _activate1Shader->CreateComputeShader(L"SPH3DActivateParticles1CS.hlsl");
+
+    _activate2Shader = make_shared<Shader>();
+    _activate2Shader->CreateComputeShader(L"SPH3DActivateParticles2CS.hlsl");
 
     _hashShader = make_shared<Shader>();
     _hashShader->CreateComputeShader(L"SPHHashCS.hlsl");
@@ -107,16 +151,16 @@ void SPH2DFluid::InitShaders() {
     _cellRangeShader->CreateComputeShader(L"SPHCellRangeCS.hlsl");
 
     _densityShader = make_shared<Shader>();
-    _densityShader->CreateComputeShader(L"SPHDensityCS.hlsl");
+    _densityShader->CreateComputeShader(L"SPH3DDensityCS.hlsl");
 
     _predictShader = make_shared<Shader>();
-    _predictShader->CreateComputeShader(L"SPHPredictCS.hlsl");
+    _predictShader->CreateComputeShader(L"SPH3DPredictCS.hlsl");
 
     _iterativeEOS1Shader = make_shared<Shader>();
-    _iterativeEOS1Shader->CreateComputeShader(L"SPHIterativeEOS1CS.hlsl");
+    _iterativeEOS1Shader->CreateComputeShader(L"SPH3DIterativeEOS1CS.hlsl");
 
     _iterativeEOS2Shader = make_shared<Shader>();
-    _iterativeEOS2Shader->CreateComputeShader(L"SPHIterativeEOS2CS.hlsl");
+    _iterativeEOS2Shader->CreateComputeShader(L"SPH3DIterativeEOS2CS.hlsl");
 
     _iterativeEOS3Shader = make_shared<Shader>();
     _iterativeEOS3Shader->CreateComputeShader(L"SPHIterativeEOS3CS.hlsl");
@@ -135,7 +179,7 @@ void SPH2DFluid::InitShaders() {
 
     ShaderInfo info = {
         SHADER_TYPE::FORWARD, RASTERIZER_TYPE::CULL_NONE,       DEPTH_STENCIL_TYPE::LESS,
-        BLEND_TYPE::DEFAULT,  D3D_PRIMITIVE_TOPOLOGY_POINTLIST, {} // No InputLayout
+        BLEND_TYPE::DEFAULT, D3D_PRIMITIVE_TOPOLOGY_POINTLIST, {} // No InputLayout
     };
     _particleRenderShader = make_shared<Shader>();
     _particleRenderShader->CreateVertexShader(L"ParticleVS.hlsl");
@@ -144,9 +188,9 @@ void SPH2DFluid::InitShaders() {
     _particleRenderShader->CreateGraphicsShader(info);
 }
 
-void SPH2DFluid::InitConstantBuffers() {
+void SPH3DFluid::InitConstantBuffers() {
     _simulationParamsCB = make_shared<ConstantBuffer>();
-    _simulationParamsCB->Init(sizeof(SPH2DFluidParams), 1);
+    _simulationParamsCB->Init(sizeof(SPH3DFluidParams), 1);
 
     vector<BitonicSortConsts> constsCPU;
     for (uint32_t k = 2; k <= _maxParticles; k *= 2)
@@ -165,7 +209,7 @@ void SPH2DFluid::InitConstantBuffers() {
     }
 }
 
-void SPH2DFluid::InitStructuredBuffers() {
+void SPH3DFluid::InitStructuredBuffers() {
     _positionBuffer = make_shared<StructuredBuffer>();
     _positionBuffer->Init(sizeof(Vec3), _maxParticles);
 
@@ -201,7 +245,7 @@ void SPH2DFluid::InitStructuredBuffers() {
     _predVelocityBuffer->Init(sizeof(Vec3), _maxParticles);
 }
 
-void SPH2DFluid::InitSimulationObjects() {
+void SPH3DFluid::InitSimulationObjects() {
     // Main Camera
     {
         shared_ptr<SimulationObject> obj = make_shared<SimulationObject>();
@@ -211,7 +255,6 @@ void SPH2DFluid::InitSimulationObjects() {
         transform->SetLocalPosition(Vec3(0.0f, 0.0f, 0.0f));
         obj->AddComponent(transform);
         shared_ptr<Camera> camera = make_shared<Camera>();
-        camera->SetProjectionType(PROJECTION_TYPE::ORTHOGRAPHIC);
         obj->AddComponent(camera);
         shared_ptr<CameraController> cameraController = make_shared<CameraController>();
         obj->AddComponent(cameraController);
@@ -224,7 +267,7 @@ void SPH2DFluid::InitSimulationObjects() {
         shared_ptr<SimulationObject> obj = make_shared<SimulationObject>();
         obj->SetName(L"BoundingBox");
 
-        shared_ptr<Mesh> mesh = GET_SINGLE(Resources)->LoadRectangleLineMesh();
+        shared_ptr<Mesh> mesh = GET_SINGLE(Resources)->LoadCubeLineMesh();
         shared_ptr<GraphicsMaterial> material = make_shared<GraphicsMaterial>();
         material->SetAlbedo(Vec3(253.0f, 253.0f, 150.0f) / 255.0f);
         material->SetShader(GET_SINGLE(Resources)->Get<Shader>(L"LineShader"));
@@ -235,7 +278,7 @@ void SPH2DFluid::InitSimulationObjects() {
 
         shared_ptr<Transform> transform = make_shared<Transform>();
         transform->SetLocalPosition(_boxCenter);
-        transform->SetLocalScale(Vec3(_boxWidth, _boxHeight, 1.0f));
+        transform->SetLocalScale(Vec3(_boxWidth, _boxHeight, _boxDepth));
 
         obj->AddComponent(meshRenderer);
         obj->AddComponent(transform);
@@ -244,12 +287,13 @@ void SPH2DFluid::InitSimulationObjects() {
     }
 }
 
-void SPH2DFluid::BuildUI() {
+void SPH3DFluid::BuildUI() {
     ImGui::Begin("Bounding Box");
     ImGui::SetNextItemOpen(true, ImGuiCond_Once);
-    ImGui::SliderFloat("Box Width", &_boxWidth, 0.5f, 3.4f);
-    ImGui::SliderFloat("Box Height", &_boxHeight, 0.5f, 1.7f);
-    ImGui::SliderFloat2("Box Position", &_boxCenter.x, -2.0f, 2.0f);
+    ImGui::SliderFloat("Box Width", &_boxWidth, 0.5f, 3.0f);
+    ImGui::SliderFloat("Box Height", &_boxHeight, 0.5f, 1.6f);
+    ImGui::SliderFloat("Box Depth", &_boxDepth, 0.5f, 1.5f);
+    ImGui::SliderFloat3("Box Position", &_boxCenter.x, -2.0f, 2.0f);
     ImGui::End();
 
     ImGui::Begin("Particles");
@@ -262,31 +306,32 @@ void SPH2DFluid::BuildUI() {
     ImGui::End();
 }
 
-void SPH2DFluid::PushSimulationParams() {
-    _sph2DFluidParams.maxParticles = _maxParticles;
-    _sph2DFluidParams.deltaTime = _deltaTime;
-    _sph2DFluidParams.totalTime += _deltaTime;
-    _sph2DFluidParams.pressureCoeff = _pressureCoeff;
-    _sph2DFluidParams.nearPressureCoeff = _nearPressureCoeff;
-    _sph2DFluidParams.viscosity = _viscosity;
-    _sph2DFluidParams.density0 = _density0;
-    _sph2DFluidParams.mass = _mass;
-    _sph2DFluidParams.smoothingLength = _smoothingLength;
-    _sph2DFluidParams.boxWidth = _boxWidth;
-    _sph2DFluidParams.boxCenter = _boxCenter;
-    _sph2DFluidParams.boxHeight = _boxHeight;
-    _sph2DFluidParams.gridOrigin = _boxCenter - Vec3(_boxWidth * 0.5f + 1e-3f, _boxHeight * 0.5f + 1e-3f, 1e-3f);
-    _sph2DFluidParams.cellSize = _cellSize;
-    _sph2DFluidParams.hashCount = _hashCount;
-    _sph2DFluidParams.addCount = 1;
-    _sph2DFluidParams.radius = _radius;
+void SPH3DFluid::PushSimulationParams() {
+    _sph3DFluidParams.maxParticles = _maxParticles;
+    _sph3DFluidParams.deltaTime = _deltaTime;
+    _sph3DFluidParams.totalTime += _deltaTime;
+    _sph3DFluidParams.pressureCoeff = _pressureCoeff;
+    _sph3DFluidParams.nearPressureCoeff = _nearPressureCoeff;
+    _sph3DFluidParams.viscosity = _viscosity;
+    _sph3DFluidParams.density0 = _density0;
+    _sph3DFluidParams.mass = _mass;
+    _sph3DFluidParams.smoothingLength = _smoothingLength;
+    _sph3DFluidParams.boxCenter = _boxCenter;
+    _sph3DFluidParams.boxWidth = _boxWidth;
+    _sph3DFluidParams.boxHeight = _boxHeight;
+    _sph3DFluidParams.boxDepth = _boxDepth;
+    _sph3DFluidParams.cellSize = _cellSize;
+    _sph3DFluidParams.gridOrigin =
+        _boxCenter - Vec3(_boxWidth * 0.5f + 1e-3f, _boxHeight * 0.5f + 1e-3f, _boxDepth * 0.5f + 1e-3f);
+    _sph3DFluidParams.hashCount = _hashCount;
+    _sph3DFluidParams.addCount = 1;
+    _sph3DFluidParams.radius = _radius;
 
-    //_simulationParamsCB->PushComputeData(&_sph2DFluidParams, sizeof(_sph2DFluidParams), CBV_REGISTER::b0); // 삭제
     _simulationParamsCB->Clear();
-    _simulationParamsCB->SetData(&_sph2DFluidParams, sizeof(_sph2DFluidParams));
+    _simulationParamsCB->SetData(&_sph3DFluidParams, sizeof(_sph3DFluidParams));
 }
 
-void SPH2DFluid::ActivateParticles() {
+void SPH3DFluid::ActivateParticles1() {
     _simulationParamsCB->Clear();
     _simulationParamsCB->BindToCompute(CBV_REGISTER::b0);
 
@@ -295,7 +340,7 @@ void SPH2DFluid::ActivateParticles() {
     _aliveBuffer->PushComputeUAVData(UAV_REGISTER::u2);
 
     // Shader Set
-    _activateShader->Update();
+    _activate1Shader->Update();
 
     // dispatch
     GEngine->GetComputeDescHeap()->CommitTable();
@@ -306,7 +351,27 @@ void SPH2DFluid::ActivateParticles() {
     COMPUTE_CMD_LIST->ResourceBarrier(1, &uavBarrier);
 }
 
-void SPH2DFluid::HashingParticles() {
+void SPH3DFluid::ActivateParticles2() {
+    _simulationParamsCB->Clear();
+    _simulationParamsCB->BindToCompute(CBV_REGISTER::b0);
+
+    _positionBuffer->PushComputeUAVData(UAV_REGISTER::u0);
+    _velocityBuffer->PushComputeUAVData(UAV_REGISTER::u1);
+    _aliveBuffer->PushComputeUAVData(UAV_REGISTER::u2);
+
+    // Shader Set
+    _activate2Shader->Update();
+
+    // dispatch
+    GEngine->GetComputeDescHeap()->CommitTable();
+
+    COMPUTE_CMD_LIST->Dispatch(_threadGroupCountX, 1, 1);
+
+    D3D12_RESOURCE_BARRIER uavBarrier = CD3DX12_RESOURCE_BARRIER::UAV(_positionBuffer->GetBuffer().Get());
+    COMPUTE_CMD_LIST->ResourceBarrier(1, &uavBarrier);
+}
+
+void SPH3DFluid::HashingParticles() {
     _simulationParamsCB->Clear();
     _simulationParamsCB->BindToCompute(CBV_REGISTER::b0);
 
@@ -326,7 +391,7 @@ void SPH2DFluid::HashingParticles() {
     COMPUTE_CMD_LIST->ResourceBarrier(1, &uavBarrier);
 }
 
-void SPH2DFluid::SortParticles() {
+void SPH3DFluid::SortParticles() {
     // Shader Set + Dispatch
     _bitonicSortCB->Clear();
 
@@ -340,7 +405,7 @@ void SPH2DFluid::SortParticles() {
             _velocityBuffer->PushComputeUAVData(UAV_REGISTER::u1);
             _aliveBuffer->PushComputeUAVData(UAV_REGISTER::u2);
             _hashBuffer->PushComputeUAVData(UAV_REGISTER::u3);
-            
+
             GEngine->GetComputeDescHeap()->CommitTable();
             COMPUTE_CMD_LIST->Dispatch(_threadGroupCountX, 1, 1);
 
@@ -350,7 +415,7 @@ void SPH2DFluid::SortParticles() {
     }
 }
 
-void SPH2DFluid::ComputeCellRange() {
+void SPH3DFluid::ComputeCellRange() {
     _simulationParamsCB->Clear();
     _simulationParamsCB->BindToCompute(CBV_REGISTER::b0);
 
@@ -361,12 +426,12 @@ void SPH2DFluid::ComputeCellRange() {
 
     GEngine->GetComputeDescHeap()->CommitTable();
     COMPUTE_CMD_LIST->Dispatch(_threadGroupCountX, 1, 1);
-    
+
     D3D12_RESOURCE_BARRIER uavBarrier = CD3DX12_RESOURCE_BARRIER::UAV(_cellRangeBuffer->GetBuffer().Get());
     COMPUTE_CMD_LIST->ResourceBarrier(1, &uavBarrier);
 }
 
-void SPH2DFluid::ComputeDensity() {
+void SPH3DFluid::ComputeDensity() {
     _simulationParamsCB->Clear();
     _simulationParamsCB->BindToCompute(CBV_REGISTER::b0);
 
@@ -379,12 +444,12 @@ void SPH2DFluid::ComputeDensity() {
 
     GEngine->GetComputeDescHeap()->CommitTable();
     COMPUTE_CMD_LIST->Dispatch(_threadGroupCountX, 1, 1);
-    
+
     D3D12_RESOURCE_BARRIER uavBarrier = CD3DX12_RESOURCE_BARRIER::UAV(_densityBuffer->GetBuffer().Get());
     COMPUTE_CMD_LIST->ResourceBarrier(1, &uavBarrier);
 }
 
-void SPH2DFluid::PredictPositionVelocity() {
+void SPH3DFluid::PredictPositionVelocity() {
     _simulationParamsCB->Clear();
     _simulationParamsCB->BindToCompute(CBV_REGISTER::b0);
 
@@ -401,12 +466,12 @@ void SPH2DFluid::PredictPositionVelocity() {
 
     GEngine->GetComputeDescHeap()->CommitTable();
     COMPUTE_CMD_LIST->Dispatch(_threadGroupCountX, 1, 1);
-    
+
     D3D12_RESOURCE_BARRIER uavBarrier = CD3DX12_RESOURCE_BARRIER::UAV(_predPositionBuffer->GetBuffer().Get());
     COMPUTE_CMD_LIST->ResourceBarrier(1, &uavBarrier);
 }
 
-void SPH2DFluid::IterativeEOS(uint32 iterationCount) {
+void SPH3DFluid::IterativeEOS(uint32 iterationCount) {
     for (uint32 i = 0; i < iterationCount; ++i) {
         IterativeEOS1();
         IterativeEOS2();
@@ -414,7 +479,7 @@ void SPH2DFluid::IterativeEOS(uint32 iterationCount) {
     }
 }
 
-void SPH2DFluid::IterativeEOS1() {
+void SPH3DFluid::IterativeEOS1() {
     _simulationParamsCB->Clear();
     _simulationParamsCB->BindToCompute(CBV_REGISTER::b0);
 
@@ -431,12 +496,12 @@ void SPH2DFluid::IterativeEOS1() {
 
     GEngine->GetComputeDescHeap()->CommitTable();
     COMPUTE_CMD_LIST->Dispatch(_threadGroupCountX, 1, 1);
-    
+
     D3D12_RESOURCE_BARRIER uavBarrier = CD3DX12_RESOURCE_BARRIER::UAV(_densityBuffer->GetBuffer().Get());
     COMPUTE_CMD_LIST->ResourceBarrier(1, &uavBarrier);
 }
 
-void SPH2DFluid::IterativeEOS2() {
+void SPH3DFluid::IterativeEOS2() {
     _simulationParamsCB->Clear();
     _simulationParamsCB->BindToCompute(CBV_REGISTER::b0);
 
@@ -454,12 +519,12 @@ void SPH2DFluid::IterativeEOS2() {
 
     GEngine->GetComputeDescHeap()->CommitTable();
     COMPUTE_CMD_LIST->Dispatch(_threadGroupCountX, 1, 1);
-    
+
     D3D12_RESOURCE_BARRIER uavBarrier = CD3DX12_RESOURCE_BARRIER::UAV(_forceBuffer->GetBuffer().Get());
     COMPUTE_CMD_LIST->ResourceBarrier(1, &uavBarrier);
 }
 
-void SPH2DFluid::IterativeEOS3() {
+void SPH3DFluid::IterativeEOS3() {
     _simulationParamsCB->Clear();
     _simulationParamsCB->BindToCompute(CBV_REGISTER::b0);
 
@@ -473,12 +538,12 @@ void SPH2DFluid::IterativeEOS3() {
 
     GEngine->GetComputeDescHeap()->CommitTable();
     COMPUTE_CMD_LIST->Dispatch(_threadGroupCountX, 1, 1);
-    
+
     D3D12_RESOURCE_BARRIER uavBarrier = CD3DX12_RESOURCE_BARRIER::UAV(_predPositionBuffer->GetBuffer().Get());
     COMPUTE_CMD_LIST->ResourceBarrier(1, &uavBarrier);
 }
 
-void SPH2DFluid::FinalEOS() {
+void SPH3DFluid::FinalEOS() {
     _simulationParamsCB->Clear();
     _simulationParamsCB->BindToCompute(CBV_REGISTER::b0);
 
@@ -493,12 +558,12 @@ void SPH2DFluid::FinalEOS() {
 
     GEngine->GetComputeDescHeap()->CommitTable();
     COMPUTE_CMD_LIST->Dispatch(_threadGroupCountX, 1, 1);
-    
+
     D3D12_RESOURCE_BARRIER uavBarrier = CD3DX12_RESOURCE_BARRIER::UAV(_positionBuffer->GetBuffer().Get());
     COMPUTE_CMD_LIST->ResourceBarrier(1, &uavBarrier);
 }
 
-void SPH2DFluid::AnimateParticles() {
+void SPH3DFluid::AnimateParticles() {
     if (INPUT->GetButton(KEY_TYPE::UP)) {
         _simulationParamsCB->Clear();
         _simulationParamsCB->BindToCompute(CBV_REGISTER::b0);
