@@ -19,6 +19,7 @@ class GraphicsCommandQueue {
     void FlushResourceCommandQueue();
 
     ComPtr<ID3D12CommandQueue> GetCmdQueue() { return _cmdQueue; }
+    ComPtr<ID3D12CommandAllocator> GetCmdAlloc() { return _cmdAlloc; }
     ComPtr<ID3D12GraphicsCommandList> GetGraphicsCmdList() { return _cmdList; }
     ComPtr<ID3D12GraphicsCommandList> GetResourceCmdList() { return _resCmdList; }
 

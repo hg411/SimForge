@@ -14,6 +14,7 @@
 #include "CommandQueue.h"
 #include "Engine.h"
 #include "Timer.h"
+#include "Input.h"
 
 SPH2DFluid::SPH2DFluid() {}
 
@@ -62,10 +63,11 @@ void SPH2DFluid::FinalUpdate() {
         PredictPositionVelocity();
         IterativeEOS(5);
         FinalEOS();
-
-        GEngine->GetComputeCmdQueue()->FlushComputeCommandQueue();
-
+        AnimateParticles();
+     
         _accumulatedTime -= _timeStep;
+
+         GEngine->GetComputeCmdQueue()->FlushComputeCommandQueue();
     }
 }
 
@@ -123,6 +125,15 @@ void SPH2DFluid::InitShaders() {
 
     _finalEOSShader = make_shared<Shader>();
     _finalEOSShader->CreateComputeShader(L"SPHFinalCS.hlsl");
+
+    _animate1Shader = make_shared<Shader>();
+    _animate1Shader->CreateComputeShader(L"SPHAnimation1CS.hlsl");
+
+    _animate2Shader = make_shared<Shader>();
+    _animate2Shader->CreateComputeShader(L"SPHAnimation2CS.hlsl");
+
+    _animate3Shader = make_shared<Shader>();
+    _animate3Shader->CreateComputeShader(L"SPHAnimation3CS.hlsl");
 
     ShaderInfo info = {
         SHADER_TYPE::FORWARD, RASTERIZER_TYPE::CULL_NONE,       DEPTH_STENCIL_TYPE::LESS,
@@ -241,6 +252,15 @@ void SPH2DFluid::BuildUI() {
     ImGui::SliderFloat("Box Width", &_boxWidth, 0.5f, 3.4f);
     ImGui::SliderFloat("Box Height", &_boxHeight, 0.5f, 1.7f);
     ImGui::SliderFloat2("Box Position", &_boxCenter.x, -2.0f, 2.0f);
+    ImGui::End();
+
+    ImGui::Begin("Particles");
+    ImGui::InputFloat("Delta Time", &_deltaTime, 0.001f, 0.001f);
+    ImGui::InputFloat("Pressure Coeff", &_pressureCoeff, 0.125f, 0.125f);
+    ImGui::InputFloat("Near Pressure Coeff", &_nearPressureCoeff, 0.01f, 0.01f);
+    ImGui::InputFloat("Viscosity", &_viscosity, 0.0001f, 0.0001f, "%.4f");
+    ImGui::InputFloat("Target Density", &_density0, 200.0f, 200.0f);
+    ImGui::InputFloat("Mass", &_mass, 0.01f, 0.01f);
     ImGui::End();
 }
 
@@ -478,4 +498,54 @@ void SPH2DFluid::FinalEOS() {
     
     D3D12_RESOURCE_BARRIER uavBarrier = CD3DX12_RESOURCE_BARRIER::UAV(_positionBuffer->GetBuffer().Get());
     COMPUTE_CMD_LIST->ResourceBarrier(1, &uavBarrier);
+}
+
+void SPH2DFluid::AnimateParticles() {
+    if (INPUT->GetButton(KEY_TYPE::UP)) {
+        _simulationParamsCB->Clear();
+        _simulationParamsCB->BindToCompute(CBV_REGISTER::b0);
+
+        _aliveBuffer->PushComputeSRVData(SRV_REGISTER::t0);
+        _velocityBuffer->PushComputeUAVData(UAV_REGISTER::u0);
+
+        _animate1Shader->Update();
+
+        GEngine->GetComputeDescHeap()->CommitTable();
+        COMPUTE_CMD_LIST->Dispatch(_threadGroupCountX, 1, 1);
+
+        D3D12_RESOURCE_BARRIER uavBarrier = CD3DX12_RESOURCE_BARRIER::UAV(_positionBuffer->GetBuffer().Get());
+        COMPUTE_CMD_LIST->ResourceBarrier(1, &uavBarrier);
+    }
+
+    if (INPUT->GetButton(KEY_TYPE::RIGHT)) {
+        _simulationParamsCB->Clear();
+        _simulationParamsCB->BindToCompute(CBV_REGISTER::b0);
+
+        _aliveBuffer->PushComputeSRVData(SRV_REGISTER::t0);
+        _velocityBuffer->PushComputeUAVData(UAV_REGISTER::u0);
+
+        _animate2Shader->Update();
+
+        GEngine->GetComputeDescHeap()->CommitTable();
+        COMPUTE_CMD_LIST->Dispatch(_threadGroupCountX, 1, 1);
+
+        D3D12_RESOURCE_BARRIER uavBarrier = CD3DX12_RESOURCE_BARRIER::UAV(_positionBuffer->GetBuffer().Get());
+        COMPUTE_CMD_LIST->ResourceBarrier(1, &uavBarrier);
+    }
+
+    if (INPUT->GetButton(KEY_TYPE::LEFT)) {
+        _simulationParamsCB->Clear();
+        _simulationParamsCB->BindToCompute(CBV_REGISTER::b0);
+
+        _aliveBuffer->PushComputeSRVData(SRV_REGISTER::t0);
+        _velocityBuffer->PushComputeUAVData(UAV_REGISTER::u0);
+
+        _animate3Shader->Update();
+
+        GEngine->GetComputeDescHeap()->CommitTable();
+        COMPUTE_CMD_LIST->Dispatch(_threadGroupCountX, 1, 1);
+
+        D3D12_RESOURCE_BARRIER uavBarrier = CD3DX12_RESOURCE_BARRIER::UAV(_positionBuffer->GetBuffer().Get());
+        COMPUTE_CMD_LIST->ResourceBarrier(1, &uavBarrier);
+    }
 }

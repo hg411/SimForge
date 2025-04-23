@@ -289,13 +289,13 @@
     <FxCompile Include="..\Resources\Shaders\SPHFinalCS.hlsl">
       <Filter>Shaders\SPHFluid</Filter>
     </FxCompile>
-    <FxCompile Include="..\..\Graphics\Resources\Shader\SPHAnimation1CS.hlsl">
+    <FxCompile Include="..\Resources\Shaders\SPHAnimation1CS.hlsl">
       <Filter>Shaders\SPHFluid</Filter>
     </FxCompile>
-    <FxCompile Include="..\..\Graphics\Resources\Shader\SPHAnimation2CS.hlsl">
+    <FxCompile Include="..\Resources\Shaders\SPHAnimation2CS.hlsl">
       <Filter>Shaders\SPHFluid</Filter>
     </FxCompile>
-    <FxCompile Include="..\..\Graphics\Resources\Shader\SPHAnimation3CS.hlsl">
+    <FxCompile Include="..\Resources\Shaders\SPHAnimation3CS.hlsl">
       <Filter>Shaders\SPHFluid</Filter>
     </FxCompile>
   </ItemGroup>

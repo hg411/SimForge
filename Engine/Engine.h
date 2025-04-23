@@ -23,6 +23,10 @@ class Engine {
 
     void ResizeWindow(int32 width, int32 height);
 
+  private:
+    void AdjustWindowSizeAndPosition();
+    void InitSwapChain();
+
   public:
     const WindowInfo &GetWindowInfo() { return _windowInfo; }
     shared_ptr<Device> GetDevice() { return _device; }

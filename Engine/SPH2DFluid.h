@@ -73,6 +73,7 @@ class SPH2DFluid : public Simulation {
     void IterativeEOS2();
     void IterativeEOS3();
     void FinalEOS();
+    void AnimateParticles();
 
   private:
     // Constant Buffer
@@ -103,18 +104,21 @@ class SPH2DFluid : public Simulation {
     shared_ptr<Shader> _iterativeEOS2Shader;
     shared_ptr<Shader> _iterativeEOS3Shader;
     shared_ptr<Shader> _finalEOSShader;
+    shared_ptr<Shader> _animate1Shader;
+    shared_ptr<Shader> _animate2Shader;
+    shared_ptr<Shader> _animate3Shader;
 
     shared_ptr<Shader> _particleRenderShader;
 
-    uint32 _maxParticles = 4096;
+    uint32 _maxParticles = 4096 * 2;
     uint32 _threadGroupCountX = 0;
     float _numThreadsX = 256.0f;
-    float _deltaTime = 0.005f;
+    float _deltaTime = 0.004f;
     float _radius = 1.0f / 128.0f; // dx = radius * 2.0f
-    float _pressureCoeff = 1.5f;
+    float _pressureCoeff = 1.0f;
     float _nearPressureCoeff = 0.1f;
-    float _density0 = 1000.0f;
     float _viscosity = 0.001f;
+    float _density0 = 1000.0f;
     float _smoothingLength = 2.6f * _radius * 2.0f; // smoothing length = dx * 1.5f
     float _cellSize = _smoothingLength * 1.1f;      //
     float _mass = 0.25f;                            // mass = dx * dx * density0

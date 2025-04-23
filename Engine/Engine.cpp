@@ -17,9 +17,10 @@
 void Engine::Init(const WindowInfo &windowInfo) {
     _windowInfo = windowInfo;
 
-    // 그려질 화면 크기를 설정
     _viewport = {0, 0, static_cast<FLOAT>(windowInfo.width), static_cast<FLOAT>(windowInfo.height), 0.0f, 1.0f};
-    _scissorRect = CD3DX12_RECT(0, 0, windowInfo.width, windowInfo.height);
+    _scissorRect = CD3DX12_RECT(0, 0, static_cast<LONG>(windowInfo.width), static_cast<LONG>(windowInfo.height));
+
+    AdjustWindowSizeAndPosition();
 
     // Device
     _device = make_shared<Device>();
@@ -33,8 +34,7 @@ void Engine::Init(const WindowInfo &windowInfo) {
     _computeCmdQueue->Init(_device->GetDevice());
 
     // SwapChain
-    _swapChain = make_shared<SwapChain>();
-    _swapChain->Init(windowInfo, _device->GetDevice(), _device->GetDXGI(), _graphicsCmdQueue->GetCmdQueue());
+    InitSwapChain();
 
     _graphicsCmdQueue->SetSwapChain(_swapChain);
 
@@ -59,8 +59,6 @@ void Engine::Init(const WindowInfo &windowInfo) {
     _materialParamsCB->Init(sizeof(MaterialParams), 256);
 
     CreateRenderTargetGroups();
-
-    ResizeWindow(windowInfo.width, windowInfo.height);
 
     GET_SINGLE(Input)->Init(windowInfo.hwnd);
     GET_SINGLE(Timer)->Init();
@@ -87,13 +85,39 @@ void Engine::RenderBegin() { _graphicsCmdQueue->RenderBegin(); }
 void Engine::RenderEnd() { _graphicsCmdQueue->RenderEnd(); }
 
 void Engine::ResizeWindow(int32 width, int32 height) {
-    _windowInfo.width = width;
-    _windowInfo.height = height;
+    if (_swapChain)
+    {
+        _windowInfo.width = width;
+        _windowInfo.height = height;
 
-    RECT rect = {0, 0, width, height};
+        _viewport = {0, 0, static_cast<FLOAT>(_windowInfo.width), static_cast<FLOAT>(_windowInfo.height), 0.0f, 1.0f};
+        _scissorRect = CD3DX12_RECT(0, 0, _windowInfo.width, _windowInfo.height);
+
+        GRAPHICS_CMD_LIST->Reset(_graphicsCmdQueue->GetCmdAlloc().Get(), nullptr);
+
+        GRAPHICS_CMD_LIST->RSSetViewports(1, &_viewport);
+        GRAPHICS_CMD_LIST->RSSetScissorRects(1, &_scissorRect);
+
+        GRAPHICS_CMD_LIST->Close();
+
+        GetGraphicsCmdQueue()->WaitSync();
+
+        _rtGroups[static_cast<uint8>(RENDER_TARGET_GROUP_TYPE::SWAP_CHAIN)].reset();
+        _swapChain->Resize(width, height);
+
+        CreateRenderTargetGroups();
+    }
+}
+
+void Engine::AdjustWindowSizeAndPosition() {
+    RECT rect = {0, 0, _windowInfo.width, _windowInfo.height};
     ::AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, false);
-    //::SetWindowPos(_windowInfo.hwnd, 0, 100, 100, width, height, 0);
     ::SetWindowPos(_windowInfo.hwnd, 0, 100, 100, rect.right - rect.left, rect.bottom - rect.top, 0);
+}
+
+void Engine::InitSwapChain() {
+    _swapChain = make_shared<SwapChain>();
+    _swapChain->Init(_windowInfo, _device->GetDXGI(), _graphicsCmdQueue->GetCmdQueue());
 }
 
 shared_ptr<RenderTargetGroup> Engine::GetRTGroup(RENDER_TARGET_GROUP_TYPE type) {
