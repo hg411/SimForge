@@ -6,7 +6,7 @@ StructuredBuffer<CellRange> g_cellRangesRead : register(t2);
 
 RWStructuredBuffer<float> g_densitiesRW : register(u0);
 
-[numthreads(128, 1, 1)]
+[numthreads(NUM_THREADS_X, 1, 1)]
 void main(uint3 dtID : SV_DispatchThreadID)
 {
     uint i = dtID.x;
@@ -19,7 +19,7 @@ void main(uint3 dtID : SV_DispatchThreadID)
 
     float3 x_i = g_positionsRead[i];
     
-    int3 selfCell = int3(ceil((x_i - gridOrigin) / cellSize));
+    int3 selfCell = int3(floor((x_i - gridOrigin) / cellSize));
     float density = 0.0;
    
     [unroll]
@@ -41,7 +41,7 @@ void main(uint3 dtID : SV_DispatchThreadID)
                     
                     float3 x_j = g_positionsRead[j];
                     
-                    int3 cell_j = int3(ceil((x_j - gridOrigin) / cellSize));
+                    int3 cell_j = int3(floor((x_j - gridOrigin) / cellSize));
                     if (neighborCell.x != cell_j.x || neighborCell.y != cell_j.y || neighborCell.z != cell_j.z)
                         continue;
                     

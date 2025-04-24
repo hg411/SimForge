@@ -1,4 +1,4 @@
-cbuffer SPH2DFluidParams : register(b3)
+cbuffer SPHFluidParams : register(b3)
 {
     uint maxParticles;
     float deltaTime;
@@ -17,12 +17,13 @@ cbuffer SPH2DFluidParams : register(b3)
     
     float cellSize;
     uint hashCount;
+    
     float3 gridOrigin;
     
     uint addCount;
     float radius;
     float surfaceCoeff;
-    float padding;
+    float padding2;
 }
 
 StructuredBuffer<float3> g_positionsRead : register(t0);

@@ -3,6 +3,8 @@
 
 #include "Constants.hlsli"
 
+#define NUM_THREADS_X 64
+
 struct CellRange
 {
     uint startIndex;
@@ -28,12 +30,20 @@ cbuffer SPHFluidParams : register(b0)
     
     float cellSize;
     uint hashCount;
+    
     float3 gridOrigin;
     
     uint addCount;
     float radius;
     float surfaceCoeff;
-    float padding;
+    float padding2;
+}
+
+cbuffer Const : register(b1)
+{
+    // https://en.wikipedia.org/wiki/Bitonic_sorter Example Code
+    uint k;
+    uint j;
 }
 
 // Computes hash value for given cell coordinates.

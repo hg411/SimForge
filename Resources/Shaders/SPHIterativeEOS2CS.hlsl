@@ -10,7 +10,7 @@ StructuredBuffer<float> g_nearPressuresRead : register(t6);
 
 RWStructuredBuffer<float3> g_forcesRW : register(u0);
 
-[numthreads(256, 1, 1)]
+[numthreads(NUM_THREADS_X, 1, 1)]
 void main(uint3 dtID : SV_DispatchThreadID)
 {
     uint i = dtID.x;

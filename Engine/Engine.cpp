@@ -43,20 +43,23 @@ void Engine::Init(const WindowInfo &windowInfo) {
     _rootSignature->Init(_device->GetDevice());
 
     // Descriptor Heap
-    _graphicsDescHeap = make_shared<GraphicsDescriptorHeap>();
-    _graphicsDescHeap->Init(256);
+    // 일단 Root Descriptor만 사용하는 방식으로 사용.
+    //_graphicsDescHeap = make_shared<GraphicsDescriptorHeap>();
+    //_graphicsDescHeap->Init(256);
 
-    _computeDescHeap = make_shared<ComputeDescriptorHeap>();
-    _computeDescHeap->Init(256);
+    //_computeDescHeap = make_shared<ComputeDescriptorHeap>();
+    //_computeDescHeap->Init(256);
 
     _globalParamsCB = make_shared<ConstantBuffer>();
-    _globalParamsCB->Init(sizeof(GlobalParams), 256);
+    _globalParamsCB->Init(sizeof(GlobalParams), 1);
 
     _transformParamsCB = make_shared<ConstantBuffer>();
-    _transformParamsCB->Init(sizeof(TransformParams), 256);
+    _transformParamsCB->Init(sizeof(TransformParams), 1);
+    //_transformParamsCB->Init(sizeof(TransformParams), 256);
 
     _materialParamsCB = make_shared<ConstantBuffer>();
-    _materialParamsCB->Init(sizeof(MaterialParams), 256);
+    _materialParamsCB->Init(sizeof(MaterialParams), 1);
+    //_materialParamsCB->Init(sizeof(MaterialParams), 256);
 
     CreateRenderTargetGroups();
 

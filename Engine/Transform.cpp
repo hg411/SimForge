@@ -44,5 +44,7 @@ void Transform::PushData() {
     transformParams.matWorld = _matWorld.Transpose();
     transformParams.matInvTranspose = _matInvTranspose.Transpose();
 
-    GEngine->GetTransformParamsCB()->PushGraphicsData(&transformParams, sizeof(transformParams), CBV_REGISTER::b1);
+    shared_ptr<ConstantBuffer> transformParamsCB = GEngine->GetTransformParamsCB();
+    transformParamsCB->UpdateData(&transformParams, sizeof(transformParams));
+    transformParamsCB->SetGraphicsRootCBV(CBV_REGISTER::b1);
 }

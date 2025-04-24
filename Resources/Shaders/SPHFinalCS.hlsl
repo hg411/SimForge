@@ -7,7 +7,7 @@ StructuredBuffer<int> g_aliveFlagsRead : register(t2);
 RWStructuredBuffer<float3> g_positionsRW : register(u0);
 RWStructuredBuffer<float3> g_velocitiesRW : register(u1);
 
-[numthreads(128, 1, 1)]
+[numthreads(NUM_THREADS_X, 1, 1)]
 void main(uint3 dtID : SV_DispatchThreadID)
 {
     uint i = dtID.x;

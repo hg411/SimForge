@@ -12,7 +12,9 @@ GraphicsMaterial::~GraphicsMaterial() {}
 
 void GraphicsMaterial::PushData() {
     // CBV 업로드
-    GEngine->GetMaterialParamsCB()->PushGraphicsData(&_materialParams, sizeof(_materialParams), CBV_REGISTER::b2);
+    shared_ptr<ConstantBuffer> materialParamsCB = GEngine->GetMaterialParamsCB();
+    materialParamsCB->UpdateData(&_materialParams, sizeof(_materialParams));
+    materialParamsCB->SetGraphicsRootCBV(CBV_REGISTER::b2);
 
     // SRV 업로드
     for (size_t i = 0; i < _textures.size(); i++) {

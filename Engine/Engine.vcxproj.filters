@@ -325,5 +325,8 @@
     <FxCompile Include="..\Resources\Shaders\SPHPredictCS.hlsl">
       <Filter>Shaders\SPHFluid\SPH2DFluid</Filter>
     </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\SPH3DIterativeEOS1CS2.hlsl">
+      <Filter>Shaders\SPHFluid\SPH3DFluid</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

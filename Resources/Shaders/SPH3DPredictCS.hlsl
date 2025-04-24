@@ -9,7 +9,7 @@ StructuredBuffer<CellRange> g_cellRangesRead : register(t4);
 RWStructuredBuffer<float3> g_predPositionsRW : register(u0);
 RWStructuredBuffer<float3> g_predVelocitiesRW : register(u1);
 
-[numthreads(128, 1, 1)]
+[numthreads(NUM_THREADS_X, 1, 1)]
 void main(uint3 dtID : SV_DispatchThreadID)
 {
     uint i = dtID.x;
@@ -22,7 +22,7 @@ void main(uint3 dtID : SV_DispatchThreadID)
     
     float3 x_i = g_positionsRead[i];
     float3 v_i = g_velocitiesRead[i];
-    int3 selfCell = int3(ceil((x_i - gridOrigin) / cellSize));
+    int3 selfCell = int3(floor((x_i - gridOrigin) / cellSize));
     float3 viscosityForce = float3(0.0, 0.0, 0.0);
     float3 gravity = float3(0.0, -9.8, 0.0);
     float3 gravityForce = mass * gravity;
@@ -49,7 +49,7 @@ void main(uint3 dtID : SV_DispatchThreadID)
                     
                     float3 x_j = g_positionsRead[j];
                     
-                    int3 cell_j = int3(ceil((x_j - gridOrigin) / cellSize));
+                    int3 cell_j = int3(floor((x_j - gridOrigin) / cellSize));
                     if (neighborCell.x != cell_j.x || neighborCell.y != cell_j.y || neighborCell.z != cell_j.z)
                         continue;
                     

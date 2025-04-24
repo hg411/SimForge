@@ -79,7 +79,7 @@ class SPH2DFluid : public Simulation {
   private:
     // Constant Buffer
     shared_ptr<ConstantBuffer> _simulationParamsCB;
-    shared_ptr<ConstantBuffer> _bitonicSortCB;
+    vector<shared_ptr<ConstantBuffer>> _bitonicSortCBs;
 
     // Structured Buffer
     shared_ptr<StructuredBuffer> _positionBuffer;
@@ -113,7 +113,7 @@ class SPH2DFluid : public Simulation {
 
     uint32 _maxParticles = 4096;
     uint32 _threadGroupCountX = 0;
-    float _numThreadsX = 256.0f;
+    float _numThreadsX = 64.0f;
     float _deltaTime = 0.006f;
     float _radius = 1.0f / 128.0f; // dx = radius * 2.0f
     float _pressureCoeff = 1.0f;

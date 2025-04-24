@@ -6,7 +6,7 @@ StructuredBuffer<CellRange> g_cellRangesRead : register(t2);
 
 RWStructuredBuffer<float> g_densitiesRW : register(u0);
 
-[numthreads(256, 1, 1)]
+[numthreads(NUM_THREADS_X, 1, 1)]
 void main(uint3 dtID : SV_DispatchThreadID)
 {
     uint i = dtID.x;

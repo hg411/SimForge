@@ -73,6 +73,50 @@ void StructuredBuffer::Init(uint32 elementSize, uint32 elementCount, void *initi
     }
 }
 
+void StructuredBuffer::SetGraphicsRootSRV(SRV_REGISTER reg) {
+    if (_resourceState != D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE) {
+        D3D12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
+            _buffer.Get(), _resourceState, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+        RESOURCE_CMD_LIST->ResourceBarrier(1, &barrier);
+        _resourceState = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+    }
+
+    GRAPHICS_CMD_LIST->SetGraphicsRootShaderResourceView(static_cast<UINT>(reg), _buffer->GetGPUVirtualAddress());
+}
+
+void StructuredBuffer::SetGraphicsRootUAV(UAV_REGISTER reg) {
+    if (_resourceState != D3D12_RESOURCE_STATE_UNORDERED_ACCESS) {
+        D3D12_RESOURCE_BARRIER barrier =
+            CD3DX12_RESOURCE_BARRIER::Transition(_buffer.Get(), _resourceState, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+        RESOURCE_CMD_LIST->ResourceBarrier(1, &barrier);
+        _resourceState = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
+    }
+
+    GRAPHICS_CMD_LIST->SetGraphicsRootUnorderedAccessView(static_cast<UINT>(reg), _buffer->GetGPUVirtualAddress());
+}
+
+void StructuredBuffer::SetComputeRootSRV(SRV_REGISTER reg) {
+    if (_resourceState != D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE) {
+        D3D12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
+            _buffer.Get(), _resourceState, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+        RESOURCE_CMD_LIST->ResourceBarrier(1, &barrier);
+        _resourceState = D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE;
+    }
+
+    COMPUTE_CMD_LIST->SetComputeRootShaderResourceView(static_cast<UINT>(reg), _buffer->GetGPUVirtualAddress());
+}
+
+void StructuredBuffer::SetComputeRootUAV(UAV_REGISTER reg) {
+    if (_resourceState != D3D12_RESOURCE_STATE_UNORDERED_ACCESS) {
+        D3D12_RESOURCE_BARRIER barrier =
+            CD3DX12_RESOURCE_BARRIER::Transition(_buffer.Get(), _resourceState, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+        RESOURCE_CMD_LIST->ResourceBarrier(1, &barrier);
+        _resourceState = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
+    }
+
+    COMPUTE_CMD_LIST->SetComputeRootUnorderedAccessView(static_cast<UINT>(reg), _buffer->GetGPUVirtualAddress());
+}
+
 void StructuredBuffer::PushGraphicsData(SRV_REGISTER reg) {
     if (_resourceState != D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE) {
         D3D12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(

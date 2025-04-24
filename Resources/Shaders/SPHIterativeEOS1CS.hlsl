@@ -9,7 +9,7 @@ RWStructuredBuffer<float> g_densitiesRW : register(u0);
 RWStructuredBuffer<float> g_pressuresRW : register(u1);
 RWStructuredBuffer<float> g_nearPressuresRW : register(u2);
 
-[numthreads(256, 1, 1)]
+[numthreads(NUM_THREADS_X, 1, 1)]
 void main(uint3 dtID : SV_DispatchThreadID)
 {
     uint i = dtID.x;
@@ -34,6 +34,7 @@ void main(uint3 dtID : SV_DispatchThreadID)
             for (int x = -1; x <= 1; ++x)
             {
                 int3 neighborCell = selfCell + int3(x, y, z);
+                
                 uint neighborHash = ComputeHash(neighborCell) & (hashCount - 1);
                 CellRange cellRange = g_cellRangesRead[neighborHash];
                 
@@ -45,7 +46,7 @@ void main(uint3 dtID : SV_DispatchThreadID)
                     
                     float3 x_j = g_predPositionsRead[j];
                     
-                    int3 cell_j = int3(ceil((g_positionsRead[j] - gridOrigin) / cellSize));
+                    int3 cell_j = int3(floor((g_positionsRead[j] - gridOrigin) / cellSize));
                     if (neighborCell.x != cell_j.x || neighborCell.y != cell_j.y || neighborCell.z != cell_j.z)
                         continue;
 

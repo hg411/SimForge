@@ -1,16 +1,11 @@
+#include "SPHFluidCommon.hlsli"
+
 RWStructuredBuffer<float3> g_positionsRW : register(u0);
 RWStructuredBuffer<float3> g_velocitiesRW : register(u1);
 RWStructuredBuffer<int> g_aliveFlagsRW : register(u2);
 RWStructuredBuffer<uint> g_hashesRW : register(u3);
 
-cbuffer Const : register(b0)
-{
-    // https://en.wikipedia.org/wiki/Bitonic_sorter Example Code
-    uint k;
-    uint j;
-}
-
-[numthreads(128, 1, 1)]
+[numthreads(NUM_THREADS_X, 1, 1)]
 void main(uint3 dtID : SV_DispatchThreadID)
 {
     uint i = dtID.x;

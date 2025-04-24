@@ -10,7 +10,7 @@ StructuredBuffer<float> g_nearPressuresRead : register(t6);
 
 RWStructuredBuffer<float3> g_forcesRW : register(u0);
 
-[numthreads(128, 1, 1)]
+[numthreads(NUM_THREADS_X, 1, 1)]
 void main(uint3 dtID : SV_DispatchThreadID)
 {
     uint i = dtID.x;
@@ -26,7 +26,7 @@ void main(uint3 dtID : SV_DispatchThreadID)
     float p_i = g_pressuresRead[i];
     float np_i = g_nearPressuresRead[i];
     
-    int3 selfCell = int3(ceil((g_positionsRead[i] - gridOrigin) / cellSize));
+    int3 selfCell = int3(floor((g_positionsRead[i] - gridOrigin) / cellSize));
     float3 forcePressure = float3(0.0, 0.0, 0.0);
     
     [unroll]
@@ -51,7 +51,7 @@ void main(uint3 dtID : SV_DispatchThreadID)
                     
                     float3 x_j = g_predPositionsRead[j];
                     
-                    int3 cell_j = int3(ceil((g_positionsRead[j] - gridOrigin) / cellSize));
+                    int3 cell_j = int3(floor((g_positionsRead[j] - gridOrigin) / cellSize));
                     if (neighborCell.x != cell_j.x || neighborCell.y != cell_j.y || neighborCell.z != cell_j.z)
                         continue;
                     

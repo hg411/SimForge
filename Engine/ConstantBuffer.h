@@ -9,7 +9,12 @@ class ConstantBuffer {
 
     void Clear();
     void SetGraphicsGlobalData(void *buffer, uint32 size);
-    void SetData(void *buffer, uint32 size);
+
+    void UpdateData(void *buffer, uint32 size);
+    void SetGraphicsRootCBV(CBV_REGISTER reg);
+    void SetComputeRootCBV(CBV_REGISTER reg);
+
+    //void SetData(void *buffer, uint32 size);
     void BindToGraphics(CBV_REGISTER reg);
     void BindToCompute(CBV_REGISTER reg);
     void PushGraphicsData(void *buffer, uint32 size, CBV_REGISTER reg);

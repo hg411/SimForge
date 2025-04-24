@@ -31,16 +31,29 @@ void ConstantBuffer::Clear() { _currentIndex = 0; }
 void ConstantBuffer::SetGraphicsGlobalData(void *buffer, uint32 size) {
     assert(_elementSize == ((size + 255) & ~255));
     ::memcpy(&_mappedBuffer[0], buffer, size);
-    GRAPHICS_CMD_LIST->SetGraphicsRootConstantBufferView(0, GetGpuVirtualAddress(0));
+    GRAPHICS_CMD_LIST->SetGraphicsRootConstantBufferView(0, _cbvBuffer->GetGPUVirtualAddress());
 }
 
-void ConstantBuffer::SetData(void *buffer, uint32 size) { 
-    assert(_currentIndex < _elementCount);
+void ConstantBuffer::UpdateData(void *buffer, uint32 size) {
     assert(_elementSize == ((size + 255) & ~255));
     ::memcpy(&_mappedBuffer[_currentIndex * _elementSize], buffer, size);
-
-    _currentIndex++;
 }
+
+void ConstantBuffer::SetGraphicsRootCBV(CBV_REGISTER reg) {
+    GRAPHICS_CMD_LIST->SetGraphicsRootConstantBufferView(static_cast<UINT>(reg), _cbvBuffer->GetGPUVirtualAddress());
+}
+
+void ConstantBuffer::SetComputeRootCBV(CBV_REGISTER reg) {
+    COMPUTE_CMD_LIST->SetComputeRootConstantBufferView(static_cast<UINT>(reg), _cbvBuffer->GetGPUVirtualAddress());
+}
+
+//void ConstantBuffer::SetData(void *buffer, uint32 size) { 
+//    assert(_currentIndex < _elementCount);
+//    assert(_elementSize == ((size + 255) & ~255));
+//    ::memcpy(&_mappedBuffer[_currentIndex * _elementSize], buffer, size);
+//
+//    _currentIndex++;
+//}
 
 void ConstantBuffer::BindToGraphics(CBV_REGISTER reg) {
     assert(_currentIndex < _elementCount);

@@ -24,12 +24,13 @@ struct SPH3DFluidParams {
 
     float cellSize = 0.0f;
     uint32 hashCount = 0;
+
     Vec3 gridOrigin = {};
 
     uint32 addCount = 0;
     float radius = 0.0f;
     float surfaceCoeff = 0.0f;
-    float padding = 0.0f;
+    float padding2 = 0.0f;
 };
 
 class SPH3DFluid : public Simulation {
@@ -79,7 +80,7 @@ class SPH3DFluid : public Simulation {
   private:
     // Constant Buffer
     shared_ptr<ConstantBuffer> _simulationParamsCB;
-    shared_ptr<ConstantBuffer> _bitonicSortCB;
+    vector<shared_ptr<ConstantBuffer>> _bitonicSortCBs;
 
     // Structured Buffer
     shared_ptr<StructuredBuffer> _positionBuffer;
@@ -114,7 +115,7 @@ class SPH3DFluid : public Simulation {
 
     uint32 _maxParticles = 8192 * 64;
     uint32 _threadGroupCountX = 0;
-    float _numThreadsX = 128.0f;
+    float _numThreadsX = 64.0f;
     float _deltaTime = 0.006f;
     float _radius = 1.0f / 128.0f;
     float _pressureCoeff = 2.0f;
@@ -124,7 +125,7 @@ class SPH3DFluid : public Simulation {
     float _smoothingLength = 1.5f * _radius * 2.0f; 
     float _cellSize = _smoothingLength * 1.2f; 
     float _mass = 0.0030f; 
-    uint32 _hashCount = 8192 * 128;
+    uint32 _hashCount = 8192 * 64;
     SPH3DFluidParams _sph3DFluidParams;
 
     // Bounding Box

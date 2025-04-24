@@ -82,13 +82,10 @@ void GraphicsCommandQueue::RenderBegin() {
 
     _cmdList->SetGraphicsRootSignature(GRAPHICS_ROOT_SIGNATURE.Get());
 
-    GEngine->GetTransformParamsCB()->Clear();
-    GEngine->GetMaterialParamsCB()->Clear();
+    //GEngine->GetGraphicsDescHeap()->Clear(); //삭제
 
-    GEngine->GetGraphicsDescHeap()->Clear();
-
-    ID3D12DescriptorHeap *descHeap = GEngine->GetGraphicsDescHeap()->GetDescriptorHeap().Get();
-    _cmdList->SetDescriptorHeaps(1, &descHeap);
+    //ID3D12DescriptorHeap *descHeap = GEngine->GetGraphicsDescHeap()->GetDescriptorHeap().Get();
+    //_cmdList->SetDescriptorHeaps(1, &descHeap);
 
     _cmdList->ResourceBarrier(1, &barrier);
 }
@@ -178,5 +175,5 @@ void ComputeCommandQueue::FlushComputeCommandQueue() {
 
     _cmdList->SetComputeRootSignature(COMPUTE_ROOT_SIGNATURE.Get());
 
-    GEngine->GetComputeDescHeap()->Clear(); // 수정
+    //GEngine->GetComputeDescHeap()->Clear(); // 수정
 }
