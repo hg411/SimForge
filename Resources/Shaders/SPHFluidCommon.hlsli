@@ -49,7 +49,8 @@ cbuffer Const : register(b1)
 // Computes hash value for given cell coordinates.
 uint ComputeHash(int3 cell)
 {
-    return ((uint(cell.x) * 73856093) ^ (uint(cell.y) * 19349663) ^ (uint(cell.z) * 83492791));
+    int3 shifted = cell + int3(1024, 1024, 1024); // ÃæºÐÇÑ offset
+    return ((uint(shifted.x) * 73856093) ^ (uint(shifted.y) * 19349663) ^ (uint(shifted.z) * 83492791));
 }
 
 float GradKernelFunction(const float q)

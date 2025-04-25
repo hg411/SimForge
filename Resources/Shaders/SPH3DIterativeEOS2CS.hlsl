@@ -43,6 +43,9 @@ void main(uint3 dtID : SV_DispatchThreadID)
                 [loop]
                 for (uint j = cellRange.startIndex; j < cellRange.endIndex; ++j)
                 {
+                    if (j >= maxParticles)
+                        continue;
+                    
                     if (i == j)
                         continue;
                     
