@@ -74,11 +74,11 @@ void StructuredBuffer::Init(uint32 elementSize, uint32 elementCount, void *initi
 }
 
 void StructuredBuffer::SetGraphicsRootSRV(SRV_REGISTER reg) {
-    if (_resourceState != D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE) {
-        D3D12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
-            _buffer.Get(), _resourceState, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+    if (_resourceState != D3D12_RESOURCE_STATE_ALL_SHADER_RESOURCE) {
+        D3D12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(_buffer.Get(), _resourceState,
+                                                                              D3D12_RESOURCE_STATE_ALL_SHADER_RESOURCE);
         RESOURCE_CMD_LIST->ResourceBarrier(1, &barrier);
-        _resourceState = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+        _resourceState = D3D12_RESOURCE_STATE_ALL_SHADER_RESOURCE;
     }
 
     GRAPHICS_CMD_LIST->SetGraphicsRootShaderResourceView(static_cast<UINT>(reg), _buffer->GetGPUVirtualAddress());

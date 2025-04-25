@@ -8,6 +8,9 @@
 #include "ConstantBuffer.h"
 #include "TableDescriptorHeap.h"
 
+
+#include "Device.h"
+
 // ************************
 // GraphicsCommandQueue
 // ************************

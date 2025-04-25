@@ -10,9 +10,22 @@ void main(uint3 dtID : SV_DispatchThreadID)
     
     uint iHash = g_hashesRead[i];
     
-    if (i == 0 || iHash != g_hashesRead[i - 1])
+    if (i == 0)
+    {
         g_cellRangesRW[iHash].startIndex = i;
+    }
+    else if (iHash != g_hashesRead[i - 1])
+    {
+        g_cellRangesRW[iHash].startIndex = i;
+    }
+        
 
-    if (i == maxParticles - 1 || iHash != g_hashesRead[i + 1])
+    if (i == maxParticles - 1)
+    {
         g_cellRangesRW[iHash].endIndex = i + 1;
+    }
+    else if (iHash != g_hashesRead[i + 1])
+    {
+        g_cellRangesRW[iHash].endIndex = i + 1;
+    }
 }
