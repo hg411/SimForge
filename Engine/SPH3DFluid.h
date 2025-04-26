@@ -115,7 +115,7 @@ class SPH3DFluid : public Simulation {
 
     uint32 _maxParticles = 8192 * 64;
     uint32 _threadGroupCountX = 0;
-    float _numThreadsX = 64.0f;
+    float _numThreadsX = 512.0f;
     float _deltaTime = 0.006f;
     float _radius = 1.0f / 128.0f;
     float _pressureCoeff = 2.0f;

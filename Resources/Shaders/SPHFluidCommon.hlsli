@@ -3,7 +3,7 @@
 
 #include "Constants.hlsli"
 
-#define NUM_THREADS_X 64
+#define NUM_THREADS_X 512
 
 struct CellRange
 {
@@ -124,7 +124,6 @@ float Poly6Kernel2D(float r2, float h2)
 
 float Poly6Kernel3D(float r2, float h)
 {
-    float result = 0.0;
     float h2 = h * h;
     float h4 = h2 * h2;
     float h9 = h4 * h4 * h;
@@ -132,13 +131,9 @@ float Poly6Kernel3D(float r2, float h)
     float coeff = 315.0 / (64.0 * PI * h9); // 3D normalization
 
     float h2_r2 = h2 - r2;
-    
-    if (r2 < h2)
-    {
-        result = coeff * h2_r2 * h2_r2 * h2_r2;
-    }
+    float mask = (r2 <= h2) ? 1.0 : 0.0;
 
-    return result;
+    return mask * coeff * h2_r2 * h2_r2 * h2_r2;
 }
 
 float3 GradientPoly6Kernel(float3 r_vec, float r_len, float h, int dimension)
@@ -277,7 +272,6 @@ float3 GradientSpikyKernel2D(float3 r_vec, float r_len, float h)
 
 float3 GradientSpikyKernel3D(float3 r_vec, float r_len, float h)
 {
-    float3 result = float3(0.0, 0.0, 0.0);
     float h2 = h * h;
     float h6 = h2 * h2 * h2;
     float coeff;
@@ -285,13 +279,9 @@ float3 GradientSpikyKernel3D(float3 r_vec, float r_len, float h)
     coeff = -45.0 / (PI * h6); // 3D normalization
     
     float h_r = h - r_len;
-
-    if (r_len < h)
-    {
-        result = coeff * h_r * h_r * (r_vec / r_len);
-    }
+    float mask = step(r_len, h);
     
-    return result;
+    return mask * (coeff * h_r * h_r * (r_vec / r_len));
 }
 
 // Viscosity Kernel: Laplacian is always positive.
@@ -422,6 +412,18 @@ float Rand(float2 co)
 float RandRange(float2 co, float minVal, float maxVal)
 {
     return minVal + (maxVal - minVal) * Rand(co);
+}
+
+float CalculateNearDensity(float r2, float h)
+{
+    float result = 0.0;
+    
+    float r = sqrt(r2);
+    float mask = (r < h) ? 1.0 : 0.0;
+    
+    float q = 1.0 - r / h;
+    
+    return mask * (q * q * q);
 }
 
 #endif // __SPHCOMMON_HLSLI__

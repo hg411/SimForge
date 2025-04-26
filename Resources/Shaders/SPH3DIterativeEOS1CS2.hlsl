@@ -40,8 +40,8 @@ void main(uint3 dtID : SV_DispatchThreadID)
                 [loop]
                 for (uint j = cellRange.startIndex; j < cellRange.endIndex; ++j)
                 {
-                    if (j >= maxParticles)
-                        continue;
+                    //if (j >= maxParticles)
+                    //    continue;
                     
                     if (g_aliveFlagsRead[j] == -1)
                         continue;
@@ -63,9 +63,8 @@ void main(uint3 dtID : SV_DispatchThreadID)
                     
                     if (i == j)
                         continue;
-
-                    float q = 1.0 - sqrt(r2) / h;
-                    nearDensity += q * q * q;
+                    
+                    nearDensity += CalculateNearDensity(r2, h);
                 }
             }
    

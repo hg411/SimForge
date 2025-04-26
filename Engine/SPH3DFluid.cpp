@@ -16,6 +16,8 @@
 #include "Timer.h"
 #include "Input.h"
 
+#include "Device.h"
+
 SPH3DFluid::SPH3DFluid() {}
 
 SPH3DFluid::~SPH3DFluid() {}
@@ -61,11 +63,11 @@ void SPH3DFluid::FinalUpdate() {
     //_accumulatedTime += DELTA_TIME;
 
     //// 초기 프레임 안정화
-    //if (_accumulatedTime > 1.0f)
-    //    _accumulatedTime = 0.0f;
+    // if (_accumulatedTime > 1.0f)
+    //     _accumulatedTime = 0.0f;
 
-    //while (_accumulatedTime >= _timeStep) {
-    //    PushSimulationParams();
+    // while (_accumulatedTime >= _timeStep) {
+    //     PushSimulationParams();
 
     //    if (INPUT->GetButtonDown(KEY_TYPE::KEY_1)) {
     //        ActivateParticles1();
@@ -175,7 +177,7 @@ void SPH3DFluid::InitShaders() {
 
     ShaderInfo info = {
         SHADER_TYPE::FORWARD, RASTERIZER_TYPE::CULL_NONE,       DEPTH_STENCIL_TYPE::LESS,
-        BLEND_TYPE::DEFAULT, D3D_PRIMITIVE_TOPOLOGY_POINTLIST, {} // No InputLayout
+        BLEND_TYPE::DEFAULT,  D3D_PRIMITIVE_TOPOLOGY_POINTLIST, {} // No InputLayout
     };
     _particleRenderShader = make_shared<Shader>();
     _particleRenderShader->CreateVertexShader(L"ParticleVS.hlsl");
@@ -429,7 +431,7 @@ void SPH3DFluid::PredictPositionVelocity() {
     _predVelocityBuffer->SetComputeRootUAV(UAV_REGISTER::u1);
 
     _predictShader->Update();
-;
+    ;
     COMPUTE_CMD_LIST->Dispatch(_threadGroupCountX, 1, 1);
 
     D3D12_RESOURCE_BARRIER uavBarrier = CD3DX12_RESOURCE_BARRIER::UAV(_predPositionBuffer->GetBuffer().Get());
@@ -521,7 +523,7 @@ void SPH3DFluid::AnimateParticles() {
 
         COMPUTE_CMD_LIST->Dispatch(_threadGroupCountX, 1, 1);
 
-        D3D12_RESOURCE_BARRIER uavBarrier = CD3DX12_RESOURCE_BARRIER::UAV(_positionBuffer->GetBuffer().Get());
+        D3D12_RESOURCE_BARRIER uavBarrier = CD3DX12_RESOURCE_BARRIER::UAV(_velocityBuffer->GetBuffer().Get());
         COMPUTE_CMD_LIST->ResourceBarrier(1, &uavBarrier);
     }
 
@@ -530,7 +532,7 @@ void SPH3DFluid::AnimateParticles() {
 
         COMPUTE_CMD_LIST->Dispatch(_threadGroupCountX, 1, 1);
 
-        D3D12_RESOURCE_BARRIER uavBarrier = CD3DX12_RESOURCE_BARRIER::UAV(_positionBuffer->GetBuffer().Get());
+        D3D12_RESOURCE_BARRIER uavBarrier = CD3DX12_RESOURCE_BARRIER::UAV(_velocityBuffer->GetBuffer().Get());
         COMPUTE_CMD_LIST->ResourceBarrier(1, &uavBarrier);
     }
 
@@ -539,7 +541,7 @@ void SPH3DFluid::AnimateParticles() {
 
         COMPUTE_CMD_LIST->Dispatch(_threadGroupCountX, 1, 1);
 
-        D3D12_RESOURCE_BARRIER uavBarrier = CD3DX12_RESOURCE_BARRIER::UAV(_positionBuffer->GetBuffer().Get());
+        D3D12_RESOURCE_BARRIER uavBarrier = CD3DX12_RESOURCE_BARRIER::UAV(_velocityBuffer->GetBuffer().Get());
         COMPUTE_CMD_LIST->ResourceBarrier(1, &uavBarrier);
     }
 }

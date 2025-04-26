@@ -17,13 +17,13 @@ void main(uint3 dtID : SV_DispatchThreadID)
     if (g_aliveFlagsRead[i] == -1)
     {
         g_hashesRW[i] = hashCount - 1;
-        
-        return;
     }
-    
-    int3 cell = int3(floor((g_positionsRead[i] - gridOrigin) / cellSize));
+    else
+    {
+        int3 cell = int3(floor((g_positionsRead[i] - gridOrigin) / cellSize));
 
-    g_hashesRW[i] = ComputeHash(cell) & (hashCount - 1); // mod
+        g_hashesRW[i] = ComputeHash(cell) & (hashCount - 1); // mod
+    }
     
     // CellRange 초기화 (주의 해쉬카운트와 maxParticles가 같아야함. 구현 간단화)
     g_cellRangesRW[i].startIndex = 0;

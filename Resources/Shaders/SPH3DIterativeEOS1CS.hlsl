@@ -22,7 +22,7 @@ void main(uint3 dtID : SV_DispatchThreadID)
 
     float3 x_i = g_predPositionsRead[i];
     
-    int3 selfCell = int3(floor((g_positionsRead[i] - gridOrigin) / cellSize));
+    int3 selfCell = int3((g_positionsRead[i] - gridOrigin) / cellSize);
     float density = 0.0;
     float nearDensity = 0.0;
    
@@ -37,35 +37,24 @@ void main(uint3 dtID : SV_DispatchThreadID)
                 uint neighborHash = ComputeHash(neighborCell) & (hashCount - 1);
                 CellRange cellRange = g_cellRangesRead[neighborHash];
                 
+                uint start = clamp(cellRange.startIndex, 0, maxParticles);
+                uint end = clamp(cellRange.endIndex, 0, maxParticles);
+                
                 [loop]
-                for (uint j = cellRange.startIndex; j < cellRange.endIndex; ++j)
+                for (uint j = start; j < end; ++j)
                 {
-                    if (j >= maxParticles)
-                        continue;
-                    
-                    if (g_aliveFlagsRead[j] == -1)
-                        continue;
-                    
+                    int alive_j = (g_aliveFlagsRead[j] != -1) ? 1 : 0;
                     float3 x_j = g_predPositionsRead[j];
                     
-                    int3 cell_j = int3(floor((g_positionsRead[j] - gridOrigin) / cellSize));
-                    if (neighborCell.x != cell_j.x || neighborCell.y != cell_j.y || neighborCell.z != cell_j.z)
-                        continue;
+                    int3 cell_j = int3((g_positionsRead[j] - gridOrigin) / cellSize);
+                    int match = (neighborCell.x == cell_j.x && neighborCell.y == cell_j.y && neighborCell.z == cell_j.z) ? 1 : 0;
 
                     float3 x_ij = x_i - x_j;
                     float r2 = dot(x_ij, x_ij);
-                    float h2 = h * h;
                     
-                    if (r2 >= h2)
-                        continue;
+                    density += alive_j * match * (mass * Poly6Kernel3D(r2, h));
                     
-                    density += mass * Poly6Kernel3D(r2, h);
-                    
-                    if (i == j)
-                        continue;
-
-                    float q = 1.0 - sqrt(r2) / h;
-                    nearDensity += q * q * q;
+                    nearDensity += CalculateNearDensity(r2, h);
                 }
             }
    

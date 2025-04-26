@@ -14,6 +14,16 @@ float stepFunction(float dist)
         return 1.0;
 }
 
+float3 LinearToneMapping(float3 color)
+{
+    float3 invGamma = float3(1.0, 1.0, 1.0) / 2.2;
+
+    color = 1.0 * color; // LinearToneMapping
+    color = pow(abs(color), invGamma);
+    
+    return color;
+}
+
 // 일반적으로 Sprite는 텍스춰를 많이 사용합니다.
 // 이 예제처럼 수식으로 패턴을 만들 수도 있습니다.
 float4 main(PixelShaderInput input) : SV_TARGET
@@ -46,5 +56,6 @@ float4 main(PixelShaderInput input) : SV_TARGET
     float3 baseColor = input.color.rgb;
     float3 shaded = baseColor * (0.3 + 0.7 * lighting); // ambient + diffuse
 
+    shaded = LinearToneMapping(shaded);
     return float4(shaded, 1.0);
 }
