@@ -5,7 +5,13 @@ StableFluid::StableFluid() {}
 
 StableFluid::~StableFluid() {}
 
-void StableFluid::Init() {}
+void StableFluid::Init() {
+    InitImgui();
+    InitShaders();
+    InitConstantBuffers();
+    InitStructuredBuffers();
+    InitSimulationObjects();
+}
 
 void StableFluid::Update() {}
 

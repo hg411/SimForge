@@ -21,6 +21,5 @@ class StableFluid : public Simulation {
 
     void BuildUI() override;
 
-
-
+  private:
 };
