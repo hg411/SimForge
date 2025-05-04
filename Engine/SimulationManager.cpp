@@ -3,6 +3,7 @@
 #include "Simulation.h"
 #include "SPH2DFluid.h"
 #include "SPH3DFluid.h"
+#include "StableFluid.h"
 
 void SimulationManager::Update() {
     if (_activeSimulation == nullptr)
@@ -22,7 +23,8 @@ void SimulationManager::Render() {
 void SimulationManager::LoadSimulation() {
     //_activeSimulation = LoadTestScene();
     //_activeSimulation = LoadSPH2DFluid();
-    _activeSimulation = LoadSPH3DFluid();
+    //_activeSimulation = LoadSPH3DFluid();
+    _activeSimulation = LoadStableFluid();
 
     _activeSimulation->Awake();
     _activeSimulation->Start();
@@ -40,4 +42,11 @@ shared_ptr<Simulation> SimulationManager::LoadSPH3DFluid() {
     sph3DFluid->Init();
 
     return sph3DFluid;
+}
+
+shared_ptr<Simulation> SimulationManager::LoadStableFluid() { 
+    shared_ptr<Simulation> stableFluid = make_shared<StableFluid>();
+    stableFluid->Init();
+
+    return stableFluid;
 }

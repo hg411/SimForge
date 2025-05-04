@@ -190,6 +190,7 @@
     <ClInclude Include="SimulationObject.h" />
     <ClInclude Include="SPH2DFluid.h" />
     <ClInclude Include="SPH3DFluid.h" />
+    <ClInclude Include="StableFluid.h" />
     <ClInclude Include="StructuredBuffer.h" />
     <ClInclude Include="SwapChain.h" />
     <ClInclude Include="TableDescriptorHeap.h" />
@@ -228,6 +229,7 @@
     <ClCompile Include="SimulationObject.cpp" />
     <ClCompile Include="SPH2DFluid.cpp" />
     <ClCompile Include="SPH3DFluid.cpp" />
+    <ClCompile Include="StableFluid.cpp" />
     <ClCompile Include="StructuredBuffer.cpp" />
     <ClCompile Include="SwapChain.cpp" />
     <ClCompile Include="TableDescriptorHeap.cpp" />

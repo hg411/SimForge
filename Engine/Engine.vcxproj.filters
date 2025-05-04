@@ -138,6 +138,9 @@
     <ClCompile Include="SPH3DFluid.cpp">
       <Filter>Manager\Simulation</Filter>
     </ClCompile>
+    <ClCompile Include="StableFluid.cpp">
+      <Filter>Manager\Simulation</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -237,6 +240,9 @@
       <Filter>Engine</Filter>
     </ClInclude>
     <ClInclude Include="SPH3DFluid.h">
+      <Filter>Manager\Simulation</Filter>
+    </ClInclude>
+    <ClInclude Include="StableFluid.h">
       <Filter>Manager\Simulation</Filter>
     </ClInclude>
   </ItemGroup>
