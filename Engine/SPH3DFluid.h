@@ -118,13 +118,13 @@ class SPH3DFluid : public Simulation {
     float _numThreadsX = 512.0f;
     float _deltaTime = 0.006f;
     float _radius = 1.0f / 128.0f;
-    float _pressureCoeff = 2.0f;
+    float _pressureCoeff = 1.0f;
     float _nearPressureCoeff = 0.0020f;
-    float _viscosity = 0.001f;
+    float _viscosity = 0.0010f;
     float _density0 = 1000.0f;
     float _smoothingLength = 1.5f * _radius * 2.0f; 
     float _cellSize = _smoothingLength * 1.2f; 
-    float _mass = 0.0030f; 
+    float _mass = 0.0035f; 
     uint32 _hashCount = 8192 * 64;
     SPH3DFluidParams _sph3DFluidParams;
 

@@ -297,10 +297,10 @@ void SPH3DFluid::BuildUI() {
     ImGui::Begin("Particles");
     ImGui::InputFloat("Delta Time", &_deltaTime, 0.001f, 0.001f);
     ImGui::InputFloat("Pressure Coeff", &_pressureCoeff, 0.125f, 0.125f);
-    ImGui::InputFloat("Near Pressure Coeff", &_nearPressureCoeff, 0.01f, 0.01f);
+    ImGui::InputFloat("Near Pressure Coeff", &_nearPressureCoeff, 0.0001f, 0.0001f, "%.4f");
     ImGui::InputFloat("Viscosity", &_viscosity, 0.0001f, 0.0001f, "%.4f");
-    ImGui::InputFloat("Target Density", &_density0, 200.0f, 200.0f);
-    ImGui::InputFloat("Mass", &_mass, 0.01f, 0.01f);
+    ImGui::InputFloat("Target Density", &_density0, 50.0f, 50.0f);
+    ImGui::InputFloat("Mass", &_mass, 0.0001f, 0.0001f, "%.4f");
     ImGui::End();
 }
 
@@ -382,13 +382,14 @@ void SPH3DFluid::SortParticles() {
     _aliveBuffer->SetComputeRootUAV(UAV_REGISTER::u2);
     _hashBuffer->SetComputeRootUAV(UAV_REGISTER::u3);
 
+    D3D12_RESOURCE_BARRIER uavBarrier = CD3DX12_RESOURCE_BARRIER::UAV(_positionBuffer->GetBuffer().Get());
+
     for (uint32_t k = 2; k <= _maxParticles; k *= 2) {
         for (uint32_t j = k / 2; j > 0; j /= 2) {
             _bitonicSortCBs[constCount++]->SetComputeRootCBV(CBV_REGISTER::b1);
 
             COMPUTE_CMD_LIST->Dispatch(_threadGroupCountX, 1, 1);
 
-            D3D12_RESOURCE_BARRIER uavBarrier = CD3DX12_RESOURCE_BARRIER::UAV(_positionBuffer->GetBuffer().Get());
             COMPUTE_CMD_LIST->ResourceBarrier(1, &uavBarrier);
         }
     }
