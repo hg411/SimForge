@@ -39,6 +39,4 @@ void main(uint3 dtID : SV_DispatchThreadID)
             g_aliveFlagsRW[l] = tempAliveFlag;
         }
     }
-    
-    GroupMemoryBarrierWithGroupSync();
 }

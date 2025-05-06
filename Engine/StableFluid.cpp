@@ -1,5 +1,7 @@
 #include "pch.h"
 #include "StableFluid.h"
+#include "SimulationObject.h"
+#include "Transform.h"
 
 StableFluid::StableFluid() {}
 
@@ -25,6 +27,16 @@ void StableFluid::InitConstantBuffers() {}
 
 void StableFluid::InitStructuredBuffers() {}
 
-void StableFluid::InitSimulationObjects() {}
+void StableFluid::InitSimulationObjects() {
+    // Main Camera
+    {
+        shared_ptr<SimulationObject> obj = make_shared<SimulationObject>();
+        obj->SetName(L"Main_Camera");
+
+        shared_ptr<Transform> trasnform = make_shared<Transform>();
+
+
+    }
+}
 
 void StableFluid::BuildUI() {}

@@ -20,7 +20,7 @@ void main(uint3 dtID : SV_DispatchThreadID)
     }
     else
     {
-        int3 cell = int3(floor((g_positionsRead[i] - gridOrigin) / cellSize));
+        int3 cell = int3((g_positionsRead[i] - gridOrigin) / cellSize);
 
         g_hashesRW[i] = ComputeHash(cell) & (hashCount - 1); // mod
     }

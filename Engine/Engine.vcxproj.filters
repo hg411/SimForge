@@ -43,6 +43,9 @@
     <Filter Include="Shaders\SPHFluid\SPH3DFluid">
       <UniqueIdentifier>{19ed401b-7419-4f1c-b3b4-8d7534897d8f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shaders\StableFluid">
+      <UniqueIdentifier>{a6f603ca-9825-4730-8571-a2ea9c0a4f09}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -286,19 +289,7 @@
     <FxCompile Include="..\Resources\Shaders\SPHCellRangeCS.hlsl">
       <Filter>Shaders\SPHFluid</Filter>
     </FxCompile>
-    <FxCompile Include="..\Resources\Shaders\SPHIterativeEOS3CS.hlsl">
-      <Filter>Shaders\SPHFluid</Filter>
-    </FxCompile>
     <FxCompile Include="..\Resources\Shaders\SPHFinalCS.hlsl">
-      <Filter>Shaders\SPHFluid</Filter>
-    </FxCompile>
-    <FxCompile Include="..\Resources\Shaders\SPHAnimation1CS.hlsl">
-      <Filter>Shaders\SPHFluid</Filter>
-    </FxCompile>
-    <FxCompile Include="..\Resources\Shaders\SPHAnimation2CS.hlsl">
-      <Filter>Shaders\SPHFluid</Filter>
-    </FxCompile>
-    <FxCompile Include="..\Resources\Shaders\SPHAnimation3CS.hlsl">
       <Filter>Shaders\SPHFluid</Filter>
     </FxCompile>
     <FxCompile Include="..\Resources\Shaders\SPH3DActivateParticles1CS.hlsl">
@@ -333,6 +324,18 @@
     </FxCompile>
     <FxCompile Include="..\Resources\Shaders\SPH3DIterativeEOS1CS2.hlsl">
       <Filter>Shaders\SPHFluid\SPH3DFluid</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\SPHAnimation1CS.hlsl">
+      <Filter>Shaders\SPHFluid</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\SPHAnimation2CS.hlsl">
+      <Filter>Shaders\SPHFluid</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\SPHAnimation3CS.hlsl">
+      <Filter>Shaders\SPHFluid</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\SPHIterativeEOS3CS.hlsl">
+      <Filter>Shaders\SPHFluid</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>

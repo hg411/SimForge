@@ -24,6 +24,7 @@ struct SPH2DFluidParams {
 
     float cellSize = 0.0f;
     uint32 hashCount = 0;
+
     Vec3 gridOrigin = {};
 
     uint32 addCount = 0;
@@ -113,7 +114,7 @@ class SPH2DFluid : public Simulation {
 
     uint32 _maxParticles = 4096;
     uint32 _threadGroupCountX = 0;
-    float _numThreadsX = 64.0f;
+    float _numThreadsX = 512.0f;
     float _deltaTime = 0.006f;
     float _radius = 1.0f / 128.0f; // dx = radius * 2.0f
     float _pressureCoeff = 1.0f;
@@ -123,13 +124,14 @@ class SPH2DFluid : public Simulation {
     float _smoothingLength = 2.6f * _radius * 2.0f; // smoothing length = dx * 1.5f
     float _cellSize = _smoothingLength * 1.1f;      //
     float _mass = 0.35f;                            // mass = dx * dx * density0
-    uint32 _hashCount = 8192 * 4;
+    uint32 _hashCount = 4096;
     SPH2DFluidParams _sph2DFluidParams;
 
     // Bounding Box
-    Vec3 _boxCenter = Vec3(0.0f, 0.0f, 1.0f);
+    Vec3 _boxCenter = Vec3(0.0f, 0.0f, 1.5f);
     float _boxWidth = 3.4f;
     float _boxHeight = 1.7f;
+    float _boxDepth = 1.5f; // 사용 X
 
     // 프레임고정
     float _accumulatedTime = 0.0f;

@@ -22,7 +22,7 @@ void main(uint3 dtID : SV_DispatchThreadID)
 
     float3 x_i = g_predPositionsRead[i];
     
-    int3 selfCell = int3(ceil((g_positionsRead[i] - gridOrigin) / cellSize));
+    int3 selfCell = int3((g_positionsRead[i] - gridOrigin) / cellSize);
     float density = 0.0;
     float nearDensity = 0.0;
    
@@ -34,36 +34,27 @@ void main(uint3 dtID : SV_DispatchThreadID)
             for (int x = -1; x <= 1; ++x)
             {
                 int3 neighborCell = selfCell + int3(x, y, z);
-                
                 uint neighborHash = ComputeHash(neighborCell) & (hashCount - 1);
                 CellRange cellRange = g_cellRangesRead[neighborHash];
                 
+                uint start = clamp(cellRange.startIndex, 0, maxParticles);
+                uint end = clamp(cellRange.endIndex, 0, maxParticles);
+                
                 [loop]
-                for (uint j = cellRange.startIndex; j < cellRange.endIndex; ++j)
+                for (uint j = start; j < end; ++j)
                 {
-                    if (g_aliveFlagsRead[j] == -1)
-                        continue;
-                    
+                    int alive_j = (g_aliveFlagsRead[j] != -1) ? 1 : 0;
                     float3 x_j = g_predPositionsRead[j];
                     
-                    int3 cell_j = int3(floor((g_positionsRead[j] - gridOrigin) / cellSize));
-                    if (neighborCell.x != cell_j.x || neighborCell.y != cell_j.y || neighborCell.z != cell_j.z)
-                        continue;
+                    int3 cell_j = int3((g_positionsRead[j] - gridOrigin) / cellSize);
+                    int match = (neighborCell.x == cell_j.x && neighborCell.y == cell_j.y && neighborCell.z == cell_j.z) ? 1 : 0;
 
                     float3 x_ij = x_i - x_j;
                     float r2 = dot(x_ij, x_ij);
-                    float h2 = h * h;
                     
-                    if (r2 >= h2)
-                        continue;
+                    density += alive_j * match * (mass * Poly6Kernel2D(r2, h));
                     
-                    density += mass * Poly6Kernel2D(r2, h2);
-                    
-                    if (i == j)
-                        continue;
-                    
-                    float q = 1.0 - sqrt(r2) / h;
-                    nearDensity += q * q * q;
+                    nearDensity += alive_j * match * CalculateNearDensity(r2, h);
                 }
             }
    
@@ -72,5 +63,6 @@ void main(uint3 dtID : SV_DispatchThreadID)
     float k = density * radius * radius / (2.0 * density0 * deltaTime * deltaTime) * pressureCoeff;
     
     g_pressuresRW[i] = max(k * (density - density0), 0.0);
+    //g_pressuresRW[i] = k * (density - density0);
     g_nearPressuresRW[i] = nearPressureCoeff * nearDensity;
 }

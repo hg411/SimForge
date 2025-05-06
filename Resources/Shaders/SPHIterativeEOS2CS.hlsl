@@ -26,7 +26,7 @@ void main(uint3 dtID : SV_DispatchThreadID)
     float p_i = g_pressuresRead[i];
     float np_i = g_nearPressuresRead[i];
     
-    int3 selfCell = int3(ceil((g_positionsRead[i] - gridOrigin) / cellSize));
+    int3 selfCell = int3((g_positionsRead[i] - gridOrigin) / cellSize);
     float3 forcePressure = float3(0.0, 0.0, 0.0);
     
     [unroll]
@@ -40,37 +40,36 @@ void main(uint3 dtID : SV_DispatchThreadID)
                 uint neighborHash = ComputeHash(neighborCell) & (hashCount - 1);
                 CellRange cellRange = g_cellRangesRead[neighborHash];
                 
+                uint start = clamp(cellRange.startIndex, 0, maxParticles);
+                uint end = clamp(cellRange.endIndex, 0, maxParticles);
+                
                 [loop]
-                for (uint j = cellRange.startIndex; j < cellRange.endIndex; ++j)
+                for (uint j = start; j < end; ++j)
                 {
-                    if (i == j)
-                        continue;
+                    float isSelf = (i == j) ? 0.0 : 1.0;
+                    float alive_j = step(0.0, g_aliveFlagsRead[j]);
                     
-                    if (g_aliveFlagsRead[j] == -1)
-                        continue;
+                    float valid = alive_j * isSelf; // 자기자신이 아니고, 살아있을 때만 1
                     
                     float3 x_j = g_predPositionsRead[j];
-                    
-                    int3 cell_j = int3(ceil((g_positionsRead[j] - gridOrigin) / cellSize));
-                    if (neighborCell.x != cell_j.x || neighborCell.y != cell_j.y || neighborCell.z != cell_j.z)
-                        continue;
-                    
+                    int3 cell_j = int3((g_positionsRead[j] - gridOrigin) / cellSize);
+                    float match = (neighborCell.x == cell_j.x && neighborCell.y == cell_j.y && neighborCell.z == cell_j.z);
                     
                     float rho_j = g_densitiesRead[j];
                     float p_j = g_pressuresRead[j];
                     float np_j = g_nearPressuresRead[j];
                
                     float3 x_ij = x_i - x_j;
-                    float r_len = length(x_ij);
+                    float r_len = max(length(x_ij), h * 1e-3);
                     
-                    if (r_len >= h || r_len < h * 1e-3)
-                        continue;
-                    
-                    forcePressure -= mass * mass * (p_i / (rho_i * rho_i) + p_j / (rho_j * rho_j)) * GradientSpikyKernel2D(x_ij, r_len, h);
+                    forcePressure -= valid * match *
+                                (mass * mass * (p_i / (rho_i * rho_i) + p_j / (rho_j * rho_j)) * GradientSpikyKernel2D(x_ij, r_len, h));
                     
                     // Near Pressure Force
+                    float mask = (r_len < h) ? 1.0 : 0.0;
                     float3 dir = x_ij / r_len; // normalize
-                    forcePressure -= dir * (np_i + np_j) / 2.0;
+                    forcePressure -= valid * match * mask *
+                                (dir * (np_i + np_j) / 2.0);
                 }
             }
     

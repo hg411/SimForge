@@ -104,22 +104,18 @@ float Poly6Kernel(float r_len, float h, int dimension)
     return result;
 }
 
-float Poly6Kernel2D(float r2, float h2)
+float Poly6Kernel2D(float r2, float h)
 {
-    float result = 0.0;
+    float h2 = h * h;
     float h4 = h2 * h2;
     float h8 = h4 * h4;
     
     float coeff = 4.0 / (PI * h8); // 2D normalization
 
     float h2_r2 = h2 - r2;
+    float mask = (r2 <= h2) ? 1.0 : 0.0;
     
-    if (r2 < h2)
-    {
-        result = coeff * h2_r2 * h2_r2 * h2_r2;
-    }
-
-    return result;
+    return mask * coeff * h2_r2 * h2_r2 * h2_r2;
 }
 
 float Poly6Kernel3D(float r2, float h)
@@ -253,7 +249,6 @@ float3 GradientSpikyKernel(float3 r_vec, float r_len, float h, int dimension)
 
 float3 GradientSpikyKernel2D(float3 r_vec, float r_len, float h)
 {
-    float3 result = float3(0.0, 0.0, 0.0);
     float h2 = h * h;
     float h5 = h2 * h2 * h;
     float coeff;
@@ -261,13 +256,9 @@ float3 GradientSpikyKernel2D(float3 r_vec, float r_len, float h)
     coeff = -30.0 / (PI * h5); // 2D normalization
     
     float h_r = h - r_len;
-
-    if (r_len < h)
-    {
-        result = coeff * h_r * h_r * (r_vec / r_len);
-    }
+    float mask = step(r_len, h);
     
-    return result;
+    return mask * (coeff * h_r * h_r * (r_vec / r_len));
 }
 
 float3 GradientSpikyKernel3D(float3 r_vec, float r_len, float h)
@@ -416,8 +407,6 @@ float RandRange(float2 co, float minVal, float maxVal)
 
 float CalculateNearDensity(float r2, float h)
 {
-    float result = 0.0;
-    
     float r = sqrt(r2);
     float mask = (r < h) ? 1.0 : 0.0;
     

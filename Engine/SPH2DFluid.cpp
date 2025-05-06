@@ -47,28 +47,31 @@ void SPH2DFluid::Update() {
 void SPH2DFluid::FinalUpdate() {
     Simulation::FinalUpdate();
 
-    _accumulatedTime += DELTA_TIME;
+    //_accumulatedTime += DELTA_TIME;
 
-    // 초기 프레임 안정화
-    if (_accumulatedTime > 1.0f)
-        _accumulatedTime = 0.0f;
+    //// 초기 프레임 안정화
+    //if (_accumulatedTime > 1.0f)
+    //    _accumulatedTime = 0.0f;
 
-    while (_accumulatedTime >= _timeStep) {
-        PushSimulationParams();
-        ActivateParticles();
-        HashingParticles();
-        SortParticles();
-        ComputeCellRange();
-        ComputeDensity();
-        PredictPositionVelocity();
-        IterativeEOS(5);
-        FinalEOS();
-        AnimateParticles();
-     
-        _accumulatedTime -= _timeStep;
+    //while (_accumulatedTime >= _timeStep) {
+    //    
+    //}
 
-         GEngine->GetComputeCmdQueue()->FlushComputeCommandQueue();
-    }
+    PushSimulationParams();
+
+    ActivateParticles();
+    HashingParticles();
+    SortParticles();
+    ComputeCellRange();
+    ComputeDensity();
+    PredictPositionVelocity();
+    IterativeEOS(5);
+    FinalEOS();
+    AnimateParticles();
+
+    _accumulatedTime -= _timeStep;
+
+    GEngine->GetComputeCmdQueue()->FlushComputeCommandQueue();
 }
 
 void SPH2DFluid::Render() {
@@ -269,11 +272,13 @@ void SPH2DFluid::PushSimulationParams() {
     _sph2DFluidParams.density0 = _density0;
     _sph2DFluidParams.mass = _mass;
     _sph2DFluidParams.smoothingLength = _smoothingLength;
-    _sph2DFluidParams.boxWidth = _boxWidth;
     _sph2DFluidParams.boxCenter = _boxCenter;
+    _sph2DFluidParams.boxWidth = _boxWidth;
     _sph2DFluidParams.boxHeight = _boxHeight;
-    _sph2DFluidParams.gridOrigin = _boxCenter - Vec3(_boxWidth * 0.5f + 1e-3f, _boxHeight * 0.5f + 1e-3f, 1e-3f);
+    _sph2DFluidParams.boxDepth = _boxDepth;
     _sph2DFluidParams.cellSize = _cellSize;
+    float epsilon = 1e-2f;
+    _sph2DFluidParams.gridOrigin = _boxCenter - Vec3(_boxWidth, _boxHeight, _boxDepth) * 0.5f - Vec3(epsilon);
     _sph2DFluidParams.hashCount = _hashCount;
     _sph2DFluidParams.addCount = 1;
     _sph2DFluidParams.radius = _radius;
@@ -283,8 +288,6 @@ void SPH2DFluid::PushSimulationParams() {
 }
 
 void SPH2DFluid::ActivateParticles() {
-    
-
     _positionBuffer->SetComputeRootUAV(UAV_REGISTER::u0);
     _velocityBuffer->SetComputeRootUAV(UAV_REGISTER::u1);
     _aliveBuffer->SetComputeRootUAV(UAV_REGISTER::u2);
@@ -301,7 +304,9 @@ void SPH2DFluid::ActivateParticles() {
 void SPH2DFluid::HashingParticles() {
     _positionBuffer->SetComputeRootSRV(SRV_REGISTER::t0);
     _aliveBuffer->SetComputeRootSRV(SRV_REGISTER::t1);
+
     _hashBuffer->SetComputeRootUAV(UAV_REGISTER::u0);
+    _cellRangeBuffer->SetComputeRootUAV(UAV_REGISTER::u1);
 
     // Shader Set
     _hashShader->Update();
@@ -322,13 +327,14 @@ void SPH2DFluid::SortParticles() {
     _aliveBuffer->SetComputeRootUAV(UAV_REGISTER::u2);
     _hashBuffer->SetComputeRootUAV(UAV_REGISTER::u3);
 
+    D3D12_RESOURCE_BARRIER uavBarrier = CD3DX12_RESOURCE_BARRIER::UAV(_positionBuffer->GetBuffer().Get());
+
     for (uint32_t k = 2; k <= _maxParticles; k *= 2) {
         for (uint32_t j = k / 2; j > 0; j /= 2) {
             _bitonicSortCBs[constCount++]->SetComputeRootCBV(CBV_REGISTER::b1);
 
             COMPUTE_CMD_LIST->Dispatch(_threadGroupCountX, 1, 1);
 
-            D3D12_RESOURCE_BARRIER uavBarrier = CD3DX12_RESOURCE_BARRIER::UAV(_positionBuffer->GetBuffer().Get());
             COMPUTE_CMD_LIST->ResourceBarrier(1, &uavBarrier);
         }
     }
@@ -336,6 +342,7 @@ void SPH2DFluid::SortParticles() {
 
 void SPH2DFluid::ComputeCellRange() {
     _hashBuffer->SetComputeRootSRV(SRV_REGISTER::t0);
+
     _cellRangeBuffer->SetComputeRootUAV(UAV_REGISTER::u0);
 
     _cellRangeShader->Update();
@@ -350,6 +357,7 @@ void SPH2DFluid::ComputeDensity() {
     _positionBuffer->SetComputeRootSRV(SRV_REGISTER::t0);
     _aliveBuffer->SetComputeRootSRV(SRV_REGISTER::t1);
     _cellRangeBuffer->SetComputeRootSRV(SRV_REGISTER::t2);
+
     _densityBuffer->SetComputeRootUAV(UAV_REGISTER::u0);
 
     _densityShader->Update();
@@ -455,39 +463,33 @@ void SPH2DFluid::FinalEOS() {
 }
 
 void SPH2DFluid::AnimateParticles() {
-    if (INPUT->GetButton(KEY_TYPE::UP)) {
-        _aliveBuffer->SetComputeRootSRV(SRV_REGISTER::t0);
-        _velocityBuffer->SetComputeRootUAV(UAV_REGISTER::u0);
+    _aliveBuffer->SetComputeRootSRV(SRV_REGISTER::t0);
+    _velocityBuffer->SetComputeRootUAV(UAV_REGISTER::u0);
 
+    if (INPUT->GetButton(KEY_TYPE::UP)) {
         _animate1Shader->Update();
 
         COMPUTE_CMD_LIST->Dispatch(_threadGroupCountX, 1, 1);
 
-        D3D12_RESOURCE_BARRIER uavBarrier = CD3DX12_RESOURCE_BARRIER::UAV(_positionBuffer->GetBuffer().Get());
+        D3D12_RESOURCE_BARRIER uavBarrier = CD3DX12_RESOURCE_BARRIER::UAV(_velocityBuffer->GetBuffer().Get());
         COMPUTE_CMD_LIST->ResourceBarrier(1, &uavBarrier);
     }
 
     if (INPUT->GetButton(KEY_TYPE::RIGHT)) {
-        _aliveBuffer->SetComputeRootSRV(SRV_REGISTER::t0);
-        _velocityBuffer->SetComputeRootUAV(UAV_REGISTER::u0);
-
         _animate2Shader->Update();
 
         COMPUTE_CMD_LIST->Dispatch(_threadGroupCountX, 1, 1);
 
-        D3D12_RESOURCE_BARRIER uavBarrier = CD3DX12_RESOURCE_BARRIER::UAV(_positionBuffer->GetBuffer().Get());
+        D3D12_RESOURCE_BARRIER uavBarrier = CD3DX12_RESOURCE_BARRIER::UAV(_velocityBuffer->GetBuffer().Get());
         COMPUTE_CMD_LIST->ResourceBarrier(1, &uavBarrier);
     }
 
     if (INPUT->GetButton(KEY_TYPE::LEFT)) {
-        _aliveBuffer->SetComputeRootSRV(SRV_REGISTER::t0);
-        _velocityBuffer->SetComputeRootUAV(UAV_REGISTER::u0);
-
         _animate3Shader->Update();
 
         COMPUTE_CMD_LIST->Dispatch(_threadGroupCountX, 1, 1);
 
-        D3D12_RESOURCE_BARRIER uavBarrier = CD3DX12_RESOURCE_BARRIER::UAV(_positionBuffer->GetBuffer().Get());
+        D3D12_RESOURCE_BARRIER uavBarrier = CD3DX12_RESOURCE_BARRIER::UAV(_velocityBuffer->GetBuffer().Get());
         COMPUTE_CMD_LIST->ResourceBarrier(1, &uavBarrier);
     }
 }
