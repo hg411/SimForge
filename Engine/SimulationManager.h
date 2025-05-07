@@ -12,7 +12,7 @@ class SimulationManager {
 
     shared_ptr<Simulation> LoadSPH2DFluid();
     shared_ptr<Simulation> LoadSPH3DFluid();
-    shared_ptr<Simulation> LoadStableFluid();
+    shared_ptr<Simulation> LoadStableFluids();
 
     shared_ptr<Simulation> GetActiveSimulation() { return _activeSimulation; }
 

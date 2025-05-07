@@ -54,7 +54,7 @@ void main(uint3 dtID : SV_DispatchThreadID)
                     
                     density += alive_j * match * (mass * Poly6Kernel3D(r2, h));
                     
-                    nearDensity += CalculateNearDensity(r2, h);
+                    nearDensity += alive_j * match * CalculateNearDensity(r2, h);
                 }
             }
    

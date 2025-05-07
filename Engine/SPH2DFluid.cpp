@@ -208,11 +208,12 @@ void SPH2DFluid::InitSimulationObjects() {
         obj->SetName(L"Main_Camera");
 
         shared_ptr<Transform> transform = make_shared<Transform>();
-        transform->SetLocalPosition(Vec3(0.0f, 0.0f, 0.0f));
         obj->AddComponent(transform);
+
         shared_ptr<Camera> camera = make_shared<Camera>();
         camera->SetProjectionType(PROJECTION_TYPE::ORTHOGRAPHIC);
         obj->AddComponent(camera);
+
         shared_ptr<CameraController> cameraController = make_shared<CameraController>();
         obj->AddComponent(cameraController);
 

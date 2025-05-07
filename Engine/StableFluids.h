@@ -2,10 +2,19 @@
 
 #include "Simulation.h"
 
-class StableFluid : public Simulation {
+struct StableFluidsParams {
+    float deltaTime;
+    float viscosity;
+    Vec2 sourcingVelocity;
+    Vec4 sourcingDensity;
+    uint32 i;
+    uint32 j;
+};
+
+class StableFluids : public Simulation {
   public:
-    StableFluid();
-    virtual ~StableFluid();
+    StableFluids();
+    virtual ~StableFluids();
 
     void Init() override;
 
@@ -16,7 +25,7 @@ class StableFluid : public Simulation {
   private:
     void InitShaders() override;
     void InitConstantBuffers() override;
-    void InitStructuredBuffers() override;
+    void InitTextures() override;
     void InitSimulationObjects() override;
 
     void BuildUI() override;

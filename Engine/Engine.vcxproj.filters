@@ -141,7 +141,7 @@
     <ClCompile Include="SPH3DFluid.cpp">
       <Filter>Manager\Simulation</Filter>
     </ClCompile>
-    <ClCompile Include="StableFluid.cpp">
+    <ClCompile Include="StableFluids.cpp">
       <Filter>Manager\Simulation</Filter>
     </ClCompile>
   </ItemGroup>
@@ -245,7 +245,7 @@
     <ClInclude Include="SPH3DFluid.h">
       <Filter>Manager\Simulation</Filter>
     </ClInclude>
-    <ClInclude Include="StableFluid.h">
+    <ClInclude Include="StableFluids.h">
       <Filter>Manager\Simulation</Filter>
     </ClInclude>
   </ItemGroup>

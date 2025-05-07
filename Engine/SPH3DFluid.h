@@ -122,11 +122,11 @@ class SPH3DFluid : public Simulation {
     float _nearPressureCoeff = 0.0020f;
     float _viscosity = 0.0010f;
     float _density0 = 1000.0f;
-    float _smoothingLength = 1.5f * _radius * 2.0f; 
-    float _cellSize = _smoothingLength * 1.2f; 
+    float _smoothingLength = 0.0f; 
+    float _cellSize = 0.0f; 
     float _mass = 0.0035f; 
-    uint32 _hashCount = 8192 * 64;
-    SPH3DFluidParams _sph3DFluidParams;
+    uint32 _hashCount = 0;
+    SPH3DFluidParams _sph3DFluidParams = {};
 
     // Bounding Box
     Vec3 _boxCenter = Vec3(0.0f, 0.0f, 1.5f);

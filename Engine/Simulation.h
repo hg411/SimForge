@@ -34,6 +34,7 @@ class Simulation : public enable_shared_from_this<Simulation> {
     virtual void InitShaders() {}
     virtual void InitConstantBuffers() {}
     virtual void InitStructuredBuffers() {}
+    virtual void InitTextures() {}
     virtual void InitSimulationObjects() {}
 
   protected:

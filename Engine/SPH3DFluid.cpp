@@ -24,6 +24,9 @@ SPH3DFluid::~SPH3DFluid() {}
 
 void SPH3DFluid::Init() {
     _threadGroupCountX = static_cast<uint32>(ceil(_maxParticles / _numThreadsX));
+    _smoothingLength = 1.5f * _radius * 2.0f;
+    _cellSize = 1.2f * _smoothingLength;
+    _hashCount = _maxParticles;
 
     InitImgui();
     InitShaders();
@@ -187,9 +190,11 @@ void SPH3DFluid::InitShaders() {
 }
 
 void SPH3DFluid::InitConstantBuffers() {
+    // SPH 3D Fluid Params
     _simulationParamsCB = make_shared<ConstantBuffer>();
     _simulationParamsCB->Init(sizeof(SPH3DFluidParams), 1);
 
+    // Bitonic Sort
     vector<BitonicSortConsts> constsCPU;
     for (uint32_t k = 2; k <= _maxParticles; k *= 2)
         for (uint32_t j = k / 2; j > 0; j /= 2) {
