@@ -31,9 +31,10 @@ void StableFluids::InitTextures() {
     _velocity = make_shared<Texture>();
     _velocity->Create(DXGI_FORMAT_R16G16_FLOAT, _width, _height, CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
                       D3D12_HEAP_FLAG_NONE,
-                      D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS, // UAV 접근 가능해야 함
-                      Vec4(0, 0, 0, 0)                            // 필요 시 clearColor)
+                      D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS // UAV 접근 가능해야 함
     );
+
+
 }
 
 void StableFluids::InitSimulationObjects() {

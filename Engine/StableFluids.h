@@ -33,8 +33,8 @@ class StableFluids : public Simulation {
     void BuildUI() override;
 
   private:
-    uint32 _width;
-    uint32 _height;
+    uint32 _width = 0;
+    uint32 _height = 0;
 
     shared_ptr<Texture> _velocity;
 };
