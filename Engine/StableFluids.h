@@ -2,6 +2,8 @@
 
 #include "Simulation.h"
 
+class Texture;
+
 struct StableFluidsParams {
     float deltaTime;
     float viscosity;
@@ -31,4 +33,8 @@ class StableFluids : public Simulation {
     void BuildUI() override;
 
   private:
+    uint32 _width;
+    uint32 _height;
+
+    shared_ptr<Texture> _velocity;
 };
