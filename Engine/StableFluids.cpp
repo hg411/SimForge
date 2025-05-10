@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "StableFluids.h"
+#include "Engine.h"
 #include "SimulationObject.h"
 #include "Transform.h"
 #include "Camera.h"
@@ -10,6 +11,10 @@ StableFluids::StableFluids() {}
 StableFluids::~StableFluids() {}
 
 void StableFluids::Init() {
+    const WindowInfo &windowInfo = GEngine->GetWindowInfo();
+    _width = windowInfo.width;
+    _height = windowInfo.height;
+
     InitImgui();
     InitShaders();
     InitConstantBuffers();
@@ -28,13 +33,16 @@ void StableFluids::InitShaders() {}
 void StableFluids::InitConstantBuffers() {}
 
 void StableFluids::InitTextures() {
-    _velocity = make_shared<Texture>();
-    _velocity->Create(DXGI_FORMAT_R16G16_FLOAT, _width, _height, CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
-                      D3D12_HEAP_FLAG_NONE,
-                      D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS // UAV 접근 가능해야 함
-    );
+    _velocity = CreateRWTexture2D(DXGI_FORMAT_R16G16_FLOAT);
+    _velocityTemp = CreateRWTexture2D(DXGI_FORMAT_R16G16_FLOAT);
 
+    _pressure = CreateRWTexture2D(DXGI_FORMAT_R16_FLOAT);
+    _pressureTemp = CreateRWTexture2D(DXGI_FORMAT_R16_FLOAT);
+    _vorticity = CreateRWTexture2D(DXGI_FORMAT_R16_FLOAT);
+    _divergence = CreateRWTexture2D(DXGI_FORMAT_R16_FLOAT);
 
+    _density = CreateRWTexture2D(DXGI_FORMAT_R16G16B16A16_FLOAT);
+    _densityTemp = CreateRWTexture2D(DXGI_FORMAT_R16G16B16A16_FLOAT);
 }
 
 void StableFluids::InitSimulationObjects() {
@@ -55,3 +63,13 @@ void StableFluids::InitSimulationObjects() {
 }
 
 void StableFluids::BuildUI() {}
+
+shared_ptr<Texture> StableFluids::CreateRWTexture2D(DXGI_FORMAT format) {
+    shared_ptr<Texture> texture = make_shared<Texture>();
+    texture->Create(format, _width, _height, CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+                    D3D12_HEAP_FLAG_NONE,
+                    D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS // UAV 접근 가능해야 함
+    );
+
+    return texture;
+}
