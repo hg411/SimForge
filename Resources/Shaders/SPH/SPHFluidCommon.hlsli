@@ -1,7 +1,7 @@
 #ifndef __SPHCOMMON_HLSLI__
 #define __SPHCOMMON_HLSLI__
 
-#include "Constants.hlsli"
+#include "../Constants.hlsli"
 
 #define NUM_THREADS_X 512
 

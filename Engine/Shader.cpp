@@ -111,10 +111,10 @@ void Shader::CreateGraphicsShader(ShaderInfo shaderInfo) {
     DEVICE->CreateGraphicsPipelineState(&_graphicsPipelineDesc, IID_PPV_ARGS(&_pipelineState));
 }
 
-void Shader::CreateComputeShader(const wstring &fileName, const string &name, const string &version) {
+void Shader::CreateComputeShader(const wstring &filePath, const string &name, const string &version) {
     _shaderInfo.shaderType = SHADER_TYPE::COMPUTE;
 
-    CreateShader(fileName, name, version, _csBlob, _computePipelineDesc.CS);
+    CreateShader(filePath, name, version, _csBlob, _computePipelineDesc.CS);
     _computePipelineDesc.pRootSignature = COMPUTE_ROOT_SIGNATURE.Get();
 
     HRESULT hr = DEVICE->CreateComputePipelineState(&_computePipelineDesc, IID_PPV_ARGS(&_pipelineState));
@@ -202,16 +202,14 @@ void Shader::CreateGeometryShader(const wstring &fileName, const string &name, c
     CreateShader(fileName, name, version, _gsBlob, _graphicsPipelineDesc.GS);
 }
 
-void Shader::CreateShader(const wstring &fileName, const string &name, const string &version, ComPtr<ID3DBlob> &blob,
+void Shader::CreateShader(const wstring &filePath, const string &name, const string &version, ComPtr<ID3DBlob> &blob,
                           D3D12_SHADER_BYTECODE &shaderByteCode) {
     uint32 compileFlag = 0;
 #ifdef _DEBUG
     compileFlag = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
 #endif
 
-    wstring path = L"../Resources/Shaders/" + fileName;
-
-    if (FAILED(::D3DCompileFromFile(path.c_str(), nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, name.c_str(),
+    if (FAILED(::D3DCompileFromFile(filePath.c_str(), nullptr, D3D_COMPILE_STANDARD_FILE_INCLUDE, name.c_str(),
                                     version.c_str(), compileFlag, 0, &blob, &_errBlob))) {
         ::MessageBoxA(nullptr, "Shader Create Failed !", nullptr, MB_OK);
     }

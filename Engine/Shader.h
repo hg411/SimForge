@@ -61,7 +61,7 @@ class Shader : public Object {
     virtual ~Shader();
 
     void CreateGraphicsShader(ShaderInfo info = ShaderInfo());
-    void CreateComputeShader(const wstring &fileName, const string &name = "main", const string &version = "cs_5_0");
+    void CreateComputeShader(const wstring &filePath, const string &name = "main", const string &version = "cs_5_0");
 
     void Update();
 
@@ -77,7 +77,7 @@ class Shader : public Object {
     void CreateGeometryShader(const wstring &fileName, const string &name = "main", const string &version = "gs_5_0");
 
   private:
-    void CreateShader(const wstring &path, const string &name, const string &version, ComPtr<ID3DBlob> &blob,
+    void CreateShader(const wstring &filePath, const string &name, const string &version, ComPtr<ID3DBlob> &blob,
                       D3D12_SHADER_BYTECODE &shaderByteCode);
 
   private:

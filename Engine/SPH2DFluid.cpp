@@ -94,53 +94,33 @@ void SPH2DFluid::InitShaders() {
     // Line Mesh
     GET_SINGLE(Resources)->CreateLineShader();
 
-    _activateShader = make_shared<Shader>();
-    _activateShader->CreateComputeShader(L"SPH2DFluidActivateCS.hlsl");
+    auto CreateCompute = [](shared_ptr<Shader> &shader, const wstring &name) {
+        shader = make_shared<Shader>();
+        shader->CreateComputeShader(L"../Resources/Shaders/SPH/" + name);
+    };
 
-    _hashShader = make_shared<Shader>();
-    _hashShader->CreateComputeShader(L"SPHHashCS.hlsl");
-
-    _bitonicSortShader = make_shared<Shader>();
-    _bitonicSortShader->CreateComputeShader(L"SPHBitonicSortCS.hlsl");
-
-    _cellRangeShader = make_shared<Shader>();
-    _cellRangeShader->CreateComputeShader(L"SPHCellRangeCS.hlsl");
-
-    _densityShader = make_shared<Shader>();
-    _densityShader->CreateComputeShader(L"SPHDensityCS.hlsl");
-
-    _predictShader = make_shared<Shader>();
-    _predictShader->CreateComputeShader(L"SPHPredictCS.hlsl");
-
-    _iterativeEOS1Shader = make_shared<Shader>();
-    _iterativeEOS1Shader->CreateComputeShader(L"SPHIterativeEOS1CS.hlsl");
-
-    _iterativeEOS2Shader = make_shared<Shader>();
-    _iterativeEOS2Shader->CreateComputeShader(L"SPHIterativeEOS2CS.hlsl");
-
-    _iterativeEOS3Shader = make_shared<Shader>();
-    _iterativeEOS3Shader->CreateComputeShader(L"SPHIterativeEOS3CS.hlsl");
-
-    _finalEOSShader = make_shared<Shader>();
-    _finalEOSShader->CreateComputeShader(L"SPHFinalCS.hlsl");
-
-    _animate1Shader = make_shared<Shader>();
-    _animate1Shader->CreateComputeShader(L"SPHAnimation1CS.hlsl");
-
-    _animate2Shader = make_shared<Shader>();
-    _animate2Shader->CreateComputeShader(L"SPHAnimation2CS.hlsl");
-
-    _animate3Shader = make_shared<Shader>();
-    _animate3Shader->CreateComputeShader(L"SPHAnimation3CS.hlsl");
+    CreateCompute(_activateShader, L"SPH2DFluidActivateCS.hlsl");
+    CreateCompute(_hashShader, L"SPHHashCS.hlsl");
+    CreateCompute(_bitonicSortShader, L"SPHBitonicSortCS.hlsl");
+    CreateCompute(_cellRangeShader, L"SPHCellRangeCS.hlsl");
+    CreateCompute(_densityShader, L"SPHDensityCS.hlsl");
+    CreateCompute(_predictShader, L"SPHPredictCS.hlsl");
+    CreateCompute(_iterativeEOS1Shader, L"SPHIterativeEOS1CS.hlsl");
+    CreateCompute(_iterativeEOS2Shader, L"SPHIterativeEOS2CS.hlsl");
+    CreateCompute(_iterativeEOS3Shader, L"SPHIterativeEOS3CS.hlsl");
+    CreateCompute(_finalEOSShader, L"SPHFinalCS.hlsl");
+    CreateCompute(_animate1Shader, L"SPHAnimation1CS.hlsl");
+    CreateCompute(_animate2Shader, L"SPHAnimation2CS.hlsl");
+    CreateCompute(_animate3Shader, L"SPHAnimation3CS.hlsl");
 
     ShaderInfo info = {
         SHADER_TYPE::FORWARD, RASTERIZER_TYPE::CULL_NONE,       DEPTH_STENCIL_TYPE::LESS,
         BLEND_TYPE::DEFAULT,  D3D_PRIMITIVE_TOPOLOGY_POINTLIST, {} // No InputLayout
     };
     _particleRenderShader = make_shared<Shader>();
-    _particleRenderShader->CreateVertexShader(L"ParticleVS.hlsl");
-    _particleRenderShader->CreateGeometryShader(L"BillboardGS.hlsl");
-    _particleRenderShader->CreatePixelShader(L"ParticlePS.hlsl");
+    _particleRenderShader->CreateVertexShader(L"../Resources/Shaders/SPH/ParticleVS.hlsl");
+    _particleRenderShader->CreateGeometryShader(L"../Resources/Shaders/SPH/BillboardGS.hlsl");
+    _particleRenderShader->CreatePixelShader(L"../Resources/Shaders/SPH/ParticlePS.hlsl");
     _particleRenderShader->CreateGraphicsShader(info);
 }
 

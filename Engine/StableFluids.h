@@ -3,6 +3,7 @@
 #include "Simulation.h"
 
 class Texture;
+class Shader;
 
 struct StableFluidsParams {
     float deltaTime;
@@ -32,12 +33,11 @@ class StableFluids : public Simulation {
 
     void BuildUI() override;
 
-    shared_ptr<Texture> CreateRWTexture2D(DXGI_FORMAT format);
-
   private:
     uint32 _width = 0;
     uint32 _height = 0;
 
+    // Texture
     shared_ptr<Texture> _velocity;
     shared_ptr<Texture> _velocityTemp;
     shared_ptr<Texture> _pressure;
@@ -46,4 +46,14 @@ class StableFluids : public Simulation {
     shared_ptr<Texture> _densityTemp;
     shared_ptr<Texture> _vorticity;
     shared_ptr<Texture> _divergence;
+    
+    // Compute Shader
+    shared_ptr<Shader> _advectionCS;
+    shared_ptr<Shader> _applyPressureCS;
+    shared_ptr<Shader> _diffuseCS;
+    shared_ptr<Shader> _divergenceCS;
+    shared_ptr<Shader> _jacobiCS;
+    shared_ptr<Shader> _sourcingCS;
+    shared_ptr<Shader> _computeVorticityCS;
+    shared_ptr<Shader> _confineVorticityCS;
 };

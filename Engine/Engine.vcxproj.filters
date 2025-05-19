@@ -257,85 +257,109 @@
     <None Include="..\Resources\Shaders\Constants.hlsli">
       <Filter>Shaders</Filter>
     </None>
-    <None Include="..\Resources\Shaders\SPHFluidCommon.hlsli">
+    <None Include="..\Resources\Shaders\SPH\SPHFluidCommon.hlsli">
       <Filter>Shaders\SPHFluid</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="..\Resources\Shaders\SPHHashCS.hlsl">
-      <Filter>Shaders\SPHFluid</Filter>
-    </FxCompile>
-    <FxCompile Include="..\Resources\Shaders\SPH2DFluidActivateCS.hlsl">
+    <FxCompile Include="..\Resources\Shaders\SPH\SPH2DFluidActivateCS.hlsl">
       <Filter>Shaders\SPHFluid\SPH2DFluid</Filter>
     </FxCompile>
-    <FxCompile Include="..\Resources\Shaders\ParticleVS.hlsl">
-      <Filter>Shaders\SPHFluid</Filter>
+    <FxCompile Include="..\Resources\Shaders\SPH\SPHDensityCS.hlsl">
+      <Filter>Shaders\SPHFluid\SPH2DFluid</Filter>
     </FxCompile>
-    <FxCompile Include="..\Resources\Shaders\ParticlePS.hlsl">
-      <Filter>Shaders\SPHFluid</Filter>
+    <FxCompile Include="..\Resources\Shaders\SPH\SPHIterativeEOS1CS.hlsl">
+      <Filter>Shaders\SPHFluid\SPH2DFluid</Filter>
     </FxCompile>
-    <FxCompile Include="..\Resources\Shaders\BillboardGS.hlsl">
-      <Filter>Shaders\SPHFluid</Filter>
+    <FxCompile Include="..\Resources\Shaders\SPH\SPHIterativeEOS2CS.hlsl">
+      <Filter>Shaders\SPHFluid\SPH2DFluid</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\SPH\SPHPredictCS.hlsl">
+      <Filter>Shaders\SPHFluid\SPH2DFluid</Filter>
     </FxCompile>
     <FxCompile Include="..\Resources\Shaders\BasicPS.hlsl">
-      <Filter>Shaders\SPHFluid</Filter>
+      <Filter>Shaders</Filter>
     </FxCompile>
     <FxCompile Include="..\Resources\Shaders\BasicVS.hlsl">
-      <Filter>Shaders\SPHFluid</Filter>
+      <Filter>Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="..\Resources\Shaders\SPHBitonicSortCS.hlsl">
-      <Filter>Shaders\SPHFluid</Filter>
-    </FxCompile>
-    <FxCompile Include="..\Resources\Shaders\SPHCellRangeCS.hlsl">
-      <Filter>Shaders\SPHFluid</Filter>
-    </FxCompile>
-    <FxCompile Include="..\Resources\Shaders\SPHFinalCS.hlsl">
-      <Filter>Shaders\SPHFluid</Filter>
-    </FxCompile>
-    <FxCompile Include="..\Resources\Shaders\SPH3DActivateParticles1CS.hlsl">
+    <FxCompile Include="..\Resources\Shaders\SPH\SPH3DActivateParticles1CS.hlsl">
       <Filter>Shaders\SPHFluid\SPH3DFluid</Filter>
     </FxCompile>
-    <FxCompile Include="..\Resources\Shaders\SPH3DActivateParticles2CS.hlsl">
+    <FxCompile Include="..\Resources\Shaders\SPH\SPH3DActivateParticles2CS.hlsl">
       <Filter>Shaders\SPHFluid\SPH3DFluid</Filter>
     </FxCompile>
-    <FxCompile Include="..\Resources\Shaders\SPH3DDensityCS.hlsl">
+    <FxCompile Include="..\Resources\Shaders\SPH\SPH3DDensityCS.hlsl">
       <Filter>Shaders\SPHFluid\SPH3DFluid</Filter>
     </FxCompile>
-    <FxCompile Include="..\Resources\Shaders\SPH3DIterativeEOS1CS.hlsl">
+    <FxCompile Include="..\Resources\Shaders\SPH\SPH3DIterativeEOS1CS.hlsl">
       <Filter>Shaders\SPHFluid\SPH3DFluid</Filter>
     </FxCompile>
-    <FxCompile Include="..\Resources\Shaders\SPH3DIterativeEOS2CS.hlsl">
+    <FxCompile Include="..\Resources\Shaders\SPH\SPH3DIterativeEOS1CS2.hlsl">
       <Filter>Shaders\SPHFluid\SPH3DFluid</Filter>
     </FxCompile>
-    <FxCompile Include="..\Resources\Shaders\SPH3DPredictCS.hlsl">
+    <FxCompile Include="..\Resources\Shaders\SPH\SPH3DIterativeEOS2CS.hlsl">
       <Filter>Shaders\SPHFluid\SPH3DFluid</Filter>
     </FxCompile>
-    <FxCompile Include="..\Resources\Shaders\SPHDensityCS.hlsl">
-      <Filter>Shaders\SPHFluid\SPH2DFluid</Filter>
-    </FxCompile>
-    <FxCompile Include="..\Resources\Shaders\SPHIterativeEOS1CS.hlsl">
-      <Filter>Shaders\SPHFluid\SPH2DFluid</Filter>
-    </FxCompile>
-    <FxCompile Include="..\Resources\Shaders\SPHIterativeEOS2CS.hlsl">
-      <Filter>Shaders\SPHFluid\SPH2DFluid</Filter>
-    </FxCompile>
-    <FxCompile Include="..\Resources\Shaders\SPHPredictCS.hlsl">
-      <Filter>Shaders\SPHFluid\SPH2DFluid</Filter>
-    </FxCompile>
-    <FxCompile Include="..\Resources\Shaders\SPH3DIterativeEOS1CS2.hlsl">
+    <FxCompile Include="..\Resources\Shaders\SPH\SPH3DPredictCS.hlsl">
       <Filter>Shaders\SPHFluid\SPH3DFluid</Filter>
     </FxCompile>
-    <FxCompile Include="..\Resources\Shaders\SPHAnimation1CS.hlsl">
+    <FxCompile Include="..\Resources\Shaders\SPH\SPHAnimation1CS.hlsl">
       <Filter>Shaders\SPHFluid</Filter>
     </FxCompile>
-    <FxCompile Include="..\Resources\Shaders\SPHAnimation2CS.hlsl">
+    <FxCompile Include="..\Resources\Shaders\SPH\SPHAnimation2CS.hlsl">
       <Filter>Shaders\SPHFluid</Filter>
     </FxCompile>
-    <FxCompile Include="..\Resources\Shaders\SPHAnimation3CS.hlsl">
+    <FxCompile Include="..\Resources\Shaders\SPH\SPHAnimation3CS.hlsl">
       <Filter>Shaders\SPHFluid</Filter>
     </FxCompile>
-    <FxCompile Include="..\Resources\Shaders\SPHIterativeEOS3CS.hlsl">
+    <FxCompile Include="..\Resources\Shaders\SPH\BillboardGS.hlsl">
       <Filter>Shaders\SPHFluid</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\SPH\ParticlePS.hlsl">
+      <Filter>Shaders\SPHFluid</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\SPH\ParticleVS.hlsl">
+      <Filter>Shaders\SPHFluid</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\SPH\SPHBitonicSortCS.hlsl">
+      <Filter>Shaders\SPHFluid</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\SPH\SPHCellRangeCS.hlsl">
+      <Filter>Shaders\SPHFluid</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\SPH\SPHFinalCS.hlsl">
+      <Filter>Shaders\SPHFluid</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\SPH\SPHHashCS.hlsl">
+      <Filter>Shaders\SPHFluid</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\SPH\SPHIterativeEOS3CS.hlsl">
+      <Filter>Shaders\SPHFluid</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\StableFluids\AdvectionCS.hlsl">
+      <Filter>Shaders\StableFluid</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\StableFluids\ApplyPressureCS.hlsl">
+      <Filter>Shaders\StableFluid</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\StableFluids\ComputeVorticityCS.hlsl">
+      <Filter>Shaders\StableFluid</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\StableFluids\ConfineVorticityCS.hlsl">
+      <Filter>Shaders\StableFluid</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\StableFluids\DiffuseCS.hlsl">
+      <Filter>Shaders\StableFluid</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\StableFluids\DivergenceCS.hlsl">
+      <Filter>Shaders\StableFluid</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\StableFluids\JacobiCS.hlsl">
+      <Filter>Shaders\StableFluid</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\StableFluids\SourcingCS.hlsl">
+      <Filter>Shaders\StableFluid</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>

@@ -17,8 +17,8 @@ void Resources::CreateLineShader() {
     ShaderArg arg = {"main", "", "", "", "main"};
 
     shared_ptr<Shader> shader = make_shared<Shader>();
-    shader->CreateVertexShader(L"BasicVS.hlsl");
-    shader->CreatePixelShader(L"BasicPS.hlsl");
+    shader->CreateVertexShader(L"../Resources/Shaders/BasicVS.hlsl");
+    shader->CreatePixelShader(L"../Resources/Shaders/BasicPS.hlsl");
     shader->CreateGraphicsShader(info);
 
     Add<Shader>(L"LineShader", shader);
@@ -38,8 +38,8 @@ void Resources::CreateWireFrameShader() {
     ShaderArg arg = {"main", "", "", "", "main"};
 
     shared_ptr<Shader> shader = make_shared<Shader>();
-    shader->CreateVertexShader(L"BasicVS.hlsl");
-    shader->CreatePixelShader(L"BasicPS.hlsl");
+    shader->CreateVertexShader(L"../Resources/Shaders/BasicVS.hlsl");
+    shader->CreatePixelShader(L"../Resources/Shaders/BasicPS.hlsl");
     shader->CreateGraphicsShader(info);
 
     Add<Shader>(L"WireFrameShader", shader);

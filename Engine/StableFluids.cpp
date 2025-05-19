@@ -28,19 +28,33 @@ void StableFluids::FinalUpdate() {}
 
 void StableFluids::Render() {}
 
-void StableFluids::InitShaders() {}
+void StableFluids::InitShaders() {
+
+
+
+}
 
 void StableFluids::InitConstantBuffers() {}
 
 void StableFluids::InitTextures() {
+    auto CreateRWTexture2D = [&](DXGI_FORMAT format) -> shared_ptr<Texture> {
+        auto texture = make_shared<Texture>();
+        texture->Create(format, _width, _height, CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT), D3D12_HEAP_FLAG_NONE,
+                        D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS);
+        return texture;
+    };
+
+    // R16G16
     _velocity = CreateRWTexture2D(DXGI_FORMAT_R16G16_FLOAT);
     _velocityTemp = CreateRWTexture2D(DXGI_FORMAT_R16G16_FLOAT);
 
+    // R16
     _pressure = CreateRWTexture2D(DXGI_FORMAT_R16_FLOAT);
     _pressureTemp = CreateRWTexture2D(DXGI_FORMAT_R16_FLOAT);
     _vorticity = CreateRWTexture2D(DXGI_FORMAT_R16_FLOAT);
     _divergence = CreateRWTexture2D(DXGI_FORMAT_R16_FLOAT);
 
+    // R16G16B16A16
     _density = CreateRWTexture2D(DXGI_FORMAT_R16G16B16A16_FLOAT);
     _densityTemp = CreateRWTexture2D(DXGI_FORMAT_R16G16B16A16_FLOAT);
 }
@@ -63,13 +77,3 @@ void StableFluids::InitSimulationObjects() {
 }
 
 void StableFluids::BuildUI() {}
-
-shared_ptr<Texture> StableFluids::CreateRWTexture2D(DXGI_FORMAT format) {
-    shared_ptr<Texture> texture = make_shared<Texture>();
-    texture->Create(format, _width, _height, CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
-                    D3D12_HEAP_FLAG_NONE,
-                    D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS // UAV 접근 가능해야 함
-    );
-
-    return texture;
-}
