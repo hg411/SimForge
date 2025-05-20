@@ -46,7 +46,7 @@ class StableFluids : public Simulation {
     shared_ptr<Texture> _densityTemp;
     shared_ptr<Texture> _vorticity;
     shared_ptr<Texture> _divergence;
-    
+
     // Compute Shader
     shared_ptr<Shader> _advectionCS;
     shared_ptr<Shader> _applyPressureCS;
