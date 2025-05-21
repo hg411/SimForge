@@ -5,6 +5,7 @@
 #include "Transform.h"
 #include "Camera.h"
 #include "Texture.h"
+#include "Shader.h"
 
 StableFluids::StableFluids() {}
 
@@ -29,9 +30,14 @@ void StableFluids::FinalUpdate() {}
 void StableFluids::Render() {}
 
 void StableFluids::InitShaders() {
+    auto CreateCompute = [](shared_ptr<Shader> &shader, const wstring &name) {
+        shader = make_shared<Shader>();
+        shader->CreateComputeShader(L"../Resources/Shaders/StableFluids/" + name);
+    };
 
-
-
+    CreateCompute(_advectionCS, L"AdvectionCS.hlsl");
+    //CreateCompute(_applyPressureCS, L"ApplyPressureCS.hlsl");
+    //CreateCompute(_diffuseCS, L"DiffuseCS.hlsl");
 }
 
 void StableFluids::InitConstantBuffers() {}

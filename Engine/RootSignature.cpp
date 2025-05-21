@@ -76,6 +76,12 @@ void RootSignature::CreateGraphicsRootSignature(ComPtr<ID3D12Device> device) {
 }
 
 void RootSignature::CreateComputeRootSignature(ComPtr<ID3D12Device> device) {
+    D3D12_STATIC_SAMPLER_DESC samplers[] = {
+        CD3DX12_STATIC_SAMPLER_DESC(0, // register(s0)
+                                    D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_TEXTURE_ADDRESS_MODE_WRAP,
+                                    D3D12_TEXTURE_ADDRESS_MODE_WRAP, D3D12_TEXTURE_ADDRESS_MODE_WRAP),
+    };
+
     CD3DX12_ROOT_PARAMETER param[TOTAL_REGISTER_COUNT];
 
     // CBV
@@ -109,7 +115,7 @@ void RootSignature::CreateComputeRootSignature(ComPtr<ID3D12Device> device) {
     //param[1].InitAsDescriptorTable(1, &srvRange);
     //param[2].InitAsDescriptorTable(1, &uavRange);
 
-    D3D12_ROOT_SIGNATURE_DESC sigDesc = CD3DX12_ROOT_SIGNATURE_DESC(_countof(param), param);
+    D3D12_ROOT_SIGNATURE_DESC sigDesc = CD3DX12_ROOT_SIGNATURE_DESC(_countof(param), param, _countof(samplers), samplers);
     sigDesc.Flags = D3D12_ROOT_SIGNATURE_FLAG_NONE; // Compute ¿ëµµ
 
     ComPtr<ID3DBlob> blobSignature;
