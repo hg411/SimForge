@@ -82,38 +82,42 @@ void RootSignature::CreateComputeRootSignature(ComPtr<ID3D12Device> device) {
                                     D3D12_TEXTURE_ADDRESS_MODE_WRAP, D3D12_TEXTURE_ADDRESS_MODE_WRAP),
     };
 
-    CD3DX12_ROOT_PARAMETER param[TOTAL_REGISTER_COUNT];
+    //CD3DX12_ROOT_PARAMETER param[TOTAL_REGISTER_COUNT];
 
-    // CBV
-    for (UINT i = 0; i < static_cast<UINT>(CBV_REGISTER_COUNT); ++i) {
-        param[i].InitAsConstantBufferView(i);
-    }
+    // Table 사용 X version
+    //// CBV
+    //for (UINT i = 0; i < static_cast<UINT>(CBV_REGISTER_COUNT); ++i) {
+    //    param[i].InitAsConstantBufferView(i);
+    //}
 
-    // SRV
-    for (UINT i = 0; i < static_cast<UINT>(SRV_REGISTER_COUNT); ++i) {
-        UINT idx = static_cast<UINT>(SRV_REGISTER::t0) + i;
-        param[idx].InitAsShaderResourceView(i);
-    }
+    //// SRV
+    //for (UINT i = 0; i < static_cast<UINT>(SRV_REGISTER_COUNT); ++i) {
+    //    UINT idx = static_cast<UINT>(SRV_REGISTER::t0) + i;
+    //    param[idx].InitAsShaderResourceView(i);
+    //}
 
-    // UAV
-    for (UINT i = 0; i < static_cast<UINT>(UAV_REGISTER_COUNT); ++i) {
-        UINT idx = static_cast<UINT>(UAV_REGISTER::u0) + i;
-        param[idx].InitAsUnorderedAccessView(i);
-    }
+    //// UAV
+    //for (UINT i = 0; i < static_cast<UINT>(UAV_REGISTER_COUNT); ++i) {
+    //    UINT idx = static_cast<UINT>(UAV_REGISTER::u0) + i;
+    //    param[idx].InitAsUnorderedAccessView(i);
+    //}
 
-    // Table 사용 X
-    //CD3DX12_DESCRIPTOR_RANGE cbvRange =
-    //    CD3DX12_DESCRIPTOR_RANGE(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, CBV_REGISTER_COUNT, 0); // b0~b9
+    // Table 사용 version
+    CD3DX12_ROOT_PARAMETER param[1];
+    param[0].InitAsDescriptorTable(_countof())
 
-    //CD3DX12_DESCRIPTOR_RANGE srvRange =
-    //    CD3DX12_DESCRIPTOR_RANGE(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, SRV_REGISTER_COUNT, 0); // t0~t9
+    CD3DX12_DESCRIPTOR_RANGE cbvRange =
+        CD3DX12_DESCRIPTOR_RANGE(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, CBV_REGISTER_COUNT, 0); // b0~b9
 
-    //CD3DX12_DESCRIPTOR_RANGE uavRange =
-    //    CD3DX12_DESCRIPTOR_RANGE(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, UAV_REGISTER_COUNT, 0); // u0~u9
+    CD3DX12_DESCRIPTOR_RANGE srvRange =
+        CD3DX12_DESCRIPTOR_RANGE(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, SRV_REGISTER_COUNT, 0); // t0~t9
 
-    //param[0].InitAsDescriptorTable(1, &cbvRange);
-    //param[1].InitAsDescriptorTable(1, &srvRange);
-    //param[2].InitAsDescriptorTable(1, &uavRange);
+    CD3DX12_DESCRIPTOR_RANGE uavRange =
+        CD3DX12_DESCRIPTOR_RANGE(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, UAV_REGISTER_COUNT, 0); // u0~u9
+
+    param[0].InitAsDescriptorTable(1, &cbvRange);
+    param[1].InitAsDescriptorTable(1, &srvRange);
+    param[2].InitAsDescriptorTable(1, &uavRange);
 
     D3D12_ROOT_SIGNATURE_DESC sigDesc = CD3DX12_ROOT_SIGNATURE_DESC(_countof(param), param, _countof(samplers), samplers);
     sigDesc.Flags = D3D12_ROOT_SIGNATURE_FLAG_NONE; // Compute 용도
