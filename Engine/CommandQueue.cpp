@@ -176,6 +176,7 @@ void ComputeCommandQueue::FlushComputeCommandQueue() {
     _cmdAlloc->Reset();
     _cmdList->Reset(_cmdAlloc.Get(), nullptr);
 
+    // RootSignature가 고정이므로 Flush에서 Reset 이후에 바로 SetComputeRootSignature 실행.
     _cmdList->SetComputeRootSignature(COMPUTE_ROOT_SIGNATURE.Get());
 
     //GEngine->GetComputeDescHeap()->Clear(); // 수정

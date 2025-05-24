@@ -77,9 +77,9 @@ void SPH2DFluid::FinalUpdate() {
 void SPH2DFluid::Render() {
     Simulation::Render();
 
-    _positionBuffer->SetGraphicsRootSRV(SRV_REGISTER::t0);
-    _velocityBuffer->SetGraphicsRootSRV(SRV_REGISTER::t1);
-    _aliveBuffer->SetGraphicsRootSRV(SRV_REGISTER::t2);
+    _positionBuffer->SetGraphicsRootSRV(SRV_REGISTER::t0, false);
+    _velocityBuffer->SetGraphicsRootSRV(SRV_REGISTER::t1, false);
+    _aliveBuffer->SetGraphicsRootSRV(SRV_REGISTER::t2, false);
 
     _simulationParamsCB->SetGraphicsRootCBV(CBV_REGISTER::b3);
 
