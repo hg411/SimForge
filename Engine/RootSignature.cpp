@@ -84,7 +84,7 @@ void RootSignature::CreateComputeRootSignature(ComPtr<ID3D12Device> device) {
 
     //CD3DX12_ROOT_PARAMETER param[TOTAL_REGISTER_COUNT];
 
-    // Table 사용 X version
+    // Root Descriptor 사용 version
     //// CBV
     //for (UINT i = 0; i < static_cast<UINT>(CBV_REGISTER_COUNT); ++i) {
     //    param[i].InitAsConstantBufferView(i);
@@ -102,19 +102,18 @@ void RootSignature::CreateComputeRootSignature(ComPtr<ID3D12Device> device) {
     //    param[idx].InitAsUnorderedAccessView(i);
     //}
 
-    // Table 사용 version
-    CD3DX12_ROOT_PARAMETER param[1];
-    param[0].InitAsDescriptorTable(_countof())
-
+    // Descriptor Table 사용 version
     CD3DX12_DESCRIPTOR_RANGE cbvRange =
-        CD3DX12_DESCRIPTOR_RANGE(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, CBV_REGISTER_COUNT, 0); // b0~b9
+        CD3DX12_DESCRIPTOR_RANGE(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, CBV_REGISTER_COUNT, 0); // b0 ~ b9
 
     CD3DX12_DESCRIPTOR_RANGE srvRange =
-        CD3DX12_DESCRIPTOR_RANGE(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, SRV_REGISTER_COUNT, 0); // t0~t9
+        CD3DX12_DESCRIPTOR_RANGE(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, SRV_REGISTER_COUNT, 0); // t0 ~ t9
 
     CD3DX12_DESCRIPTOR_RANGE uavRange =
-        CD3DX12_DESCRIPTOR_RANGE(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, UAV_REGISTER_COUNT, 0); // u0~u9
+        CD3DX12_DESCRIPTOR_RANGE(D3D12_DESCRIPTOR_RANGE_TYPE_UAV, UAV_REGISTER_COUNT, 0); // u0 ~ u9
 
+
+    CD3DX12_ROOT_PARAMETER param[3];
     param[0].InitAsDescriptorTable(1, &cbvRange);
     param[1].InitAsDescriptorTable(1, &srvRange);
     param[2].InitAsDescriptorTable(1, &uavRange);
