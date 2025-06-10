@@ -68,7 +68,7 @@ void ConstantBuffer::BindToCompute(CBV_REGISTER reg) {
     D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle = GetCpuHandle(_currentIndex);
     GEngine->GetComputeDescHeap()->SetCBV(cpuHandle, reg);
 
-    _currentIndex++;
+    //_currentIndex++;
 }
 
 void ConstantBuffer::PushGraphicsData(void *buffer, uint32 size, CBV_REGISTER reg) {
@@ -93,7 +93,7 @@ void ConstantBuffer::PushComputeData(void *buffer, uint32 size, CBV_REGISTER reg
     D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle = GetCpuHandle(_currentIndex);
     GEngine->GetComputeDescHeap()->SetCBV(cpuHandle, reg);
 
-    _currentIndex++;
+    //_currentIndex++;
 }
 
 D3D12_GPU_VIRTUAL_ADDRESS ConstantBuffer::GetGpuVirtualAddress(uint32 index) {

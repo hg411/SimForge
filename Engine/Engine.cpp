@@ -47,8 +47,8 @@ void Engine::Init(const WindowInfo &windowInfo) {
     //_graphicsDescHeap = make_shared<GraphicsDescriptorHeap>();
     //_graphicsDescHeap->Init(256);
 
-    //_computeDescHeap = make_shared<ComputeDescriptorHeap>();
-    //_computeDescHeap->Init(256);
+    _computeDescHeap = make_shared<ComputeDescriptorHeap>();
+    _computeDescHeap->Init();
 
     _globalParamsCB = make_shared<ConstantBuffer>();
     _globalParamsCB->Init(sizeof(GlobalParams), 1);

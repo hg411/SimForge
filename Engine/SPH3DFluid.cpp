@@ -34,6 +34,9 @@ void SPH3DFluid::Init() {
     InitStructuredBuffers();
     InitSimulationObjects();
 
+    ID3D12DescriptorHeap *descHeap = GEngine->GetComputeDescHeap()->GetDescriptorHeap().Get();
+    COMPUTE_CMD_LIST->SetDescriptorHeaps(1, &descHeap);
+
     PushSimulationParams();
     ActivateParticles1();
     GEngine->GetComputeCmdQueue()->FlushComputeCommandQueue();
@@ -94,6 +97,9 @@ void SPH3DFluid::FinalUpdate() {
     //    GEngine->GetComputeCmdQueue()->FlushComputeCommandQueue();
     //}
 
+    ID3D12DescriptorHeap *descHeap = GEngine->GetComputeDescHeap()->GetDescriptorHeap().Get();
+    COMPUTE_CMD_LIST->SetDescriptorHeaps(1, &descHeap);
+
     PushSimulationParams();
 
     if (INPUT->GetButtonDown(KEY_TYPE::KEY_1)) {
@@ -106,7 +112,7 @@ void SPH3DFluid::FinalUpdate() {
 
     HashingParticles();
     SortParticles();
-    ComputeCellRange();
+    ComputeCellRange(); 
     ComputeDensity();
     PredictPositionVelocity();
     IterativeEOS(3);
@@ -121,7 +127,7 @@ void SPH3DFluid::Render() {
 
     _positionBuffer->SetGraphicsRootSRV(SRV_REGISTER::t0, false);
     _velocityBuffer->SetGraphicsRootSRV(SRV_REGISTER::t1, false);
-    _aliveBuffer->SetGraphicsRootSRV(SRV_REGISTER::t2,false);
+    _aliveBuffer->SetGraphicsRootSRV(SRV_REGISTER::t2, false);
 
     _simulationParamsCB->SetGraphicsRootCBV(CBV_REGISTER::b3);
 
@@ -308,14 +314,17 @@ void SPH3DFluid::PushSimulationParams() {
     _sph3DFluidParams.addCount = 1;
     _sph3DFluidParams.radius = _radius;
 
-    _simulationParamsCB->UpdateData(&_sph3DFluidParams, sizeof(_sph3DFluidParams));
-    _simulationParamsCB->SetComputeRootCBV(CBV_REGISTER::b0);
+    //_simulationParamsCB->UpdateData(&_sph3DFluidParams, sizeof(_sph3DFluidParams));
+    //_simulationParamsCB->SetComputeRootCBV(CBV_REGISTER::b0);
+    _simulationParamsCB->PushComputeData(&_sph3DFluidParams, sizeof(_sph3DFluidParams), CBV_REGISTER::b0);
 }
 
 void SPH3DFluid::ActivateParticles1() {
-    _positionBuffer->SetComputeRootUAV(UAV_REGISTER::u0);
-    _velocityBuffer->SetComputeRootUAV(UAV_REGISTER::u1);
-    _aliveBuffer->SetComputeRootUAV(UAV_REGISTER::u2);
+    _positionBuffer->PushComputeUAVData(UAV_REGISTER::u0);
+    _velocityBuffer->PushComputeUAVData(UAV_REGISTER::u1);
+    _aliveBuffer->PushComputeUAVData(UAV_REGISTER::u2);
+
+    GEngine->GetComputeDescHeap()->CommitTable();
 
     // Shader Set
     _activate1Shader->Update();
@@ -327,9 +336,11 @@ void SPH3DFluid::ActivateParticles1() {
 }
 
 void SPH3DFluid::ActivateParticles2() {
-    _positionBuffer->SetComputeRootUAV(UAV_REGISTER::u0);
-    _velocityBuffer->SetComputeRootUAV(UAV_REGISTER::u1);
-    _aliveBuffer->SetComputeRootUAV(UAV_REGISTER::u2);
+    _positionBuffer->PushComputeUAVData(UAV_REGISTER::u0);
+    _velocityBuffer->PushComputeUAVData(UAV_REGISTER::u1);
+    _aliveBuffer->PushComputeUAVData(UAV_REGISTER::u2);
+
+    GEngine->GetComputeDescHeap()->CommitTable();
 
     // Shader Set
     _activate2Shader->Update();
@@ -341,10 +352,12 @@ void SPH3DFluid::ActivateParticles2() {
 }
 
 void SPH3DFluid::HashingParticles() {
-    _positionBuffer->SetComputeRootSRV(SRV_REGISTER::t0);
-    _aliveBuffer->SetComputeRootSRV(SRV_REGISTER::t1);
-    _hashBuffer->SetComputeRootUAV(UAV_REGISTER::u0);
-    _cellRangeBuffer->SetComputeRootUAV(UAV_REGISTER::u1);
+    _positionBuffer->PushComputeSRVData(SRV_REGISTER::t0);
+    _aliveBuffer->PushComputeSRVData(SRV_REGISTER::t1);
+    _hashBuffer->PushComputeUAVData(UAV_REGISTER::u0);
+    _cellRangeBuffer->PushComputeUAVData(UAV_REGISTER::u1);
+
+    GEngine->GetComputeDescHeap()->CommitTable();
 
     // Shader Set
     _hashShader->Update();
@@ -360,16 +373,18 @@ void SPH3DFluid::SortParticles() {
 
     _bitonicSortShader->Update();
 
-    _positionBuffer->SetComputeRootUAV(UAV_REGISTER::u0);
-    _velocityBuffer->SetComputeRootUAV(UAV_REGISTER::u1);
-    _aliveBuffer->SetComputeRootUAV(UAV_REGISTER::u2);
-    _hashBuffer->SetComputeRootUAV(UAV_REGISTER::u3);
+    _positionBuffer->PushComputeUAVData(UAV_REGISTER::u0);
+    _velocityBuffer->PushComputeUAVData(UAV_REGISTER::u1);
+    _aliveBuffer->PushComputeUAVData(UAV_REGISTER::u2);
+    _hashBuffer->PushComputeUAVData(UAV_REGISTER::u3);
 
     D3D12_RESOURCE_BARRIER uavBarrier = CD3DX12_RESOURCE_BARRIER::UAV(_positionBuffer->GetBuffer().Get());
 
     for (uint32_t k = 2; k <= _maxParticles; k *= 2) {
         for (uint32_t j = k / 2; j > 0; j /= 2) {
-            _bitonicSortCBs[constCount++]->SetComputeRootCBV(CBV_REGISTER::b1);
+            _bitonicSortCBs[constCount++]->BindToCompute(CBV_REGISTER::b1);
+
+            GEngine->GetComputeDescHeap()->CommitTable();
 
             COMPUTE_CMD_LIST->Dispatch(_threadGroupCountX, 1, 1);
 
@@ -379,8 +394,10 @@ void SPH3DFluid::SortParticles() {
 }
 
 void SPH3DFluid::ComputeCellRange() {
-    _hashBuffer->SetComputeRootSRV(SRV_REGISTER::t0);
-    _cellRangeBuffer->SetComputeRootUAV(UAV_REGISTER::u0);
+    _hashBuffer->PushComputeSRVData(SRV_REGISTER::t0);
+    _cellRangeBuffer->PushComputeUAVData(UAV_REGISTER::u0);
+
+    GEngine->GetComputeDescHeap()->CommitTable();
 
     _cellRangeShader->Update();
 
@@ -391,10 +408,12 @@ void SPH3DFluid::ComputeCellRange() {
 }
 
 void SPH3DFluid::ComputeDensity() {
-    _positionBuffer->SetComputeRootSRV(SRV_REGISTER::t0);
-    _aliveBuffer->SetComputeRootSRV(SRV_REGISTER::t1);
-    _cellRangeBuffer->SetComputeRootSRV(SRV_REGISTER::t2);
-    _densityBuffer->SetComputeRootUAV(UAV_REGISTER::u0);
+    _positionBuffer->PushComputeSRVData(SRV_REGISTER::t0);
+    _aliveBuffer->PushComputeSRVData(SRV_REGISTER::t1);
+    _cellRangeBuffer->PushComputeSRVData(SRV_REGISTER::t2);
+    _densityBuffer->PushComputeUAVData(UAV_REGISTER::u0);
+
+    GEngine->GetComputeDescHeap()->CommitTable();
 
     _densityShader->Update();
 
@@ -405,14 +424,16 @@ void SPH3DFluid::ComputeDensity() {
 }
 
 void SPH3DFluid::PredictPositionVelocity() {
-    _positionBuffer->SetComputeRootSRV(SRV_REGISTER::t0);
-    _velocityBuffer->SetComputeRootSRV(SRV_REGISTER::t1);
-    _densityBuffer->SetComputeRootSRV(SRV_REGISTER::t2);
-    _aliveBuffer->SetComputeRootSRV(SRV_REGISTER::t3);
-    _cellRangeBuffer->SetComputeRootSRV(SRV_REGISTER::t4);
+    _positionBuffer->PushComputeSRVData(SRV_REGISTER::t0);
+    _velocityBuffer->PushComputeSRVData(SRV_REGISTER::t1);
+    _densityBuffer->PushComputeSRVData(SRV_REGISTER::t2);
+    _aliveBuffer->PushComputeSRVData(SRV_REGISTER::t3);
+    _cellRangeBuffer->PushComputeSRVData(SRV_REGISTER::t4);
 
-    _predPositionBuffer->SetComputeRootUAV(UAV_REGISTER::u0);
-    _predVelocityBuffer->SetComputeRootUAV(UAV_REGISTER::u1);
+    _predPositionBuffer->PushComputeUAVData(UAV_REGISTER::u0);
+    _predVelocityBuffer->PushComputeUAVData(UAV_REGISTER::u1);
+
+    GEngine->GetComputeDescHeap()->CommitTable();
 
     _predictShader->Update();
     ;
@@ -431,14 +452,16 @@ void SPH3DFluid::IterativeEOS(uint32 iterationCount) {
 }
 
 void SPH3DFluid::IterativeEOS1() {
-    _positionBuffer->SetComputeRootSRV(SRV_REGISTER::t0);
-    _predPositionBuffer->SetComputeRootSRV(SRV_REGISTER::t1);
-    _aliveBuffer->SetComputeRootSRV(SRV_REGISTER::t2);
-    _cellRangeBuffer->SetComputeRootSRV(SRV_REGISTER::t3);
+    _positionBuffer->PushComputeSRVData(SRV_REGISTER::t0);
+    _predPositionBuffer->PushComputeSRVData(SRV_REGISTER::t1);
+    _aliveBuffer->PushComputeSRVData(SRV_REGISTER::t2);
+    _cellRangeBuffer->PushComputeSRVData(SRV_REGISTER::t3);
 
-    _densityBuffer->SetComputeRootUAV(UAV_REGISTER::u0);
-    _pressureBuffer->SetComputeRootUAV(UAV_REGISTER::u1);
-    _nearPressureBuffer->SetComputeRootUAV(UAV_REGISTER::u2);
+    _densityBuffer->PushComputeUAVData(UAV_REGISTER::u0);
+    _pressureBuffer->PushComputeUAVData(UAV_REGISTER::u1);
+    _nearPressureBuffer->PushComputeUAVData(UAV_REGISTER::u2);
+
+    GEngine->GetComputeDescHeap()->CommitTable();
 
     _iterativeEOS1Shader->Update();
 
@@ -449,15 +472,17 @@ void SPH3DFluid::IterativeEOS1() {
 }
 
 void SPH3DFluid::IterativeEOS2() {
-    _positionBuffer->SetComputeRootSRV(SRV_REGISTER::t0);
-    _predPositionBuffer->SetComputeRootSRV(SRV_REGISTER::t1);
-    _aliveBuffer->SetComputeRootSRV(SRV_REGISTER::t2);
-    _cellRangeBuffer->SetComputeRootSRV(SRV_REGISTER::t3);
-    _densityBuffer->SetComputeRootSRV(SRV_REGISTER::t4);
-    _pressureBuffer->SetComputeRootSRV(SRV_REGISTER::t5);
-    _nearPressureBuffer->SetComputeRootSRV(SRV_REGISTER::t6);
+    _positionBuffer->PushComputeSRVData(SRV_REGISTER::t0);
+    _predPositionBuffer->PushComputeSRVData(SRV_REGISTER::t1);
+    _aliveBuffer->PushComputeSRVData(SRV_REGISTER::t2);
+    _cellRangeBuffer->PushComputeSRVData(SRV_REGISTER::t3);
+    _densityBuffer->PushComputeSRVData(SRV_REGISTER::t4);
+    _pressureBuffer->PushComputeSRVData(SRV_REGISTER::t5);
+    _nearPressureBuffer->PushComputeSRVData(SRV_REGISTER::t6);
 
-    _forceBuffer->SetComputeRootUAV(UAV_REGISTER::u0);
+    _forceBuffer->PushComputeUAVData(UAV_REGISTER::u0);
+
+    GEngine->GetComputeDescHeap()->CommitTable();
 
     _iterativeEOS2Shader->Update();
 
@@ -468,11 +493,13 @@ void SPH3DFluid::IterativeEOS2() {
 }
 
 void SPH3DFluid::IterativeEOS3() {
-    _forceBuffer->SetComputeRootSRV(SRV_REGISTER::t0);
-    _aliveBuffer->SetComputeRootSRV(SRV_REGISTER::t1);
+    _forceBuffer->PushComputeSRVData(SRV_REGISTER::t0);
+    _aliveBuffer->PushComputeSRVData(SRV_REGISTER::t1);
 
-    _predPositionBuffer->SetComputeRootUAV(UAV_REGISTER::u0);
-    _predVelocityBuffer->SetComputeRootUAV(UAV_REGISTER::u1);
+    _predPositionBuffer->PushComputeUAVData(UAV_REGISTER::u0);
+    _predVelocityBuffer->PushComputeUAVData(UAV_REGISTER::u1);
+
+    GEngine->GetComputeDescHeap()->CommitTable();
 
     _iterativeEOS3Shader->Update();
 
@@ -483,12 +510,14 @@ void SPH3DFluid::IterativeEOS3() {
 }
 
 void SPH3DFluid::FinalEOS() {
-    _predPositionBuffer->SetComputeRootSRV(SRV_REGISTER::t0);
-    _predVelocityBuffer->SetComputeRootSRV(SRV_REGISTER::t1);
-    _aliveBuffer->SetComputeRootSRV(SRV_REGISTER::t2);
+    _predPositionBuffer->PushComputeSRVData(SRV_REGISTER::t0);
+    _predVelocityBuffer->PushComputeSRVData(SRV_REGISTER::t1);
+    _aliveBuffer->PushComputeSRVData(SRV_REGISTER::t2);
 
-    _positionBuffer->SetComputeRootUAV(UAV_REGISTER::u0);
-    _velocityBuffer->SetComputeRootUAV(UAV_REGISTER::u1);
+    _positionBuffer->PushComputeUAVData(UAV_REGISTER::u0);
+    _velocityBuffer->PushComputeUAVData(UAV_REGISTER::u1);
+
+    GEngine->GetComputeDescHeap()->CommitTable();
 
     _finalEOSShader->Update();
 
@@ -499,8 +528,10 @@ void SPH3DFluid::FinalEOS() {
 }
 
 void SPH3DFluid::AnimateParticles() {
-    _aliveBuffer->SetComputeRootSRV(SRV_REGISTER::t0);
-    _velocityBuffer->SetComputeRootUAV(UAV_REGISTER::u0);
+    _aliveBuffer->PushComputeSRVData(SRV_REGISTER::t0);
+    _velocityBuffer->PushComputeUAVData(UAV_REGISTER::u0);
+
+    GEngine->GetComputeDescHeap()->CommitTable();
 
     if (INPUT->GetButton(KEY_TYPE::UP)) {
         _animate1Shader->Update();
