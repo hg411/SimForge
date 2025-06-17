@@ -117,7 +117,7 @@ void ComputeDescriptorHeap::SetUAV(D3D12_CPU_DESCRIPTOR_HANDLE srcHandle, UAV_RE
 void ComputeDescriptorHeap::CommitTable() {
     // SetDescriptorHeaps 는 다른곳에서 1번만 실행하는 형식으로 변경 필요.
     //ID3D12DescriptorHeap *descHeap = GEngine->GetComputeDescHeap()->GetDescriptorHeap().Get();
-    //COMPUTE_CMD_LIST->SetDescriptorHeaps(1, &descHeap);
+    //COMPUTE_CMD_LIST->SetDescriptorHeaps(1, &descHeap);// 수정필요
 
     D3D12_GPU_DESCRIPTOR_HANDLE handle = _descHeap.Get()->GetGPUDescriptorHandleForHeapStart();
 
