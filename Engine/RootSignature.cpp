@@ -128,5 +128,5 @@ void RootSignature::CreateComputeRootSignature(ComPtr<ID3D12Device> device) {
     device->CreateRootSignature(0, blobSignature->GetBufferPointer(), blobSignature->GetBufferSize(),
                                 IID_PPV_ARGS(&_computeRootSignature));
 
-    COMPUTE_CMD_LIST->SetComputeRootSignature(_computeRootSignature.Get()); // 꼭 수정필요!!!!
+    COMPUTE_CMD_LIST->SetComputeRootSignature(_computeRootSignature.Get()); // 처음 만들 때 Set.
 }

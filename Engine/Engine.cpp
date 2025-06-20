@@ -47,8 +47,9 @@ void Engine::Init(const WindowInfo &windowInfo) {
     //_graphicsDescHeap = make_shared<GraphicsDescriptorHeap>();
     //_graphicsDescHeap->Init(256);
 
+    // Compute Descriptor Heap은 100개 생성. (Offset 이용)
     _computeDescHeap = make_shared<ComputeDescriptorHeap>();
-    _computeDescHeap->Init();
+    _computeDescHeap->Init(256);
 
     _globalParamsCB = make_shared<ConstantBuffer>();
     _globalParamsCB->Init(sizeof(GlobalParams), 1);
@@ -68,6 +69,13 @@ void Engine::Init(const WindowInfo &windowInfo) {
 }
 
 void Engine::Update() {
+    // Update에서 Compute Descriptor Heap의 Offset Clear
+    _computeDescHeap->Clear();
+
+    // Compute DescriptorHeap 설정
+    ID3D12DescriptorHeap *descHeap = _computeDescHeap->GetDescriptorHeap().Get();
+    COMPUTE_CMD_LIST->SetDescriptorHeaps(1, &descHeap);
+
     CheckResizeByClientRect();
     GET_SINGLE(Input)->Update();
     GET_SINGLE(Timer)->Update();

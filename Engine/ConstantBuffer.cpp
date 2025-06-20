@@ -36,6 +36,7 @@ void ConstantBuffer::SetGraphicsGlobalData(void *buffer, uint32 size) {
 
 void ConstantBuffer::UpdateData(void *buffer, uint32 size) {
     assert(_elementSize == ((size + 255) & ~255));
+
     ::memcpy(&_mappedBuffer[_currentIndex * _elementSize], buffer, size);
 }
 
@@ -65,6 +66,7 @@ void ConstantBuffer::BindToGraphics(CBV_REGISTER reg) {
 
 void ConstantBuffer::BindToCompute(CBV_REGISTER reg) {
     assert(_currentIndex < _elementCount);
+
     D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle = GetCpuHandle(_currentIndex);
     GEngine->GetComputeDescHeap()->SetCBV(cpuHandle, reg);
 
@@ -85,15 +87,8 @@ void ConstantBuffer::PushGraphicsData(void *buffer, uint32 size, CBV_REGISTER re
 }
 
 void ConstantBuffer::PushComputeData(void *buffer, uint32 size, CBV_REGISTER reg) {
-    assert(_currentIndex < _elementCount);
-    assert(_elementSize == ((size + 255) & ~255));
-
-    ::memcpy(&_mappedBuffer[_currentIndex * _elementSize], buffer, size);
-
-    D3D12_CPU_DESCRIPTOR_HANDLE cpuHandle = GetCpuHandle(_currentIndex);
-    GEngine->GetComputeDescHeap()->SetCBV(cpuHandle, reg);
-
-    //_currentIndex++;
+    UpdateData(buffer, size);
+    BindToCompute(reg);
 }
 
 D3D12_GPU_VIRTUAL_ADDRESS ConstantBuffer::GetGpuVirtualAddress(uint32 index) {

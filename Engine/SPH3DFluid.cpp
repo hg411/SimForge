@@ -97,9 +97,6 @@ void SPH3DFluid::FinalUpdate() {
     //    GEngine->GetComputeCmdQueue()->FlushComputeCommandQueue();
     //}
 
-    ID3D12DescriptorHeap *descHeap = GEngine->GetComputeDescHeap()->GetDescriptorHeap().Get();
-    COMPUTE_CMD_LIST->SetDescriptorHeaps(1, &descHeap);
-
     PushSimulationParams();
 
     if (INPUT->GetButtonDown(KEY_TYPE::KEY_1)) {
