@@ -128,7 +128,7 @@ void StructuredBuffer::SetComputeRootUAV(UAV_REGISTER reg) {
     COMPUTE_CMD_LIST->SetComputeRootUnorderedAccessView(static_cast<UINT>(reg), _buffer->GetGPUVirtualAddress());
 }
 
-void StructuredBuffer::PushGraphicsData(SRV_REGISTER reg) {
+void StructuredBuffer::BindSRVToGraphics(SRV_REGISTER reg) {
     if (_resourceState != D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE) {
         D3D12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
             _buffer.Get(), _resourceState, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
@@ -139,7 +139,7 @@ void StructuredBuffer::PushGraphicsData(SRV_REGISTER reg) {
     GEngine->GetGraphicsDescHeap()->SetSRV(_srvHeapBegin, reg);
 }
 
-void StructuredBuffer::PushComputeSRVData(SRV_REGISTER reg) {
+void StructuredBuffer::BindSRVToCompute(SRV_REGISTER reg) {
     if (_resourceState != D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE) {
         D3D12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
             _buffer.Get(), _resourceState, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
@@ -150,7 +150,7 @@ void StructuredBuffer::PushComputeSRVData(SRV_REGISTER reg) {
     GEngine->GetComputeDescHeap()->SetSRV(_srvHeapBegin, reg);
 }
 
-void StructuredBuffer::PushComputeUAVData(UAV_REGISTER reg) {
+void StructuredBuffer::BindUAVToCompute(UAV_REGISTER reg) {
     if (_resourceState != D3D12_RESOURCE_STATE_UNORDERED_ACCESS) {
         D3D12_RESOURCE_BARRIER barrier =
             CD3DX12_RESOURCE_BARRIER::Transition(_buffer.Get(), _resourceState, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
