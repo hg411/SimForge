@@ -62,7 +62,7 @@ class SPH3DFluid : public Simulation {
 
     void BuildUI() override;
 
-    void PushSimulationParams();
+    void UpdateSimulationParams();
     void ActivateParticles1();
     void ActivateParticles2();
     void HashingParticles();

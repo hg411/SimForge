@@ -129,6 +129,7 @@ void ComputeDescriptorHeap::CommitTable() {
     D3D12_GPU_DESCRIPTOR_HANDLE handle = _descHeap.Get()->GetGPUDescriptorHandleForHeapStart();
 
     // param[0] = CBV Table
+    handle.ptr += _currentGroupIndex * _groupSize;
     COMPUTE_CMD_LIST->SetComputeRootDescriptorTable(static_cast<uint32>(ROOT_PARAM_COMPUTE::CBV_TABLE), handle);
 
     // param[1] = SRV Table
@@ -141,7 +142,7 @@ void ComputeDescriptorHeap::CommitTable() {
 
     _currentGroupIndex++;
 
-    cout << _currentGroupIndex << endl;
+    //cout << _currentGroupIndex << endl;
 }
 
 D3D12_CPU_DESCRIPTOR_HANDLE ComputeDescriptorHeap::GetCPUHandle(CBV_REGISTER reg) {

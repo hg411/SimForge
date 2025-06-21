@@ -39,13 +39,6 @@ cbuffer SPHFluidParams : register(b0)
     float padding2;
 }
 
-cbuffer Const : register(b1)
-{
-    // https://en.wikipedia.org/wiki/Bitonic_sorter Example Code
-    uint k;
-    uint j;
-}
-
 // Computes hash value for given cell coordinates.
 uint ComputeHash(int3 cell)
 {

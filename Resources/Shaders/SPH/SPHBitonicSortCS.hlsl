@@ -1,5 +1,12 @@
 #include "SPHFluidCommon.hlsli"
 
+cbuffer Const : register(b1)
+{
+    // https://en.wikipedia.org/wiki/Bitonic_sorter Example Code
+    uint k;
+    uint j;
+}
+
 RWStructuredBuffer<float3> g_positionsRW : register(u0);
 RWStructuredBuffer<float3> g_velocitiesRW : register(u1);
 RWStructuredBuffer<int> g_aliveFlagsRW : register(u2);
