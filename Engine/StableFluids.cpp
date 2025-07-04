@@ -36,8 +36,13 @@ void StableFluids::InitShaders() {
     };
 
     CreateCompute(_advectionCS, L"AdvectionCS.hlsl");
-    //CreateCompute(_applyPressureCS, L"ApplyPressureCS.hlsl");
-    //CreateCompute(_diffuseCS, L"DiffuseCS.hlsl");
+    CreateCompute(_applyPressureCS, L"ApplyPressureCS.hlsl");
+    CreateCompute(_diffuseCS, L"DiffuseCS.hlsl");
+    CreateCompute(_divergenceCS, L"DivergenceCS.hlsl");
+    CreateCompute(_jacobiCS, L"JacobiCS.hlsl");
+    CreateCompute(_sourcingCS, L"SourcingCS.hlsl");
+    CreateCompute(_computeVorticityCS, L"ComputeVorticityCS.hlsl");
+    CreateCompute(_confineVorticityCS, L"ConfineVorticityCS.hlsl");
 }
 
 void StableFluids::InitConstantBuffers() {}
