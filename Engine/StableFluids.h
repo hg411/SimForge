@@ -4,9 +4,10 @@
 
 class Texture;
 class Shader;
+class ConstantBuffer;
 
 struct StableFluidsParams {
-    float deltaTime;
+    float dt;
     float viscosity;
     Vec2 sourcingVelocity;
     Vec4 sourcingDensity;
@@ -47,6 +48,9 @@ class StableFluids : public Simulation {
     shared_ptr<Shader> _computeVorticityCS;
     shared_ptr<Shader> _confineVorticityCS;
 
+    // ConstantBuffer
+    shared_ptr<ConstantBuffer> _constantBuffer;
+
     // Texture
     shared_ptr<Texture> _velocity;
     shared_ptr<Texture> _velocityTemp;
@@ -56,4 +60,6 @@ class StableFluids : public Simulation {
     shared_ptr<Texture> _densityTemp;
     shared_ptr<Texture> _vorticity;
     shared_ptr<Texture> _divergence;
+
+    
 };

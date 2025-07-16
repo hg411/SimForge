@@ -13,7 +13,6 @@ cbuffer Consts : register(b0)
 {
     float dt;
     float viscosity;
-    float alpha;
 }
 
 [numthreads(32, 32, 1)]

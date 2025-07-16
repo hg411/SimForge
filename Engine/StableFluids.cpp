@@ -6,6 +6,7 @@
 #include "Camera.h"
 #include "Texture.h"
 #include "Shader.h"
+#include "ConstantBuffer.h"
 
 StableFluids::StableFluids() {}
 
@@ -45,7 +46,11 @@ void StableFluids::InitShaders() {
     CreateCompute(_confineVorticityCS, L"ConfineVorticityCS.hlsl");
 }
 
-void StableFluids::InitConstantBuffers() {}
+void StableFluids::InitConstantBuffers() {
+    _constantBuffer = make_shared<ConstantBuffer>();
+    _constantBuffer->Init(sizeof(StableFluidsParams), 1);
+
+}
 
 void StableFluids::InitTextures() {
     auto CreateRWTexture2D = [&](DXGI_FORMAT format) -> shared_ptr<Texture> {
