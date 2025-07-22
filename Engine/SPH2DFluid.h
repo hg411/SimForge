@@ -136,4 +136,6 @@ class SPH2DFluid : public Simulation {
     // 프레임고정
     float _accumulatedTime = 0.0f;
     float _timeStep = 1.0f / 100.0f;
+
+    bool isRunning = false;
 };

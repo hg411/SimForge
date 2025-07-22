@@ -2,6 +2,8 @@
 #include "Texture.h"
 #include "Engine.h"
 #include "Device.h"
+#include "CommandQueue.h"
+#include "TableDescriptorHeap.h" 
 
 Texture::Texture() : Object(OBJECT_TYPE::TEXTURE) {}
 
@@ -15,21 +17,21 @@ void Texture::Create(DXGI_FORMAT format, uint32 width, uint32 height, const D3D1
     D3D12_CLEAR_VALUE optimizedClearValue = {};
     D3D12_CLEAR_VALUE *pOptimizedClearValue = nullptr;
 
-    D3D12_RESOURCE_STATES resourceStates = D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COMMON;
+   _resourceState = D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COMMON;
 
     if (resFlags & D3D12_RESOURCE_FLAGS::D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL) {
-        resourceStates = D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_DEPTH_WRITE;
+        _resourceState = D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_DEPTH_WRITE;
         optimizedClearValue = CD3DX12_CLEAR_VALUE(DXGI_FORMAT_D32_FLOAT, 1.0f, 0);
         pOptimizedClearValue = &optimizedClearValue;
     } else if (resFlags & D3D12_RESOURCE_FLAGS::D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET) {
-        resourceStates = D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COMMON;
+        _resourceState = D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COMMON;
         float arrFloat[4] = {clearColor.x, clearColor.y, clearColor.z, clearColor.w};
         optimizedClearValue = CD3DX12_CLEAR_VALUE(format, arrFloat);
         pOptimizedClearValue = &optimizedClearValue;
     }
 
     // Create Texture2D
-    HRESULT hr = DEVICE->CreateCommittedResource(&heapProperty, heapFlags, &_desc, resourceStates, pOptimizedClearValue,
+    HRESULT hr = DEVICE->CreateCommittedResource(&heapProperty, heapFlags, &_desc, _resourceState, pOptimizedClearValue,
                                                  IID_PPV_ARGS(&_tex2D));
 
     assert(SUCCEEDED(hr));
@@ -105,4 +107,26 @@ void Texture::CreateFromResource(ComPtr<ID3D12Resource> tex2D) {
         srvDesc.Texture2D.MipLevels = 1;
         DEVICE->CreateShaderResourceView(_tex2D.Get(), &srvDesc, _srvHeapBegin);
     }
+}
+
+void Texture::BindSRVToCompute(SRV_REGISTER reg) {
+    if (_resourceState != D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE) {
+        D3D12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
+            _tex2D.Get(), _resourceState, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+        COMPUTE_CMD_LIST->ResourceBarrier(1, &barrier);
+        _resourceState = D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE;
+    }
+
+    GEngine->GetComputeDescHeap()->SetSRV(_srvHeapBegin, reg);
+}
+
+void Texture::BindUAVToCompute(UAV_REGISTER reg) {
+    if (_resourceState != D3D12_RESOURCE_STATE_UNORDERED_ACCESS) {
+        D3D12_RESOURCE_BARRIER barrier =
+            CD3DX12_RESOURCE_BARRIER::Transition(_tex2D.Get(), _resourceState, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+        COMPUTE_CMD_LIST->ResourceBarrier(1, &barrier);
+        _resourceState = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
+    }
+
+    GEngine->GetComputeDescHeap()->SetUAV(_uavHeapBegin, reg);
 }

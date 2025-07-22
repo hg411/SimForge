@@ -72,7 +72,7 @@ void GraphicsCommandQueue::WaitSync() {
 void GraphicsCommandQueue::RenderBegin() {
     _cmdAlloc->Reset();
     _cmdList->Reset(_cmdAlloc.Get(), nullptr);
-
+     
     int8 backIndex = _swapChain->GetBackBufferIndex();
 
     D3D12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(

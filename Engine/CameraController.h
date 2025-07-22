@@ -9,6 +9,7 @@ class CameraController : public MonoBehaviour {
     CameraController();
     virtual ~CameraController();
 
+    void BuildUI();
     void LateUpdate() override;
 
     bool *GetUseFPVPtr() { return &_useFirstPersonView; }

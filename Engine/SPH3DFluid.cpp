@@ -272,6 +272,8 @@ void SPH3DFluid::InitSimulationObjects() {
 }
 
 void SPH3DFluid::BuildUI() {
+    _cameras[0]->GetCameraController()->BuildUI();
+
     ImGui::Begin("Bounding Box");
     ImGui::SetNextItemOpen(true, ImGuiCond_Once);
     ImGui::SliderFloat("Box Width", &_boxWidth, 0.5f, 3.0f);

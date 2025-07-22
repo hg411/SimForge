@@ -88,7 +88,7 @@ void StructuredBuffer::SetGraphicsRootSRV(SRV_REGISTER reg, bool forPixelShader)
     if (_resourceState != desiredState) {
         D3D12_RESOURCE_BARRIER barrier =
             CD3DX12_RESOURCE_BARRIER::Transition(_buffer.Get(), _resourceState, desiredState);
-        RESOURCE_CMD_LIST->ResourceBarrier(1, &barrier);
+        GRAPHICS_CMD_LIST->ResourceBarrier(1, &barrier);
         _resourceState = desiredState;
     }
 
@@ -99,7 +99,7 @@ void StructuredBuffer::SetGraphicsRootUAV(UAV_REGISTER reg) {
     if (_resourceState != D3D12_RESOURCE_STATE_UNORDERED_ACCESS) {
         D3D12_RESOURCE_BARRIER barrier =
             CD3DX12_RESOURCE_BARRIER::Transition(_buffer.Get(), _resourceState, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-        RESOURCE_CMD_LIST->ResourceBarrier(1, &barrier);
+        GRAPHICS_CMD_LIST->ResourceBarrier(1, &barrier);
         _resourceState = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
     }
 
@@ -141,9 +141,8 @@ void StructuredBuffer::BindSRVToGraphics(SRV_REGISTER reg) {
 
 void StructuredBuffer::BindSRVToCompute(SRV_REGISTER reg) {
     if (_resourceState != D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE) {
-        D3D12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
-            _buffer.Get(), _resourceState, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
-        RESOURCE_CMD_LIST->ResourceBarrier(1, &barrier);
+        D3D12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(_buffer.Get(), _resourceState, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+        COMPUTE_CMD_LIST->ResourceBarrier(1, &barrier);
         _resourceState = D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE;
     }
 
@@ -154,7 +153,7 @@ void StructuredBuffer::BindUAVToCompute(UAV_REGISTER reg) {
     if (_resourceState != D3D12_RESOURCE_STATE_UNORDERED_ACCESS) {
         D3D12_RESOURCE_BARRIER barrier =
             CD3DX12_RESOURCE_BARRIER::Transition(_buffer.Get(), _resourceState, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
-        RESOURCE_CMD_LIST->ResourceBarrier(1, &barrier);
+        COMPUTE_CMD_LIST->ResourceBarrier(1, &barrier);
         _resourceState = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
     }
 

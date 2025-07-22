@@ -23,7 +23,7 @@ SPH2DFluid::~SPH2DFluid() {}
 void SPH2DFluid::Init() {
     _threadGroupCountX = static_cast<uint32>(ceil(_maxParticles / _numThreadsX));
 
-    InitImgui();
+    Simulation::InitImgui();
     InitShaders();
     InitConstantBuffers();
     InitStructuredBuffers();
@@ -42,6 +42,10 @@ void SPH2DFluid::Update() {
             }
         }
     }
+
+    if (INPUT->GetButtonDown(KEY_TYPE::SPACE)) {
+        isRunning = !isRunning;
+    }
 }
 
 void SPH2DFluid::FinalUpdate() {
@@ -56,6 +60,9 @@ void SPH2DFluid::FinalUpdate() {
     //while (_accumulatedTime >= _timeStep) {
     //    
     //}
+
+    if (!isRunning)
+        return;
 
     UpdateSimulationParams();
 
@@ -194,8 +201,8 @@ void SPH2DFluid::InitSimulationObjects() {
         camera->SetProjectionType(PROJECTION_TYPE::ORTHOGRAPHIC);
         obj->AddComponent(camera);
 
-        shared_ptr<CameraController> cameraController = make_shared<CameraController>();
-        obj->AddComponent(cameraController);
+        //shared_ptr<CameraController> cameraController = make_shared<CameraController>();
+        //obj->AddComponent(cameraController);
 
         AddSimulationObject(obj);
     }

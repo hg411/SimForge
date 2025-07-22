@@ -34,6 +34,9 @@ class StableFluids : public Simulation {
 
     void BuildUI() override;
 
+    void UpdateSimulationParams();
+    void Sourcing();
+
   private:
     uint32 _width = 0;
     uint32 _height = 0;
@@ -49,7 +52,8 @@ class StableFluids : public Simulation {
     shared_ptr<Shader> _confineVorticityCS;
 
     // ConstantBuffer
-    shared_ptr<ConstantBuffer> _constantBuffer;
+    shared_ptr<ConstantBuffer> _stableFluidsParamsCB;
+    StableFluidsParams _stableFluidsParams;
 
     // Texture
     shared_ptr<Texture> _velocity;
@@ -61,5 +65,6 @@ class StableFluids : public Simulation {
     shared_ptr<Texture> _vorticity;
     shared_ptr<Texture> _divergence;
 
-    
+    // Stable Fluids Simulation Constant
+    float _viscosity = 0.001f;
 };

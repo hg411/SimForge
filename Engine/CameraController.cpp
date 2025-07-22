@@ -9,6 +9,12 @@ CameraController::CameraController() {}
 
 CameraController::~CameraController() {}
 
+void CameraController::BuildUI() { 
+    ImGui::Begin("Camera");
+    ImGui::Checkbox("Enable First Person View [F key]", &_useFirstPersonView);
+    ImGui::End();
+}
+
 void CameraController::LateUpdate() {
     if (INPUT->GetButtonDown(KEY_TYPE::F))
         _useFirstPersonView = !_useFirstPersonView;

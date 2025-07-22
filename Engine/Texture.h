@@ -13,6 +13,9 @@ class Texture : public Object {
 
     void CreateFromResource(ComPtr<ID3D12Resource> tex2D);
 
+    void BindSRVToCompute(SRV_REGISTER reg);
+    void BindUAVToCompute(UAV_REGISTER reg);
+
   public:
     ComPtr<ID3D12Resource> GetTex2D() { return _tex2D; }
     ComPtr<ID3D12DescriptorHeap> GetSRV() { return _srvHeap; }
@@ -35,6 +38,8 @@ class Texture : public Object {
     ComPtr<ID3D12DescriptorHeap> _rtvHeap;
     ComPtr<ID3D12DescriptorHeap> _dsvHeap;
     ComPtr<ID3D12DescriptorHeap> _uavHeap;
+
+    D3D12_RESOURCE_STATES _resourceState = {};
 
   private:
     D3D12_CPU_DESCRIPTOR_HANDLE _srvHeapBegin = {};
