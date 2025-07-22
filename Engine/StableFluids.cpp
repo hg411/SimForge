@@ -92,4 +92,9 @@ void StableFluids::InitSimulationObjects() {
     }
 }
 
-void StableFluids::BuildUI() {}
+void StableFluids::BuildUI() { 
+    ImGui::Begin("Color");
+    ImGui::SetNextItemOpen(true, ImGuiCond_Once);
+
+
+}
