@@ -148,7 +148,7 @@ void StableFluids::UpdateSimulationParams() {
     _stableFluidsParamsCB->UpdateData(&_stableFluidsParams, sizeof(_stableFluidsParams));
 }
 
-void StableFluids::Sourcing() { 
+void StableFluids::Sourcing() {
     _stableFluidsParamsCB->BindToCompute(CBV_REGISTER::b0);
 
     _velocity->BindUAVToCompute(UAV_REGISTER::u0);
