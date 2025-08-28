@@ -36,9 +36,17 @@ void StableFluids::FinalUpdate() {
     UpdateSimulationParams();
 
     Sourcing();
+    ComputeVorticity();
+    ConfineVorticity();
+
+    GEngine->GetComputeCmdQueue()->FlushComputeCommandQueue();
 }
 
-void StableFluids::Render() {}
+void StableFluids::Render() {
+    Simulation::Render();
+
+    _imgui->Render();
+}
 
 void StableFluids::InitShaders() {
     auto CreateCompute = [](shared_ptr<Shader> &shader, const wstring &name) {
@@ -102,6 +110,7 @@ void StableFluids::InitSimulationObjects() {
 }
 
 void StableFluids::BuildUI() {
+    // 수정 필요
     // ImGui::Begin("Color");
     // ImGui::SetNextItemOpen(true, ImGuiCond_Once);
     //  ImGui::Checkbox()
@@ -149,6 +158,7 @@ void StableFluids::UpdateSimulationParams() {
 }
 
 void StableFluids::Sourcing() {
+    // Sourcing
     _stableFluidsParamsCB->BindToCompute(CBV_REGISTER::b0);
 
     _velocity->BindUAVToCompute(UAV_REGISTER::u0);
@@ -158,10 +168,144 @@ void StableFluids::Sourcing() {
 
     _sourcingCS->Update();
 
-    COMPUTE_CMD_LIST->Dispatch(UINT(ceil(_width / 32.0f)), UINT(ceil(_height / 32.0f)), 1);
+    COMPUTE_CMD_LIST->Dispatch(static_cast<UINT>(ceil(_width / 32.0f)), static_cast<UINT>(ceil(_height / 32.0f)), 1);
 
     D3D12_RESOURCE_BARRIER uavBarriers[] = {CD3DX12_RESOURCE_BARRIER::UAV(_velocity->GetTex2D().Get()),
                                             CD3DX12_RESOURCE_BARRIER::UAV(_density->GetTex2D().Get())};
 
     COMPUTE_CMD_LIST->ResourceBarrier(1, uavBarriers);
+}
+
+void StableFluids::ComputeVorticity() {
+    // Vorticity calculation
+    _velocity->BindSRVToCompute(SRV_REGISTER::t0);
+    _vorticity->BindUAVToCompute(UAV_REGISTER::u0);
+
+    GEngine->GetComputeDescHeap()->CommitTable();
+
+    _computeVorticityCS->Update();
+
+    COMPUTE_CMD_LIST->Dispatch(static_cast<UINT>(ceil(_width / 32.0f)), static_cast<UINT>(ceil(_height / 32.0f)), 1);
+
+    D3D12_RESOURCE_BARRIER uavBarriers[] = {CD3DX12_RESOURCE_BARRIER::UAV(_vorticity->GetTex2D().Get())};
+
+    COMPUTE_CMD_LIST->ResourceBarrier(1, uavBarriers);
+}
+
+void StableFluids::ConfineVorticity() {
+
+    // Vorticity confinemenet
+    _vorticity->BindSRVToCompute(SRV_REGISTER::t0);
+    _velocity->BindUAVToCompute(UAV_REGISTER::u0);
+
+    GEngine->GetComputeDescHeap()->CommitTable();
+
+    _confineVorticityCS->Update();
+
+    COMPUTE_CMD_LIST->Dispatch(static_cast<UINT>(ceil(_width / 32.0f)), static_cast<UINT>(ceil(_height / 32.0f)), 1);
+
+    D3D12_RESOURCE_BARRIER uavBarriers[] = {CD3DX12_RESOURCE_BARRIER::UAV(_velocity->GetTex2D().Get())};
+
+    COMPUTE_CMD_LIST->ResourceBarrier(1, uavBarriers);
+}
+
+void StableFluids::Diffuse() {
+    for (int32 i = 0; i < 10; i++) {
+        if (i % 2 == 0) {
+            _velocity->BindSRVToCompute(SRV_REGISTER::t0);
+            _density->BindSRVToCompute(SRV_REGISTER::t1);
+            _velocityTemp->BindUAVToCompute(UAV_REGISTER::u0);
+            _densityTemp->BindUAVToCompute(UAV_REGISTER::u1);
+        } else {
+            _velocityTemp->BindSRVToCompute(SRV_REGISTER::t0);
+            _densityTemp->BindSRVToCompute(SRV_REGISTER::t1);
+            _velocity->BindUAVToCompute(UAV_REGISTER::u0);
+            _density->BindUAVToCompute(UAV_REGISTER::u1);
+        }
+
+        GEngine->GetComputeDescHeap()->CommitTable();
+
+        _diffuseCS->Update();
+
+        COMPUTE_CMD_LIST->Dispatch(static_cast<UINT>(ceil(_width / 32.0f)), static_cast<UINT>(ceil(_height / 32.0f)),
+                                   1);
+
+        if (i % 2 == 0) {
+            D3D12_RESOURCE_BARRIER uavBarriers[] = {CD3DX12_RESOURCE_BARRIER::UAV(_velocityTemp->GetTex2D().Get()),
+                                                    CD3DX12_RESOURCE_BARRIER::UAV(_densityTemp->GetTex2D().Get())};
+            COMPUTE_CMD_LIST->ResourceBarrier(1, uavBarriers);
+        } else {
+            D3D12_RESOURCE_BARRIER uavBarriers[] = {CD3DX12_RESOURCE_BARRIER::UAV(_velocity->GetTex2D().Get()),
+                                                    CD3DX12_RESOURCE_BARRIER::UAV(_density->GetTex2D().Get())};
+            COMPUTE_CMD_LIST->ResourceBarrier(1, uavBarriers);
+        }
+    }
+}
+
+void StableFluids::Projection() {
+
+    // Compute divergence
+    {
+        _velocity->BindSRVToCompute(SRV_REGISTER::t0);
+        _divergence->BindUAVToCompute(UAV_REGISTER::u0);
+        _pressure->BindUAVToCompute(UAV_REGISTER::u1);
+        _pressureTemp->BindUAVToCompute(UAV_REGISTER::u2);
+
+        GEngine->GetComputeDescHeap()->CommitTable();
+
+        _divergenceCS->Update();
+
+        COMPUTE_CMD_LIST->Dispatch(static_cast<UINT>(ceil(_width / 32.0f)), static_cast<UINT>(ceil(_height / 32.0f)),
+                                   1);
+
+        D3D12_RESOURCE_BARRIER uavBarriers[] = {CD3DX12_RESOURCE_BARRIER::UAV(_divergence->GetTex2D().Get()),
+                                                CD3DX12_RESOURCE_BARRIER::UAV(_pressure->GetTex2D().Get()),
+                                                CD3DX12_RESOURCE_BARRIER::UAV(_pressureTemp->GetTex2D().Get())};
+
+        COMPUTE_CMD_LIST->ResourceBarrier(1, uavBarriers);
+    }
+
+    // Jacobi iteration
+
+    {
+        for (int32 i = 0; i < 100; i++) {
+            if (i % 2 == 0) {
+                _pressure->BindSRVToCompute(SRV_REGISTER::t0);
+                _divergence->BindSRVToCompute(SRV_REGISTER::t1);
+                _pressureTemp->BindUAVToCompute(UAV_REGISTER::u0);
+            } else {
+                _pressureTemp->BindSRVToCompute(SRV_REGISTER::t0);
+                _divergence->BindSRVToCompute(SRV_REGISTER::t1);
+                _pressure->BindUAVToCompute(UAV_REGISTER::u0);
+            }
+            GEngine->GetComputeDescHeap()->CommitTable();
+            _jacobiCS->Update(); // update를 밖으로 빼서 한번만 실행시켜도 될까?
+            COMPUTE_CMD_LIST->Dispatch(static_cast<UINT>(ceil(_width / 32.0f)),
+                                       static_cast<UINT>(ceil(_height / 32.0f)), 1);
+            if (i % 2 == 0) {
+                D3D12_RESOURCE_BARRIER uavBarriers[] = {CD3DX12_RESOURCE_BARRIER::UAV(_pressureTemp->GetTex2D().Get())};
+                COMPUTE_CMD_LIST->ResourceBarrier(1, uavBarriers);
+            } else {
+                D3D12_RESOURCE_BARRIER uavBarriers[] = {CD3DX12_RESOURCE_BARRIER::UAV(_pressure->GetTex2D().Get())};
+                COMPUTE_CMD_LIST->ResourceBarrier(1, uavBarriers);
+            }
+        }
+    }
+
+    // Apply pressure
+
+    {
+        _pressure->BindSRVToCompute(SRV_REGISTER::t0);
+        _velocity->BindUAVToCompute(UAV_REGISTER::u0);
+
+        GEngine->GetComputeDescHeap()->CommitTable();
+
+        _applyPressureCS->Update();
+
+        COMPUTE_CMD_LIST->Dispatch(static_cast<UINT>(ceil(_width / 32.0f)), static_cast<UINT>(ceil(_height / 32.0f)),
+                                   1);
+
+        D3D12_RESOURCE_BARRIER uavBarriers[] = {CD3DX12_RESOURCE_BARRIER::UAV(_velocity->GetTex2D().Get())};
+        COMPUTE_CMD_LIST->ResourceBarrier(1, uavBarriers);
+    }
 }

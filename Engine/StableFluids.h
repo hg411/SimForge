@@ -36,6 +36,10 @@ class StableFluids : public Simulation {
 
     void UpdateSimulationParams();
     void Sourcing();
+    void ComputeVorticity();
+    void ConfineVorticity();
+    void Diffuse();
+    void Projection();
 
   private:
     uint32 _width = 0;
