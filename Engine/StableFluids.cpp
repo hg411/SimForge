@@ -11,6 +11,7 @@
 #include "Input.h"
 #include "TableDescriptorHeap.h"
 #include "CommandQueue.h"
+#include "SwapChain.h"
 
 StableFluids::StableFluids() {}
 
@@ -38,12 +39,19 @@ void StableFluids::FinalUpdate() {
     Sourcing();
     ComputeVorticity();
     ConfineVorticity();
+    Diffuse();
+    Projection();
+    Advection();
 
     GEngine->GetComputeCmdQueue()->FlushComputeCommandQueue();
 }
 
 void StableFluids::Render() {
     Simulation::Render();
+
+    // 백버퍼에 복사해서 출력
+
+    //GRAPHICS_CMD_LIST->CopyResource(, _density->GetTex2D().Get());
 
     _imgui->Render();
 }
@@ -308,4 +316,25 @@ void StableFluids::Projection() {
         D3D12_RESOURCE_BARRIER uavBarriers[] = {CD3DX12_RESOURCE_BARRIER::UAV(_velocity->GetTex2D().Get())};
         COMPUTE_CMD_LIST->ResourceBarrier(1, uavBarriers);
     }
+}
+
+void StableFluids::Advection() {
+    _velocityTemp->CopyResource(_velocity);
+    _densityTemp->CopyResource(_density);
+
+    _velocityTemp->BindSRVToCompute(SRV_REGISTER::t0);
+    _densityTemp->BindSRVToCompute(SRV_REGISTER::t1);
+
+    _velocity->BindUAVToCompute(UAV_REGISTER::u0);
+    _density->BindUAVToCompute(UAV_REGISTER::u1);
+
+    GEngine->GetComputeDescHeap()->CommitTable();
+
+    _advectionCS->Update();
+
+    COMPUTE_CMD_LIST->Dispatch(static_cast<UINT>(ceil(_width / 32.0f)), static_cast<UINT>(ceil(_height / 32.0f)), 1);
+
+    D3D12_RESOURCE_BARRIER uavBarriers[] = {CD3DX12_RESOURCE_BARRIER::UAV(_velocity->GetTex2D().Get()),
+                                            CD3DX12_RESOURCE_BARRIER::UAV(_density->GetTex2D().Get())};
+    COMPUTE_CMD_LIST->ResourceBarrier(1, uavBarriers);
 }

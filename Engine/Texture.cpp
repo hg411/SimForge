@@ -130,3 +130,19 @@ void Texture::BindUAVToCompute(UAV_REGISTER reg) {
 
     GEngine->GetComputeDescHeap()->SetUAV(_uavHeapBegin, reg);
 }
+
+void Texture::CopyResource(shared_ptr<Texture> &src) {
+    Transition(COMPUTE_CMD_LIST, D3D12_RESOURCE_STATE_COPY_DEST);
+    src->Transition(COMPUTE_CMD_LIST, D3D12_RESOURCE_STATE_COPY_SOURCE);
+
+    COMPUTE_CMD_LIST->CopyResource(_tex2D.Get(), src->GetTex2D().Get());
+}
+
+void Texture::Transition(ComPtr<ID3D12GraphicsCommandList> commandList, D3D12_RESOURCE_STATES resourceState) {
+    if (_resourceState != resourceState) {
+        D3D12_RESOURCE_BARRIER barrier =
+            CD3DX12_RESOURCE_BARRIER::Transition(_tex2D.Get(), _resourceState, resourceState);
+        commandList->ResourceBarrier(1, &barrier);
+        _resourceState = resourceState;
+    }
+}

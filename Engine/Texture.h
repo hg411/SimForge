@@ -15,6 +15,9 @@ class Texture : public Object {
 
     void BindSRVToCompute(SRV_REGISTER reg);
     void BindUAVToCompute(UAV_REGISTER reg);
+    void CopyResource(shared_ptr<Texture>& src);
+
+    void Transition(ComPtr<ID3D12GraphicsCommandList> commandList, D3D12_RESOURCE_STATES resourceState);
 
   public:
     ComPtr<ID3D12Resource> GetTex2D() { return _tex2D; }
@@ -22,6 +25,8 @@ class Texture : public Object {
     ComPtr<ID3D12DescriptorHeap> GetRTV() { return _rtvHeap; }
     ComPtr<ID3D12DescriptorHeap> GetDSV() { return _dsvHeap; }
     ComPtr<ID3D12DescriptorHeap> GetUAV() { return _uavHeap; }
+
+    D3D12_RESOURCE_STATES GetResourceState() { return _resourceState; }
 
     D3D12_CPU_DESCRIPTOR_HANDLE GetSRVHandle() { return _srvHeapBegin; }
     D3D12_CPU_DESCRIPTOR_HANDLE GetUAVHandle() { return _uavHeapBegin; }

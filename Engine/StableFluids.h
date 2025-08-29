@@ -40,6 +40,7 @@ class StableFluids : public Simulation {
     void ConfineVorticity();
     void Diffuse();
     void Projection();
+    void Advection();
 
   private:
     uint32 _width = 0;
