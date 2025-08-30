@@ -12,6 +12,7 @@
 #include "TableDescriptorHeap.h"
 #include "CommandQueue.h"
 #include "SwapChain.h"
+#include "RenderTargetGroup.h"
 
 StableFluids::StableFluids() {}
 
@@ -49,9 +50,11 @@ void StableFluids::FinalUpdate() {
 void StableFluids::Render() {
     Simulation::Render();
 
-    // 백버퍼에 복사해서 출력
+    // 백버퍼에 출력
+    
 
-    //GRAPHICS_CMD_LIST->CopyResource(, _density->GetTex2D().Get());
+    GEngine->GetGraphicsDescHeap()->CommitTable();
+
 
     _imgui->Render();
 }
@@ -133,7 +136,7 @@ void StableFluids::UpdateSimulationParams() {
     _stableFluidsParams.dt = DELTA_TIME;
     _stableFluidsParams.viscosity = 0.001f;
 
-    if (INPUT->GetButton(KEY_TYPE::LEFT)) {
+    if (INPUT->GetButton(KEY_TYPE::LBUTTON)) {
         _stableFluidsParams.i = static_cast<uint32>(INPUT->GetMousePos().x);
         _stableFluidsParams.j = static_cast<uint32>(INPUT->GetMousePos().y);
 
@@ -159,7 +162,7 @@ void StableFluids::UpdateSimulationParams() {
         _stableFluidsParams.i = -1; // uint의 Overflow 이용(좌클릭을 누르지 않을때 CS에서 처리)
     }
 
-    prevLeftButton = INPUT->GetButton(KEY_TYPE::LEFT);
+    prevLeftButton = INPUT->GetButton(KEY_TYPE::LBUTTON);
     prevMouseNdc = INPUT->GetMouseNdc();
 
     _stableFluidsParamsCB->UpdateData(&_stableFluidsParams, sizeof(_stableFluidsParams));
@@ -181,7 +184,7 @@ void StableFluids::Sourcing() {
     D3D12_RESOURCE_BARRIER uavBarriers[] = {CD3DX12_RESOURCE_BARRIER::UAV(_velocity->GetTex2D().Get()),
                                             CD3DX12_RESOURCE_BARRIER::UAV(_density->GetTex2D().Get())};
 
-    COMPUTE_CMD_LIST->ResourceBarrier(1, uavBarriers);
+    COMPUTE_CMD_LIST->ResourceBarrier(_countof(uavBarriers), uavBarriers);
 }
 
 void StableFluids::ComputeVorticity() {
@@ -197,11 +200,10 @@ void StableFluids::ComputeVorticity() {
 
     D3D12_RESOURCE_BARRIER uavBarriers[] = {CD3DX12_RESOURCE_BARRIER::UAV(_vorticity->GetTex2D().Get())};
 
-    COMPUTE_CMD_LIST->ResourceBarrier(1, uavBarriers);
+    COMPUTE_CMD_LIST->ResourceBarrier(_countof(uavBarriers), uavBarriers);
 }
 
 void StableFluids::ConfineVorticity() {
-
     // Vorticity confinemenet
     _vorticity->BindSRVToCompute(SRV_REGISTER::t0);
     _velocity->BindUAVToCompute(UAV_REGISTER::u0);
@@ -214,19 +216,23 @@ void StableFluids::ConfineVorticity() {
 
     D3D12_RESOURCE_BARRIER uavBarriers[] = {CD3DX12_RESOURCE_BARRIER::UAV(_velocity->GetTex2D().Get())};
 
-    COMPUTE_CMD_LIST->ResourceBarrier(1, uavBarriers);
+    COMPUTE_CMD_LIST->ResourceBarrier(_countof(uavBarriers), uavBarriers);
 }
 
 void StableFluids::Diffuse() {
     for (int32 i = 0; i < 10; i++) {
+        _stableFluidsParamsCB->BindToCompute(CBV_REGISTER::b0);
+
         if (i % 2 == 0) {
             _velocity->BindSRVToCompute(SRV_REGISTER::t0);
             _density->BindSRVToCompute(SRV_REGISTER::t1);
+
             _velocityTemp->BindUAVToCompute(UAV_REGISTER::u0);
             _densityTemp->BindUAVToCompute(UAV_REGISTER::u1);
         } else {
             _velocityTemp->BindSRVToCompute(SRV_REGISTER::t0);
             _densityTemp->BindSRVToCompute(SRV_REGISTER::t1);
+
             _velocity->BindUAVToCompute(UAV_REGISTER::u0);
             _density->BindUAVToCompute(UAV_REGISTER::u1);
         }
@@ -241,11 +247,11 @@ void StableFluids::Diffuse() {
         if (i % 2 == 0) {
             D3D12_RESOURCE_BARRIER uavBarriers[] = {CD3DX12_RESOURCE_BARRIER::UAV(_velocityTemp->GetTex2D().Get()),
                                                     CD3DX12_RESOURCE_BARRIER::UAV(_densityTemp->GetTex2D().Get())};
-            COMPUTE_CMD_LIST->ResourceBarrier(1, uavBarriers);
+            COMPUTE_CMD_LIST->ResourceBarrier(_countof(uavBarriers), uavBarriers);
         } else {
             D3D12_RESOURCE_BARRIER uavBarriers[] = {CD3DX12_RESOURCE_BARRIER::UAV(_velocity->GetTex2D().Get()),
                                                     CD3DX12_RESOURCE_BARRIER::UAV(_density->GetTex2D().Get())};
-            COMPUTE_CMD_LIST->ResourceBarrier(1, uavBarriers);
+            COMPUTE_CMD_LIST->ResourceBarrier(_countof(uavBarriers), uavBarriers);
         }
     }
 }
@@ -270,7 +276,7 @@ void StableFluids::Projection() {
                                                 CD3DX12_RESOURCE_BARRIER::UAV(_pressure->GetTex2D().Get()),
                                                 CD3DX12_RESOURCE_BARRIER::UAV(_pressureTemp->GetTex2D().Get())};
 
-        COMPUTE_CMD_LIST->ResourceBarrier(1, uavBarriers);
+        COMPUTE_CMD_LIST->ResourceBarrier(_countof(uavBarriers), uavBarriers);
     }
 
     // Jacobi iteration
@@ -292,10 +298,10 @@ void StableFluids::Projection() {
                                        static_cast<UINT>(ceil(_height / 32.0f)), 1);
             if (i % 2 == 0) {
                 D3D12_RESOURCE_BARRIER uavBarriers[] = {CD3DX12_RESOURCE_BARRIER::UAV(_pressureTemp->GetTex2D().Get())};
-                COMPUTE_CMD_LIST->ResourceBarrier(1, uavBarriers);
+                COMPUTE_CMD_LIST->ResourceBarrier(_countof(uavBarriers), uavBarriers);
             } else {
                 D3D12_RESOURCE_BARRIER uavBarriers[] = {CD3DX12_RESOURCE_BARRIER::UAV(_pressure->GetTex2D().Get())};
-                COMPUTE_CMD_LIST->ResourceBarrier(1, uavBarriers);
+                COMPUTE_CMD_LIST->ResourceBarrier(_countof(uavBarriers), uavBarriers);
             }
         }
     }
@@ -314,13 +320,15 @@ void StableFluids::Projection() {
                                    1);
 
         D3D12_RESOURCE_BARRIER uavBarriers[] = {CD3DX12_RESOURCE_BARRIER::UAV(_velocity->GetTex2D().Get())};
-        COMPUTE_CMD_LIST->ResourceBarrier(1, uavBarriers);
+        COMPUTE_CMD_LIST->ResourceBarrier(_countof(uavBarriers), uavBarriers);
     }
 }
 
 void StableFluids::Advection() {
     _velocityTemp->CopyResource(_velocity);
     _densityTemp->CopyResource(_density);
+
+    _stableFluidsParamsCB->BindToCompute(CBV_REGISTER::b0);
 
     _velocityTemp->BindSRVToCompute(SRV_REGISTER::t0);
     _densityTemp->BindSRVToCompute(SRV_REGISTER::t1);
@@ -336,5 +344,5 @@ void StableFluids::Advection() {
 
     D3D12_RESOURCE_BARRIER uavBarriers[] = {CD3DX12_RESOURCE_BARRIER::UAV(_velocity->GetTex2D().Get()),
                                             CD3DX12_RESOURCE_BARRIER::UAV(_density->GetTex2D().Get())};
-    COMPUTE_CMD_LIST->ResourceBarrier(1, uavBarriers);
+    COMPUTE_CMD_LIST->ResourceBarrier(_countof(uavBarriers), uavBarriers);
 }

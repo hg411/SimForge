@@ -23,6 +23,8 @@ class GraphicsCommandQueue {
     ComPtr<ID3D12GraphicsCommandList> GetGraphicsCmdList() { return _cmdList; }
     ComPtr<ID3D12GraphicsCommandList> GetResourceCmdList() { return _resCmdList; }
 
+    shared_ptr<SwapChain> GetSwapChain() { return _swapChain; }
+
   private:
     // CommandQueue : DX12에 등장
     // 외주를 요청할 때, 하나씩 요청하면 비효율적
