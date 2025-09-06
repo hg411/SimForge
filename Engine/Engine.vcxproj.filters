@@ -361,5 +361,8 @@
     <FxCompile Include="..\Resources\Shaders\StableFluids\SourcingCS.hlsl">
       <Filter>Shaders\StableFluid</Filter>
     </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\StableFluids\DensityRenderPS.hlsl">
+      <Filter>Shaders\StableFluid</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>
