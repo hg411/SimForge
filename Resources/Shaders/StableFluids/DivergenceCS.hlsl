@@ -3,8 +3,8 @@ RWTexture2D<float> divergence : register(u0);
 RWTexture2D<float> pressure : register(u1);
 RWTexture2D<float> pressureTemp : register(u2);
 
-SamplerState pointWrapSS : register(s0);
-SamplerState linearWrapSS : register(s1);
+//SamplerState pointWrapSS : register(s0);
+//SamplerState linearWrapSS : register(s1);
 
 [numthreads(32, 32, 1)]
 void main(int3 gID : SV_GroupID, int3 gtID : SV_GroupThreadID,

@@ -109,6 +109,20 @@ void Texture::CreateFromResource(ComPtr<ID3D12Resource> tex2D) {
     }
 }
 
+void Texture::BindSRVToGraphics(SRV_REGISTER reg, bool forPixelShader) {
+    D3D12_RESOURCE_STATES targetState =
+        forPixelShader ? D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE : D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE;
+
+    if (_resourceState != targetState) {
+        D3D12_RESOURCE_BARRIER barrier =
+            CD3DX12_RESOURCE_BARRIER::Transition(_tex2D.Get(), _resourceState, targetState);
+        GRAPHICS_CMD_LIST->ResourceBarrier(1, &barrier);
+        _resourceState = targetState;
+    }
+
+    GRAPHICS_CMD_LIST->SetGraphicsRootShaderResourceView(static_cast<UINT>(reg), _tex2D->GetGPUVirtualAddress());
+}
+
 void Texture::BindSRVToCompute(SRV_REGISTER reg) {
     if (_resourceState != D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE) {
         D3D12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(

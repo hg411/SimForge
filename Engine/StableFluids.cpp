@@ -51,9 +51,9 @@ void StableFluids::Render() {
     Simulation::Render();
 
     // 백버퍼에 출력
-    
+    _density->BindSRVToGraphics(SRV_REGISTER::t0, true);
 
-    GEngine->GetGraphicsDescHeap()->CommitTable();
+    //GEngine->GetGraphicsDescHeap()->CommitTable();
 
 
     _imgui->Render();

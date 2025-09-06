@@ -7,7 +7,7 @@ class StructuredBuffer {
 
     void Init(uint32 elementSize, uint32 elementCount, void *initialData = nullptr);
 
-    void SetGraphicsRootSRV(SRV_REGISTER reg, bool forFixelShader);
+    void SetGraphicsRootSRV(SRV_REGISTER reg, bool forPixelShader);
     void SetGraphicsRootUAV(UAV_REGISTER reg);
     void SetComputeRootSRV(SRV_REGISTER reg);
     void SetComputeRootUAV(UAV_REGISTER reg);
