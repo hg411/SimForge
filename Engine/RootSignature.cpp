@@ -35,34 +35,35 @@ void RootSignature::CreateGraphicsRootSignature(ComPtr<ID3D12Device> device) {
                                     D3D12_TEXTURE_ADDRESS_MODE_CLAMP, D3D12_TEXTURE_ADDRESS_MODE_CLAMP),
     };
 
-    CD3DX12_ROOT_PARAMETER param[TOTAL_REGISTER_COUNT];
+    //CD3DX12_ROOT_PARAMETER param[TOTAL_REGISTER_COUNT];
 
-    // CBV
-    for (UINT i = 0; i < static_cast<UINT>(CBV_REGISTER_COUNT); ++i) {
-        param[i].InitAsConstantBufferView(i);
-    }
+    //// CBV
+    //for (UINT i = 0; i < static_cast<UINT>(CBV_REGISTER_COUNT); ++i) {
+    //    param[i].InitAsConstantBufferView(i);
+    //}
 
-    // SRV
-    for (UINT i = 0; i < static_cast<UINT>(SRV_REGISTER_COUNT); ++i) {
-        UINT idx = static_cast<UINT>(SRV_REGISTER::t0) + i;
-        param[idx].InitAsShaderResourceView(i);
-    }
+    //// SRV
+    //for (UINT i = 0; i < static_cast<UINT>(SRV_REGISTER_COUNT); ++i) {
+    //    UINT idx = static_cast<UINT>(SRV_REGISTER::t0) + i;
+    //    param[idx].InitAsShaderResourceView(i);
+    //}
 
-    // UAV
-    for (UINT i = 0; i < static_cast<UINT>(UAV_REGISTER_COUNT); ++i) {
-        UINT idx = static_cast<UINT>(UAV_REGISTER::u0) + i;
-        param[idx].InitAsUnorderedAccessView(i);
-    }
+    //// UAV
+    //for (UINT i = 0; i < static_cast<UINT>(UAV_REGISTER_COUNT); ++i) {
+    //    UINT idx = static_cast<UINT>(UAV_REGISTER::u0) + i;
+    //    param[idx].InitAsUnorderedAccessView(i);
+    //}
 
-    // Table 사용  X
-    // CD3DX12_DESCRIPTOR_RANGE cbvRange =
-    //    CD3DX12_DESCRIPTOR_RANGE(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, CBV_REGISTER_COUNT - 1, 1); // b1~b9
+    // Descriptor Table 사용
+     CD3DX12_DESCRIPTOR_RANGE cbvRange =
+        CD3DX12_DESCRIPTOR_RANGE(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, CBV_REGISTER_COUNT, 0); // b0~b9
 
-    // CD3DX12_DESCRIPTOR_RANGE srvRange =
-    //     CD3DX12_DESCRIPTOR_RANGE(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, SRV_REGISTER_COUNT, 0); // t0~t9
+     CD3DX12_DESCRIPTOR_RANGE srvRange =
+         CD3DX12_DESCRIPTOR_RANGE(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, SRV_REGISTER_COUNT, 0); // t0~t9
 
-    // param[1].InitAsDescriptorTable(1, &cbvRange);
-    // param[2].InitAsDescriptorTable(1, &srvRange);
+     CD3DX12_ROOT_PARAMETER param[2];
+     param[0].InitAsDescriptorTable(1, &cbvRange);
+     param[1].InitAsDescriptorTable(1, &srvRange);
 
     D3D12_ROOT_SIGNATURE_DESC sigDesc =
         CD3DX12_ROOT_SIGNATURE_DESC(_countof(param), param, _countof(samplers), samplers);

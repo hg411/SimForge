@@ -14,6 +14,7 @@ class Texture : public Object {
     void CreateFromResource(ComPtr<ID3D12Resource> tex2D);
 
     void BindSRVToGraphics(SRV_REGISTER reg, bool forPixelShader);
+    void SetGraphicsRootSRV(SRV_REGISTER reg, bool forPixelShader);
 
     void BindSRVToCompute(SRV_REGISTER reg);
     void BindUAVToCompute(UAV_REGISTER reg);

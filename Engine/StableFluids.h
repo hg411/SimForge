@@ -56,6 +56,9 @@ class StableFluids : public Simulation {
     shared_ptr<Shader> _computeVorticityCS;
     shared_ptr<Shader> _confineVorticityCS;
 
+    //Graphics Shader
+    shared_ptr<Shader> _densityRenderShader;
+
     // ConstantBuffer
     shared_ptr<ConstantBuffer> _stableFluidsParamsCB;
     StableFluidsParams _stableFluidsParams;

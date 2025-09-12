@@ -51,10 +51,13 @@ void StableFluids::Render() {
     Simulation::Render();
 
     // 백버퍼에 출력
+    // Table 사용 (Texture의 경우 Structured Buffer와 달리 무조건 Descriptor Table을 이용해야 함.)
     _density->BindSRVToGraphics(SRV_REGISTER::t0, true);
+    GEngine->GetGraphicsDescHeap()->CommitTable();
 
-    //GEngine->GetGraphicsDescHeap()->CommitTable();
+    _densityRenderShader->Update();
 
+    GRAPHICS_CMD_LIST->DrawInstanced(3, 1, 0, 0);
 
     _imgui->Render();
 }
@@ -73,6 +76,16 @@ void StableFluids::InitShaders() {
     CreateCompute(_sourcingCS, L"SourcingCS.hlsl");
     CreateCompute(_computeVorticityCS, L"ComputeVorticityCS.hlsl");
     CreateCompute(_confineVorticityCS, L"ConfineVorticityCS.hlsl");
+
+    ShaderInfo info = {
+        SHADER_TYPE::FORWARD, RASTERIZER_TYPE::CULL_NONE,       DEPTH_STENCIL_TYPE::LESS,
+        BLEND_TYPE::DEFAULT,  D3D_PRIMITIVE_TOPOLOGY_POINTLIST, {} // No InputLayout
+    };
+    _densityRenderShader = make_shared<Shader>();
+    _densityRenderShader->CreateVertexShader(L"../Resources/Shaders/StableFluids/DensityRenderVS.hlsl");
+    _densityRenderShader->CreatePixelShader(L"../Resources/Shaders/StableFluids/DensityRenderPS.hlsl");
+    _densityRenderShader->CreateGraphicsShader(info);
+
 }
 
 void StableFluids::InitConstantBuffers() {
