@@ -9,5 +9,7 @@ struct PS_IN
 // 단순 출력
 float4 main(PS_IN input) : SV_Target
 {
-    return float4(0, 0, 0, 0);
+    float4 output = float4(1, 1, 1, 1);
+    
+    return output;
 }
