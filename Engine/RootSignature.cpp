@@ -56,14 +56,15 @@ void RootSignature::CreateGraphicsRootSignature(ComPtr<ID3D12Device> device) {
 
     // Descriptor Table »ç¿ë
      CD3DX12_DESCRIPTOR_RANGE cbvRange =
-        CD3DX12_DESCRIPTOR_RANGE(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, CBV_REGISTER_COUNT, 0); // b0~b9
+        CD3DX12_DESCRIPTOR_RANGE(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, CBV_REGISTER_COUNT - 1, 1); // b1~b9
 
      CD3DX12_DESCRIPTOR_RANGE srvRange =
          CD3DX12_DESCRIPTOR_RANGE(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, SRV_REGISTER_COUNT, 0); // t0~t9
 
-     CD3DX12_ROOT_PARAMETER param[2];
-     param[0].InitAsDescriptorTable(1, &cbvRange);
-     param[1].InitAsDescriptorTable(1, &srvRange);
+     CD3DX12_ROOT_PARAMETER param[3];
+     param[0].InitAsConstantBufferView(0);
+     param[1].InitAsDescriptorTable(1, &cbvRange);
+     param[2].InitAsDescriptorTable(1, &srvRange);
 
     D3D12_ROOT_SIGNATURE_DESC sigDesc =
         CD3DX12_ROOT_SIGNATURE_DESC(_countof(param), param, _countof(samplers), samplers);
