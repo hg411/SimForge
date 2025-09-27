@@ -52,7 +52,9 @@ void StableFluids::Render() {
 
     // 백버퍼에 출력
     // Table 사용 (Texture의 경우 Structured Buffer와 달리 무조건 Descriptor Table을 이용해야 함.)
-    _density->BindSRVToGraphics(SRV_REGISTER::t0, true);
+    //_density->BindSRVToGraphics(SRV_REGISTER::t0, true);
+    _density->SetSRVToGraphics(SRV_REGISTER::t0, true);
+    
     GEngine->GetGraphicsDescHeap()->CommitTable();
 
     _densityRenderShader->Update();

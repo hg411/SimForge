@@ -85,10 +85,13 @@ void GraphicsCommandQueue::RenderBegin() {
 
     _cmdList->SetGraphicsRootSignature(GRAPHICS_ROOT_SIGNATURE.Get());
 
-    //GEngine->GetGraphicsDescHeap()->Clear(); //삭제
+    // Graphics Descriptor Table 사용 버전 추가
+    {
+        GEngine->GetGraphicsDescHeap()->Clear(); // 삭제
 
-    //ID3D12DescriptorHeap *descHeap = GEngine->GetGraphicsDescHeap()->GetDescriptorHeap().Get();
-    //_cmdList->SetDescriptorHeaps(1, &descHeap);
+        ID3D12DescriptorHeap *descHeap = GEngine->GetGraphicsDescHeap()->GetDescriptorHeap().Get();
+        _cmdList->SetDescriptorHeaps(1, &descHeap);
+    }
 
     _cmdList->ResourceBarrier(1, &barrier);
 }

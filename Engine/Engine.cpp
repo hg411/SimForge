@@ -44,8 +44,8 @@ void Engine::Init(const WindowInfo &windowInfo) {
 
     // Descriptor Heap
     // 일단 Root Descriptor만 사용하는 방식으로 사용.
-    //_graphicsDescHeap = make_shared<GraphicsDescriptorHeap>();
-    //_graphicsDescHeap->Init(256);
+    _graphicsDescHeap = make_shared<GraphicsDescriptorHeap>();
+    _graphicsDescHeap->Init(256);
 
     // Compute Descriptor Heap은 100개 생성. (Offset 이용)
     _computeDescHeap = make_shared<ComputeDescriptorHeap>();
