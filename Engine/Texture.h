@@ -16,6 +16,10 @@ class Texture : public Object {
     void BindSRVToGraphics(SRV_REGISTER reg, bool forPixelShader);
     void SetGraphicsRootSRV(SRV_REGISTER reg, bool forPixelShader);
 
+    // Descriptor Table 사용하기 위한 Commit Table 전 과정.
+    void SetSRVToGraphics(SRV_REGISTER reg, bool forPixelShader);
+    void SetUAVToGraphics(UAV_REGISTER reg);
+
     void BindSRVToCompute(SRV_REGISTER reg);
     void BindUAVToCompute(UAV_REGISTER reg);
     void CopyResource(shared_ptr<Texture>& src);

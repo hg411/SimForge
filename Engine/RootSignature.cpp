@@ -55,6 +55,7 @@ void RootSignature::CreateGraphicsRootSignature(ComPtr<ID3D12Device> device) {
     //}
 
     // Descriptor Table 사용
+    // b0 는 root signature 로 적용. (Global Constant Buffer)
      CD3DX12_DESCRIPTOR_RANGE cbvRange =
         CD3DX12_DESCRIPTOR_RANGE(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, CBV_REGISTER_COUNT - 1, 1); // b1~b9
 

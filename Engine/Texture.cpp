@@ -137,6 +137,35 @@ void Texture::SetGraphicsRootSRV(SRV_REGISTER reg, bool forPixelShader) {
     GRAPHICS_CMD_LIST->SetGraphicsRootShaderResourceView(static_cast<UINT>(reg), _tex2D->GetGPUVirtualAddress());
 }
 
+void Texture::SetSRVToGraphics(SRV_REGISTER reg, bool forPixelShader) {
+    // Commit Table을 위한 Graphics SRV Set
+    D3D12_RESOURCE_STATES targetState =
+        forPixelShader ? D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE : D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE;
+
+    if (_resourceState != targetState) {
+        D3D12_RESOURCE_BARRIER barrier =
+            CD3DX12_RESOURCE_BARRIER::Transition(_tex2D.Get(), _resourceState, targetState);
+        GRAPHICS_CMD_LIST->ResourceBarrier(1, &barrier);
+        _resourceState = targetState;
+    }
+
+    GEngine->GetGraphicsDescHeap()->SetSRV(_srvHeapBegin, reg);
+}
+
+void Texture::SetUAVToGraphics(UAV_REGISTER reg) {
+    // Graphics Root Signature에서 아직 UAV설정을 안해둠. 나중에 필요할때 다시 설정할 필요가 있어 보임.
+    D3D12_RESOURCE_STATES targetState = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
+
+    if (_resourceState != targetState) {
+        D3D12_RESOURCE_BARRIER barrier =
+            CD3DX12_RESOURCE_BARRIER::Transition(_tex2D.Get(), _resourceState, targetState);
+        GRAPHICS_CMD_LIST->ResourceBarrier(1, &barrier);
+        _resourceState = targetState;
+    }
+
+    //GEngine->GetGraphicsDescHeap()->SetUAV
+}
+
 void Texture::BindSRVToCompute(SRV_REGISTER reg) {
     if (_resourceState != D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE) {
         D3D12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(

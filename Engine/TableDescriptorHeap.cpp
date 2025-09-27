@@ -141,8 +141,6 @@ void ComputeDescriptorHeap::CommitTable() {
     COMPUTE_CMD_LIST->SetComputeRootDescriptorTable(static_cast<uint32>(ROOT_PARAM_COMPUTE::UAV_TABLE), handle);
 
     _currentGroupIndex++;
-
-    //cout << _currentGroupIndex << endl;
 }
 
 D3D12_CPU_DESCRIPTOR_HANDLE ComputeDescriptorHeap::GetCPUHandle(CBV_REGISTER reg) {
