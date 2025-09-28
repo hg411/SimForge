@@ -20,9 +20,9 @@ void main(int3 gID : SV_GroupID, int3 gtID : SV_GroupThreadID,
     uint2 down = uint2(dtID.x, dtID.y == 0 ? height - 1 : dtID.y - 1);
 
     //float2 du = float2(velocity[right].x - velocity[left].x, velocity[up].y - velocity[down].y);
+    //divergence[dtID.xy] = du.x * 0.5 + du.y * 0.5;
 
-    divergence[dtID.xy] = 0.5 * (velocity[right].x - velocity[left].x 
-                                + velocity[up].y - velocity[down].y);
+    divergence[dtID.xy] = 0.5 * (velocity[right].x - velocity[left].x + velocity[up].y - velocity[down].y);
     
     pressure[dtID.xy] = 0.0;
     pressureTemp[dtID.xy] = 0.0;
