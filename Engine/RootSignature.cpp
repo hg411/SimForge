@@ -83,6 +83,26 @@ void RootSignature::CreateComputeRootSignature(ComPtr<ID3D12Device> device) {
         CD3DX12_STATIC_SAMPLER_DESC(0, // register(s0)
                                     D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_TEXTURE_ADDRESS_MODE_WRAP,
                                     D3D12_TEXTURE_ADDRESS_MODE_WRAP, D3D12_TEXTURE_ADDRESS_MODE_WRAP),
+
+        CD3DX12_STATIC_SAMPLER_DESC(1, // register(s1)
+                                    D3D12_FILTER_MIN_MAG_MIP_LINEAR, D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
+                                    D3D12_TEXTURE_ADDRESS_MODE_CLAMP, D3D12_TEXTURE_ADDRESS_MODE_CLAMP),
+
+        CD3DX12_STATIC_SAMPLER_DESC(2, // register(s2)
+                                    D3D12_FILTER_MIN_MAG_MIP_POINT, D3D12_TEXTURE_ADDRESS_MODE_WRAP,
+                                    D3D12_TEXTURE_ADDRESS_MODE_WRAP, D3D12_TEXTURE_ADDRESS_MODE_WRAP),
+
+        CD3DX12_STATIC_SAMPLER_DESC(3, // register(s3)
+                                    D3D12_FILTER_MIN_MAG_MIP_POINT, D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
+                                    D3D12_TEXTURE_ADDRESS_MODE_CLAMP, D3D12_TEXTURE_ADDRESS_MODE_CLAMP),
+
+        CD3DX12_STATIC_SAMPLER_DESC(4, // register(s4)
+                                    D3D12_FILTER_MAXIMUM_ANISOTROPIC, D3D12_TEXTURE_ADDRESS_MODE_WRAP,
+                                    D3D12_TEXTURE_ADDRESS_MODE_WRAP, D3D12_TEXTURE_ADDRESS_MODE_WRAP),
+
+        CD3DX12_STATIC_SAMPLER_DESC(5, // register(s5)
+                                    D3D12_FILTER_MAXIMUM_ANISOTROPIC, D3D12_TEXTURE_ADDRESS_MODE_CLAMP,
+                                    D3D12_TEXTURE_ADDRESS_MODE_CLAMP, D3D12_TEXTURE_ADDRESS_MODE_CLAMP),
     };
 
     //CD3DX12_ROOT_PARAMETER param[TOTAL_REGISTER_COUNT];

@@ -61,6 +61,8 @@ void StableFluids::Render() {
 
     GRAPHICS_CMD_LIST->DrawInstanced(3, 1, 0, 0);
 
+    _density->Transition(GRAPHICS_CMD_LIST, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+
     _imgui->Render();
 }
 
@@ -81,7 +83,7 @@ void StableFluids::InitShaders() {
 
     ShaderInfo info = {
         SHADER_TYPE::FORWARD, RASTERIZER_TYPE::CULL_NONE,       DEPTH_STENCIL_TYPE::LESS,
-        BLEND_TYPE::DEFAULT,  D3D_PRIMITIVE_TOPOLOGY_POINTLIST, {} // No InputLayout
+        BLEND_TYPE::DEFAULT,  D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST, {} // No InputLayout
     };
     _densityRenderShader = make_shared<Shader>();
     _densityRenderShader->CreateVertexShader(L"../Resources/Shaders/StableFluids/DensityRenderVS.hlsl");
@@ -167,10 +169,11 @@ void StableFluids::UpdateSimulationParams() {
                 {0.5f, 0.0f, 1.0f, 1.0f}   // Violet/Purple
             };
 
-            _stableFluidsParams.sourcingDensity = rainbow[(color++) & 7];
+            _stableFluidsParams.sourcingDensity = rainbow[(color++) % 7];
             _stableFluidsParams.sourcingVelocity = Vec2(0.0f);
         } else {
             Vec2 ndcVel = INPUT->GetMouseNdc() - prevMouseNdc;
+            ndcVel.y = -ndcVel.y; // y√‡ π›¿¸
             _stableFluidsParams.sourcingVelocity = ndcVel * 10.0f;
         }
     } else {
