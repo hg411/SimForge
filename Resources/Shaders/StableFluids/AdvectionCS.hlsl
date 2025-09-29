@@ -27,7 +27,7 @@ void main(int3 gID : SV_GroupID, int3 gtID : SV_GroupThreadID,
     float2 pos = (dtID.xy + 0.5) * dx; // 이 쓰레드가 처리하는 셀의 중심
     
     // TODO: 1. velocityTemp로부터 속도 샘플링해오기
-    float2 vel = velocityTemp.SampleLevel(pointWrapSS, pos, 0);
+    float2 vel = velocityTemp.SampleLevel(linearWrapSS, pos, 0);
     
     // TODO: 2. 그 속도를 이용해서 역추적 위치 계산
     float2 posBack = pos - vel * dt;

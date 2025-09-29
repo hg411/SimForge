@@ -153,8 +153,6 @@ void StableFluids::UpdateSimulationParams() {
     _stableFluidsParams.dt = DELTA_TIME;
     _stableFluidsParams.viscosity = 0.001f;
 
-    cout << DELTA_TIME << '\n';
-
     if (INPUT->GetButton(KEY_TYPE::LBUTTON)) {
         _stableFluidsParams.i = static_cast<uint32>(INPUT->GetMousePos().x);
         _stableFluidsParams.j = static_cast<uint32>(INPUT->GetMousePos().y);

@@ -34,6 +34,6 @@ void main(int3 gID : SV_GroupID, int3 gtID : SV_GroupThreadID,
     float3 psi = float3(normalize(eta), 0.0);
     float3 omega = float3(0.0, 0.0, vorticity[dtID.xy]);
    
-    velocity[dtID.xy] += 0.02 * cross(psi, omega).xy * dt; // * dx
-    //velocity[dtID.xy] += 0.2 * cross(psi, omega).xy * dx; 
+    velocity[dtID.xy] += 0.02 * cross(psi, omega).xy * dt;
+    //velocity[dtID.xy] += 0.2 * cross(psi, omega).xy * dx;
 }

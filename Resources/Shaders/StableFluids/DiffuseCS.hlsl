@@ -28,7 +28,7 @@ void main(int3 gID : SV_GroupID, int3 gtID : SV_GroupThreadID,
     // Density의 diffusion에는 viscosity와 별도의 계수(coefficient) 사용 가능
     
     // Explicit integration
-    //float2 velocityLaplacian = velocityTemp[right] + velocityTemp[left] 
+    //float2 velocityLaplacian = velocityTemp[right] + velocityTemp[left]
     //                         + velocityTemp[up] + velocityTemp[down]
     //                         - 4.0 * velocityTemp[dtID.xy];
     //velocity[dtID.xy] = velocityTemp[dtID.xy] + viscosity * dt * velocityLaplacian;

@@ -19,7 +19,6 @@ void main(int3 gID : SV_GroupID, int3 gtID : SV_GroupThreadID,
     
     uint width, height;
     pressureOut.GetDimensions(width, height);
-    float2 dx = float2(1.0 / width, 1.0 / height);
         
     uint2 left = uint2(dtID.x == 0 ? width - 1 : dtID.x - 1, dtID.y);
     uint2 right = uint2(dtID.x == width - 1 ? 0 : dtID.x + 1, dtID.y);
@@ -31,5 +30,4 @@ void main(int3 gID : SV_GroupID, int3 gtID : SV_GroupThreadID,
                                    + pressureTemp[right] 
                                    + pressureTemp[up] 
                                    + pressureTemp[down]);
-
 }
