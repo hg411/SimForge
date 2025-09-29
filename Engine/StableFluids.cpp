@@ -153,6 +153,8 @@ void StableFluids::UpdateSimulationParams() {
     _stableFluidsParams.dt = DELTA_TIME;
     _stableFluidsParams.viscosity = 0.001f;
 
+    cout << DELTA_TIME << '\n';
+
     if (INPUT->GetButton(KEY_TYPE::LBUTTON)) {
         _stableFluidsParams.i = static_cast<uint32>(INPUT->GetMousePos().x);
         _stableFluidsParams.j = static_cast<uint32>(INPUT->GetMousePos().y);
@@ -222,6 +224,8 @@ void StableFluids::ComputeVorticity() {
 }
 
 void StableFluids::ConfineVorticity() {
+    _stableFluidsParamsCB->BindToCompute(CBV_REGISTER::b0);
+
     // Vorticity confinemenet
     _vorticity->BindSRVToCompute(SRV_REGISTER::t0);
     _velocity->BindUAVToCompute(UAV_REGISTER::u0);

@@ -35,5 +35,4 @@ void main(int3 gID : SV_GroupID, int3 gtID : SV_GroupThreadID,
     // TODO: 3. 그 위치에서 샘플링 해오기
     velocity[dtID.xy] = velocityTemp.SampleLevel(linearWrapSS, posBack, 0);
     density[dtID.xy] = densityTemp.SampleLevel(linearWrapSS, posBack, 0);
-
 }

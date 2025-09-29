@@ -1,6 +1,16 @@
 Texture2D<float> vorticity : register(t0);
 RWTexture2D<float2> velocity : register(u0);
 
+cbuffer Consts : register(b0)
+{
+    float dt;
+    float viscosity;
+    float2 sourcingVelocity;
+    float4 sourcingDensity;
+    uint i;
+    uint j;
+}
+
 [numthreads(32, 32, 1)]
 void main(int3 gID : SV_GroupID, int3 gtID : SV_GroupThreadID,
           uint3 dtID : SV_DispatchThreadID)
@@ -23,6 +33,7 @@ void main(int3 gID : SV_GroupID, int3 gtID : SV_GroupThreadID,
     
     float3 psi = float3(normalize(eta), 0.0);
     float3 omega = float3(0.0, 0.0, vorticity[dtID.xy]);
-
-    velocity[dtID.xy] += 0.2 * cross(psi, omega).xy * dx;
+   
+    velocity[dtID.xy] += 0.02 * cross(psi, omega).xy * dt; // * dx
+    //velocity[dtID.xy] += 0.2 * cross(psi, omega).xy * dx; 
 }
