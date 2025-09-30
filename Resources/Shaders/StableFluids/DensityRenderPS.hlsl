@@ -8,10 +8,22 @@ struct PS_IN
     float2 uv : TEXCOORD0;
 };
 
+float3 LinearToneMapping(float3 color)
+{
+    float3 invGamma = float3(1.0, 1.0, 1.0) / 2.2;
+
+    color = 1.0 * color; // LinearToneMapping
+    color = pow(abs(color), invGamma);
+    
+    return color;
+}
+
 // 단순 출력
 float4 main(PS_IN input) : SV_Target
 {
     float4 output = density.Sample(linearWrapSampler, input.uv);
+    
+    output.xyz = LinearToneMapping(output.xyz);
     
     return output;
 }
