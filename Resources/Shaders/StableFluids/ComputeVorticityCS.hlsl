@@ -18,6 +18,9 @@ void main(int3 gID : SV_GroupID, int3 gtID : SV_GroupThreadID,
     //vorticity[dtID.xy] = (velocity[up].y - velocity[down].y) / (2.0 * dx.y)
     //            - (velocity[right].x - velocity[left].x) / (2.0 * dx.x);
     
-    vorticity[dtID.xy] = (velocity[right].y - velocity[left].y) / (2.0 * dx.x)
-                - (velocity[up].x - velocity[down].x) / (2.0 * dx.y);
+    //vorticity[dtID.xy] = (velocity[right].y - velocity[left].y) / (2.0 * dx.x)
+    //            - (velocity[up].x - velocity[down].x) / (2.0 * dx.y);
+    
+    vorticity[dtID.xy] = (velocity[right].y - velocity[left].y) * 0.5
+                       - (velocity[up].x - velocity[down].x) * 0.5;
 }
