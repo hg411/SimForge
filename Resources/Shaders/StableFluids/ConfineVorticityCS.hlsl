@@ -13,7 +13,6 @@ void main(int3 gID : SV_GroupID, int3 gtID : SV_GroupThreadID,
 {
     uint width, height;
     velocity.GetDimensions(width, height);
-    float2 dx = float2(1.0 / width, 1.0 / height);
 
     // Vorticity confinement
     uint2 left = uint2(dtID.x == 0 ? width - 1 : dtID.x - 1, dtID.y);
@@ -33,6 +32,6 @@ void main(int3 gID : SV_GroupID, int3 gtID : SV_GroupThreadID,
     float3 psi = float3(normalize(eta), 0.0);
     float3 omega = float3(0.0, 0.0, vorticity[dtID.xy]);
 
-    const float eps = 0.2;
+    const float eps = 20;
     velocity[dtID.xy] += eps * cross(psi, omega).xy * dt;
 }
