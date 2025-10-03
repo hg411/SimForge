@@ -65,7 +65,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     MSG msg;
 
     GWindowInfo.width = 1600;
-    GWindowInfo.height = 500;
+    GWindowInfo.height = 600;
     GWindowInfo.windowed = true;
 
     unique_ptr<SimForge> simForge = make_unique<SimForge>();
