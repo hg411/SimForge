@@ -20,7 +20,7 @@ void Engine::Init(const WindowInfo &windowInfo) {
     _viewport = {0, 0, static_cast<FLOAT>(windowInfo.width), static_cast<FLOAT>(windowInfo.height), 0.0f, 1.0f};
     _scissorRect = CD3DX12_RECT(0, 0, static_cast<LONG>(windowInfo.width), static_cast<LONG>(windowInfo.height));
 
-    AdjustWindowSizeAndPosition();
+    AdjustWindowSizeAndPosition(windowInfo.width, windowInfo.height);
 
     // Device
     _device = make_shared<Device>();
@@ -154,10 +154,12 @@ void Engine::CheckResizeByClientRect() {
         _windowInfo = newInfo;
         ResizeWindow(_windowInfo);
     }
+
+    cout << _windowInfo.width << ' ' << _windowInfo.height << '\n';
 }
 
-void Engine::AdjustWindowSizeAndPosition() {
-    RECT rect = {0, 0, _windowInfo.width, _windowInfo.height};
+void Engine::AdjustWindowSizeAndPosition(int32 width, int32 height) {
+    RECT rect = {0, 0, width, height};
     ::AdjustWindowRect(&rect, WS_OVERLAPPEDWINDOW, false);
     ::SetWindowPos(_windowInfo.hwnd, 0, 100, 100, rect.right - rect.left, rect.bottom - rect.top, 0);
 }

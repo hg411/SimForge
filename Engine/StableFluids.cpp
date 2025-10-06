@@ -19,9 +19,20 @@ StableFluids::StableFluids() {}
 StableFluids::~StableFluids() {}
 
 void StableFluids::Init() {
-    const WindowInfo &windowInfo = GEngine->GetWindowInfo();
-    _width = windowInfo.width;
-    _height = windowInfo.height;
+    //const WindowInfo &windowInfo = GEngine->GetWindowInfo();
+    //_width = windowInfo.width;
+    //_height = windowInfo.height;
+
+    _width = 1024;
+    _height = 1024;
+
+    WindowInfo windowInfo;
+    windowInfo.width = _width;
+    windowInfo.height = _height;
+    windowInfo.windowed = true;
+
+    GEngine->ResizeWindow(windowInfo);
+    GEngine->AdjustWindowSizeAndPosition(_width, _height);
 
     Simulation::InitImgui();
     InitShaders();
@@ -54,7 +65,7 @@ void StableFluids::Render() {
     // Table 사용 (Texture의 경우 Structured Buffer와 달리 무조건 Descriptor Table을 이용해야 함.)
     //_density->BindSRVToGraphics(SRV_REGISTER::t0, true);
     _density->SetSRVToGraphics(SRV_REGISTER::t0, true);
-    
+
     GEngine->GetGraphicsDescHeap()->CommitTable();
 
     _densityRenderShader->Update();
@@ -82,14 +93,13 @@ void StableFluids::InitShaders() {
     CreateCompute(_confineVorticityCS, L"ConfineVorticityCS.hlsl");
 
     ShaderInfo info = {
-        SHADER_TYPE::FORWARD, RASTERIZER_TYPE::CULL_NONE,       DEPTH_STENCIL_TYPE::LESS,
+        SHADER_TYPE::FORWARD, RASTERIZER_TYPE::CULL_NONE,          DEPTH_STENCIL_TYPE::LESS,
         BLEND_TYPE::DEFAULT,  D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST, {} // No InputLayout
     };
     _densityRenderShader = make_shared<Shader>();
     _densityRenderShader->CreateVertexShader(L"../Resources/Shaders/StableFluids/DensityRenderVS.hlsl");
     _densityRenderShader->CreatePixelShader(L"../Resources/Shaders/StableFluids/DensityRenderPS.hlsl");
     _densityRenderShader->CreateGraphicsShader(info);
-
 }
 
 void StableFluids::InitConstantBuffers() {

@@ -24,8 +24,9 @@ class Engine {
     void ResizeWindow(const WindowInfo &windowInfo);
     void CheckResizeByClientRect();
 
+    void AdjustWindowSizeAndPosition(int32 width, int32 height);
+
   private:
-    void AdjustWindowSizeAndPosition();
     void InitSwapChain();
 
   public:
