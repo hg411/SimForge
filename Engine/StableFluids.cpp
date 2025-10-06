@@ -72,6 +72,7 @@ void StableFluids::Render() {
 
     GRAPHICS_CMD_LIST->DrawInstanced(3, 1, 0, 0);
 
+    // 다음 프레임에서 Compute_CMD_LIST가 SRV(for pixelShader) 상태일 시 Transition 불가.
     _density->Transition(GRAPHICS_CMD_LIST, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
 
     _imgui->Render();

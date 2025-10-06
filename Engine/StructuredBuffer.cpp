@@ -128,33 +128,41 @@ void StructuredBuffer::SetComputeRootUAV(UAV_REGISTER reg) {
     COMPUTE_CMD_LIST->SetComputeRootUnorderedAccessView(static_cast<UINT>(reg), _buffer->GetGPUVirtualAddress());
 }
 
-void StructuredBuffer::BindSRVToGraphics(SRV_REGISTER reg) {
-    if (_resourceState != D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE) {
-        D3D12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(
-            _buffer.Get(), _resourceState, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+void StructuredBuffer::BindSRVToGraphics(SRV_REGISTER reg, bool forPixelShader) {
+    D3D12_RESOURCE_STATES targetState =
+        forPixelShader ? D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE : D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE;
+
+    if (_resourceState != targetState) {
+        D3D12_RESOURCE_BARRIER barrier =
+            CD3DX12_RESOURCE_BARRIER::Transition(_buffer.Get(), _resourceState, targetState);
         GRAPHICS_CMD_LIST->ResourceBarrier(1, &barrier);
-        _resourceState = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE;
+        _resourceState = targetState;
     }
 
     GEngine->GetGraphicsDescHeap()->SetSRV(_srvHeapBegin, reg);
 }
 
 void StructuredBuffer::BindSRVToCompute(SRV_REGISTER reg) {
-    if (_resourceState != D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE) {
-        D3D12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(_buffer.Get(), _resourceState, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+    D3D12_RESOURCE_STATES targetState = D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE;
+
+    if (_resourceState != targetState) {
+        D3D12_RESOURCE_BARRIER barrier =
+            CD3DX12_RESOURCE_BARRIER::Transition(_buffer.Get(), _resourceState, targetState);
         COMPUTE_CMD_LIST->ResourceBarrier(1, &barrier);
-        _resourceState = D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE;
+        _resourceState = targetState;
     }
 
     GEngine->GetComputeDescHeap()->SetSRV(_srvHeapBegin, reg);
 }
 
 void StructuredBuffer::BindUAVToCompute(UAV_REGISTER reg) {
-    if (_resourceState != D3D12_RESOURCE_STATE_UNORDERED_ACCESS) {
+    D3D12_RESOURCE_STATES targetState = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
+
+    if (_resourceState != targetState) {
         D3D12_RESOURCE_BARRIER barrier =
-            CD3DX12_RESOURCE_BARRIER::Transition(_buffer.Get(), _resourceState, D3D12_RESOURCE_STATE_UNORDERED_ACCESS);
+            CD3DX12_RESOURCE_BARRIER::Transition(_buffer.Get(), _resourceState, targetState);
         COMPUTE_CMD_LIST->ResourceBarrier(1, &barrier);
-        _resourceState = D3D12_RESOURCE_STATE_UNORDERED_ACCESS;
+        _resourceState = targetState;
     }
 
     GEngine->GetComputeDescHeap()->SetUAV(_uavHeapBegin, reg);

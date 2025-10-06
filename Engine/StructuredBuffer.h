@@ -12,7 +12,7 @@ class StructuredBuffer {
     void SetComputeRootSRV(SRV_REGISTER reg);
     void SetComputeRootUAV(UAV_REGISTER reg);
 
-    void BindSRVToGraphics(SRV_REGISTER reg);
+    void BindSRVToGraphics(SRV_REGISTER reg, bool forPixelShader);
     void BindSRVToCompute(SRV_REGISTER reg);
     void BindUAVToCompute(UAV_REGISTER reg);
 

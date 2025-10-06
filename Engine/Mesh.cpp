@@ -27,11 +27,15 @@ void Mesh::RenderIndexed(uint32 instanceCount, uint32 idx) {
     GRAPHICS_CMD_LIST->IASetVertexBuffers(0, 1, &_vertexBufferView); // Slot: (0~15)
     GRAPHICS_CMD_LIST->IASetIndexBuffer(&_vecIndexBufferInfo[idx].indexBufferView);
 
+    GEngine->GetGraphicsDescHeap()->CommitTable();
+
     GRAPHICS_CMD_LIST->DrawIndexedInstanced(_vecIndexBufferInfo[idx].indexCount, instanceCount, 0, 0, 0);
 }
 
 void Mesh::RenderLines(uint32 instanceCount) {
     GRAPHICS_CMD_LIST->IASetVertexBuffers(0, 1, &_vertexBufferView);
+
+    GEngine->GetGraphicsDescHeap()->CommitTable();
 
     GRAPHICS_CMD_LIST->DrawInstanced(_vertexCount, instanceCount, 0, 0);
 }

@@ -33,6 +33,8 @@ void SPH2DFluid::Init() {
 void SPH2DFluid::Update() {
     Simulation::Update();
 
+    _simulationParamsCB->Clear();
+
     for (auto &obj : _simulationObjects) {
         if (obj->GetName() == L"BoundingBox") {
             auto transform = obj->GetTransform();
@@ -84,11 +86,19 @@ void SPH2DFluid::FinalUpdate() {
 void SPH2DFluid::Render() {
     Simulation::Render();
 
-    _positionBuffer->SetGraphicsRootSRV(SRV_REGISTER::t0, false);
-    _velocityBuffer->SetGraphicsRootSRV(SRV_REGISTER::t1, false);
-    _aliveBuffer->SetGraphicsRootSRV(SRV_REGISTER::t2, false);
+    //_positionBuffer->SetGraphicsRootSRV(SRV_REGISTER::t0, false);
+    //_velocityBuffer->SetGraphicsRootSRV(SRV_REGISTER::t1, false);
+    //_aliveBuffer->SetGraphicsRootSRV(SRV_REGISTER::t2, false);
 
-    _simulationParamsCB->SetGraphicsRootCBV(CBV_REGISTER::b3);
+    //_simulationParamsCB->SetGraphicsRootCBV(CBV_REGISTER::b3);
+
+    _positionBuffer->BindSRVToGraphics(SRV_REGISTER::t0, false);
+    _velocityBuffer->BindSRVToGraphics(SRV_REGISTER::t1, false);
+    _aliveBuffer->BindSRVToGraphics(SRV_REGISTER::t2, false);
+
+    _simulationParamsCB->BindToGraphics(CBV_REGISTER::b3);
+
+    GEngine->GetGraphicsDescHeap()->CommitTable();
 
     _particleRenderShader->Update();
 

@@ -46,5 +46,6 @@ void Transform::PushData() {
 
     shared_ptr<ConstantBuffer> transformParamsCB = GEngine->GetTransformParamsCB();
     transformParamsCB->UpdateData(&transformParams, sizeof(transformParams));
-    transformParamsCB->SetGraphicsRootCBV(CBV_REGISTER::b1);
+    //transformParamsCB->SetGraphicsRootCBV(CBV_REGISTER::b1); // »èÁ¦
+    transformParamsCB->BindToGraphics(CBV_REGISTER::b1);
 }

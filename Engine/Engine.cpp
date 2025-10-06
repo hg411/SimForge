@@ -155,7 +155,7 @@ void Engine::CheckResizeByClientRect() {
         ResizeWindow(_windowInfo);
     }
 
-    cout << _windowInfo.width << ' ' << _windowInfo.height << '\n';
+    //cout << _windowInfo.width << ' ' << _windowInfo.height << '\n';
 }
 
 void Engine::AdjustWindowSizeAndPosition(int32 width, int32 height) {

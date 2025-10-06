@@ -85,6 +85,9 @@ void GraphicsCommandQueue::RenderBegin() {
 
     _cmdList->SetGraphicsRootSignature(GRAPHICS_ROOT_SIGNATURE.Get());
 
+    GEngine->GetTransformParamsCB()->Clear();
+    GEngine->GetMaterialParamsCB()->Clear();
+
     // Graphics Descriptor Table 사용 버전 추가
     {
         GEngine->GetGraphicsDescHeap()->Clear(); // 삭제
