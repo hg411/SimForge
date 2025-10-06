@@ -45,6 +45,8 @@ void SPH3DFluid::Init() {
 void SPH3DFluid::Update() {
     Simulation::Update();
 
+    _simulationParamsCB->Clear();
+
     for (auto &obj : _simulationObjects) {
         if (obj->GetName() == L"BoundingBox") {
             auto transform = obj->GetTransform();
@@ -122,11 +124,20 @@ void SPH3DFluid::FinalUpdate() {
 void SPH3DFluid::Render() {
     Simulation::Render();
 
-    _positionBuffer->SetGraphicsRootSRV(SRV_REGISTER::t0, false);
-    _velocityBuffer->SetGraphicsRootSRV(SRV_REGISTER::t1, false);
-    _aliveBuffer->SetGraphicsRootSRV(SRV_REGISTER::t2, false);
+    // »èÁ¦
+    //_positionBuffer->SetGraphicsRootSRV(SRV_REGISTER::t0, false);
+    //_velocityBuffer->SetGraphicsRootSRV(SRV_REGISTER::t1, false);
+    //_aliveBuffer->SetGraphicsRootSRV(SRV_REGISTER::t2, false);
 
-    _simulationParamsCB->SetGraphicsRootCBV(CBV_REGISTER::b3);
+    //_simulationParamsCB->SetGraphicsRootCBV(CBV_REGISTER::b3);
+
+    _positionBuffer->BindSRVToGraphics(SRV_REGISTER::t0, false);
+    _velocityBuffer->BindSRVToGraphics(SRV_REGISTER::t1, false);
+    _aliveBuffer->BindSRVToGraphics(SRV_REGISTER::t2, false);
+
+    _simulationParamsCB->BindToGraphics(CBV_REGISTER::b3);
+
+    GEngine->GetGraphicsDescHeap()->CommitTable();
 
     _particleRenderShader->Update();
 
