@@ -21,7 +21,7 @@ class Engine {
     void RenderBegin();
     void RenderEnd();
 
-    void ResizeWindow(const WindowInfo &windowInfo);
+    void ResizeWindow(int32 width, int32 height);
     void CheckResizeByClientRect();
 
     void AdjustWindowSizeAndPosition(int32 width, int32 height);

@@ -24,8 +24,8 @@ void SimulationManager::LoadSimulation() {
     //_activeSimulation = LoadTestScene();
 
     //_activeSimulation = LoadSPH2DFluid();
-    _activeSimulation = LoadSPH3DFluid();
-    //_activeSimulation = LoadStableFluids();
+    //_activeSimulation = LoadSPH3DFluid();
+    _activeSimulation = LoadStableFluids();
 
     _activeSimulation->Awake();
     _activeSimulation->Start();

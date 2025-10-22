@@ -19,19 +19,10 @@ StableFluids::StableFluids() {}
 StableFluids::~StableFluids() {}
 
 void StableFluids::Init() {
-    //const WindowInfo &windowInfo = GEngine->GetWindowInfo();
-    //_width = windowInfo.width;
-    //_height = windowInfo.height;
-
     _width = 1024;
     _height = 1024;
 
-    WindowInfo windowInfo;
-    windowInfo.width = _width;
-    windowInfo.height = _height;
-    windowInfo.windowed = true;
-
-    GEngine->ResizeWindow(windowInfo);
+    GEngine->ResizeWindow(_width, _height);
     GEngine->AdjustWindowSizeAndPosition(_width, _height);
 
     Simulation::InitImgui();

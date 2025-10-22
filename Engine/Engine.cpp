@@ -96,28 +96,37 @@ void Engine::RenderBegin() { _graphicsCmdQueue->RenderBegin(); }
 
 void Engine::RenderEnd() { _graphicsCmdQueue->RenderEnd(); }
 
-void Engine::ResizeWindow(const WindowInfo &windowInfo) {
-    if (windowInfo.width <= 0 || windowInfo.height <= 0)
+void Engine::ResizeWindow(int32 width, int32 height) {
+    if (width <= 0 || height <= 0)
         return;
 
-    if (_swapChain) {
-        _viewport = {0, 0, static_cast<FLOAT>(_windowInfo.width), static_cast<FLOAT>(_windowInfo.height), 0.0f, 1.0f};
-        _scissorRect = CD3DX12_RECT(0, 0, _windowInfo.width, _windowInfo.height);
+    _windowInfo.width = width;
+    _windowInfo.height = height;
 
-        GRAPHICS_CMD_LIST->Reset(_graphicsCmdQueue->GetCmdAlloc().Get(), nullptr);
+    if (!_swapChain)
+        return;
 
-        GRAPHICS_CMD_LIST->RSSetViewports(1, &_viewport);
-        GRAPHICS_CMD_LIST->RSSetScissorRects(1, &_scissorRect);
+    _viewport = {0, 0, static_cast<FLOAT>(width), static_cast<FLOAT>(height), 0.0f, 1.0f};
+    _scissorRect = CD3DX12_RECT(0, 0, width, height);
 
-        GRAPHICS_CMD_LIST->Close();
+    GetGraphicsCmdQueue()->WaitSync();
 
-        GetGraphicsCmdQueue()->WaitSync();
+    _rtGroups[static_cast<uint8>(RENDER_TARGET_GROUP_TYPE::SWAP_CHAIN)].reset();
 
-        _rtGroups[static_cast<uint8>(RENDER_TARGET_GROUP_TYPE::SWAP_CHAIN)].reset();
-        _swapChain->Resize(_windowInfo);
+    GRAPHICS_CMD_LIST->Reset(_graphicsCmdQueue->GetCmdAlloc().Get(), nullptr);
 
-        CreateRenderTargetGroups();
-    }
+    GRAPHICS_CMD_LIST->RSSetViewports(1, &_viewport);
+    GRAPHICS_CMD_LIST->RSSetScissorRects(1, &_scissorRect);
+
+    GRAPHICS_CMD_LIST->Close();
+
+    //GetGraphicsCmdQueue()->WaitSync();
+
+    //_rtGroups[static_cast<uint8>(RENDER_TARGET_GROUP_TYPE::SWAP_CHAIN)].reset();
+
+    _swapChain->Resize(_windowInfo); // ¹®Á¦
+
+    CreateRenderTargetGroups();
 }
 
 void Engine::CheckResizeByClientRect() {
@@ -152,10 +161,10 @@ void Engine::CheckResizeByClientRect() {
 
     if (_windowInfo.width != width || _windowInfo.height != height || _windowInfo.windowed != newInfo.windowed) {
         _windowInfo = newInfo;
-        ResizeWindow(_windowInfo);
+        ResizeWindow(width, height);
     }
 
-    //cout << _windowInfo.width << ' ' << _windowInfo.height << '\n';
+    // cout << _windowInfo.width << ' ' << _windowInfo.height << '\n';
 }
 
 void Engine::AdjustWindowSizeAndPosition(int32 width, int32 height) {
