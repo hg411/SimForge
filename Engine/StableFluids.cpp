@@ -23,7 +23,6 @@ void StableFluids::Init() {
     _height = 1024;
 
     GEngine->ResizeWindow(_width, _height);
-    GEngine->AdjustWindowSizeAndPosition(_width, _height);
 
     Simulation::InitImgui();
     InitShaders();

@@ -109,24 +109,17 @@ void Engine::ResizeWindow(int32 width, int32 height) {
     _viewport = {0, 0, static_cast<FLOAT>(width), static_cast<FLOAT>(height), 0.0f, 1.0f};
     _scissorRect = CD3DX12_RECT(0, 0, width, height);
 
-    GetGraphicsCmdQueue()->WaitSync();
+    _graphicsCmdQueue->WaitSync();
+    //_graphicsCmdQueue->FlushResourceCommandQueue();
+    //_computeCmdQueue->WaitSync(); // 굳이 Compute Cmd Queue 의 WaitSync를 할 필요는 없어 보임.
 
     _rtGroups[static_cast<uint8>(RENDER_TARGET_GROUP_TYPE::SWAP_CHAIN)].reset();
 
-    GRAPHICS_CMD_LIST->Reset(_graphicsCmdQueue->GetCmdAlloc().Get(), nullptr);
-
-    GRAPHICS_CMD_LIST->RSSetViewports(1, &_viewport);
-    GRAPHICS_CMD_LIST->RSSetScissorRects(1, &_scissorRect);
-
-    GRAPHICS_CMD_LIST->Close();
-
-    //GetGraphicsCmdQueue()->WaitSync();
-
-    //_rtGroups[static_cast<uint8>(RENDER_TARGET_GROUP_TYPE::SWAP_CHAIN)].reset();
-
-    _swapChain->Resize(_windowInfo); // 문제
+    _swapChain->Resize(_windowInfo);
 
     CreateRenderTargetGroups();
+
+    AdjustWindowSizeAndPosition(width, height);
 }
 
 void Engine::CheckResizeByClientRect() {

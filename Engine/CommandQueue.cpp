@@ -53,6 +53,7 @@ void GraphicsCommandQueue::SetSwapChain(shared_ptr<SwapChain> swapChain) { _swap
 void GraphicsCommandQueue::WaitSync() {
     // Advance the fence value to mark commands up to this fence point.
     _fenceValue++;
+    //cout << "Graphcis Cmd Queue Fence Value: " << _fenceValue << '\n';
 
     // Add an instruction to the command queue to set a new fence point.  Because we
     // are on the GPU timeline, the new fence point won't be set until the GPU finishes
@@ -162,6 +163,7 @@ void ComputeCommandQueue::Init(ComPtr<ID3D12Device> device) {
 
 void ComputeCommandQueue::WaitSync() {
     _fenceValue++;
+    //cout << "Compute Cmd Queue Fence Value: " << _fenceValue << '\n';
 
     _cmdQueue->Signal(_fence.Get(), _fenceValue);
 
