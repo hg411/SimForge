@@ -7,8 +7,6 @@
 #include "RootSignature.h"
 #include "ConstantBuffer.h"
 #include "TableDescriptorHeap.h"
-
-
 #include "Device.h"
 
 // ************************
