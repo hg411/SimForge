@@ -36,9 +36,6 @@ class GraphicsCommandQueue {
     ComPtr<ID3D12CommandAllocator> _resCmdAlloc;
     ComPtr<ID3D12GraphicsCommandList> _resCmdList;
 
-    // 
-
-
     ComPtr<ID3D12Fence> _fence;
     uint32 _fenceValue = 0;
     HANDLE _fenceEvent = INVALID_HANDLE_VALUE;
