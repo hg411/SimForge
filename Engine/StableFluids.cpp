@@ -22,13 +22,13 @@ void StableFluids::Init() {
     _width = 1024;
     _height = 1024;
 
-    GEngine->ResizeWindow(_width, _height);
-
     Simulation::InitImgui();
     InitShaders();
     InitConstantBuffers();
     InitTextures();
     InitSimulationObjects();
+
+    GEngine->ResizeWindow(_width, _height);
 }
 
 void StableFluids::Update() { Simulation::Update(); }
