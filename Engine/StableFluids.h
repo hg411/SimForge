@@ -13,6 +13,7 @@ struct StableFluidsParams {
     Vec4 sourcingDensity;
     uint32 i;
     uint32 j;
+    float vorticityScale;
 };
 
 class StableFluids : public Simulation {
@@ -75,4 +76,5 @@ class StableFluids : public Simulation {
 
     // Stable Fluids Simulation Constant
     float _viscosity = 0.001f;
+    float _vorticityScale = 10.0f;
 };

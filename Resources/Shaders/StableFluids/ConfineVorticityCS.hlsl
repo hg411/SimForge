@@ -5,6 +5,11 @@ cbuffer Consts : register(b0)
 {
     float dt;
     float viscosity;
+    float2 sourcingVelocity;
+    float4 sourcingDensity;
+    uint i;
+    uint j;
+    float vorticityScale;
 }
 
 [numthreads(32, 32, 1)]
@@ -32,6 +37,6 @@ void main(int3 gID : SV_GroupID, int3 gtID : SV_GroupThreadID,
     float3 psi = float3(normalize(eta), 0.0);
     float3 omega = float3(0.0, 0.0, vorticity[dtID.xy]);
 
-    const float eps = 10;
-    velocity[dtID.xy] += eps * cross(psi, omega).xy * dt;
+    //const float eps = 10; // C-buffer: vorticityScale∑Œ ¥Î√º.
+    velocity[dtID.xy] += vorticityScale * cross(psi, omega).xy * dt;
 }

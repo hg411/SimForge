@@ -139,11 +139,15 @@ void StableFluids::InitSimulationObjects() {
 }
 
 void StableFluids::BuildUI() {
-    // 수정 필요
     // ImGui::Begin("Color");
     // ImGui::SetNextItemOpen(true, ImGuiCond_Once);
-    //  ImGui::Checkbox()
+    // ImGui::Checkbox()
     // ImGui::End();
+
+    ImGui::Begin("Stable Fluids");
+    ImGui::SetNextItemOpen(true, ImGuiCond_Once);
+    ImGui::InputFloat("Vorticity Scale", &_vorticityScale, 1.0, 1.0, "%.1f");
+    ImGui::End();
 }
 
 void StableFluids::UpdateSimulationParams() {
@@ -152,7 +156,8 @@ void StableFluids::UpdateSimulationParams() {
     static Vec2 prevMouseNdc = Vec2(-1.0f, -1.0f);
 
     _stableFluidsParams.dt = DELTA_TIME;
-    _stableFluidsParams.viscosity = 0.001f;
+    _stableFluidsParams.viscosity = _viscosity;
+    _stableFluidsParams.vorticityScale = _vorticityScale;
 
     if (INPUT->GetButton(KEY_TYPE::LBUTTON)) {
         _stableFluidsParams.i = static_cast<uint32>(INPUT->GetMousePos().x);
