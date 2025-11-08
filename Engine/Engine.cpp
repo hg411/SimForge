@@ -130,7 +130,8 @@ void Engine::CheckResizeByClientRect() {
 
     // === [전체화면 여부 판단] ===
     RECT winRect;
-    GetWindowRect(_windowInfo.hwnd, &winRect);
+    if (!GetWindowRect(_windowInfo.hwnd, &winRect))
+        return;
 
     HMONITOR hMonitor = MonitorFromWindow(_windowInfo.hwnd, MONITOR_DEFAULTTONEAREST);
     MONITORINFO mi = {sizeof(MONITORINFO)};
