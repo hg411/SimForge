@@ -106,19 +106,27 @@ void StableFluids::InitTextures() {
         return texture;
     };
 
-    // R16G16
+    // R16G16 FLOAT
     _velocity = CreateRWTexture2D(DXGI_FORMAT_R16G16_FLOAT);
     _velocityTemp = CreateRWTexture2D(DXGI_FORMAT_R16G16_FLOAT);
 
-    // R16
+    // R16 FLOAT
     _pressure = CreateRWTexture2D(DXGI_FORMAT_R16_FLOAT);
     _pressureTemp = CreateRWTexture2D(DXGI_FORMAT_R16_FLOAT);
     _vorticity = CreateRWTexture2D(DXGI_FORMAT_R16_FLOAT);
     _divergence = CreateRWTexture2D(DXGI_FORMAT_R16_FLOAT);
 
-    // R16G16B16A16
+    // R16G16B16A16 FLOAT
     _density = CreateRWTexture2D(DXGI_FORMAT_R16G16B16A16_FLOAT);
     _densityTemp = CreateRWTexture2D(DXGI_FORMAT_R16G16B16A16_FLOAT);
+
+    // R32 SINT
+    // Boundary Condition
+    // 0: Normal Cell
+    // 1: Dirichlet Boundary Condition 
+    // 2: Neumann Boundary Condition
+    // 3: Periodic Boundary Condition (Wrap-around)
+    _boundaryCondition = CreateRWTexture2D(DXGI_FORMAT_R32_SINT);
 }
 
 void StableFluids::InitSimulationObjects() {
@@ -158,6 +166,7 @@ void StableFluids::UpdateSimulationParams() {
     _stableFluidsParams.dt = DELTA_TIME;
     _stableFluidsParams.viscosity = _viscosity;
     _stableFluidsParams.vorticityScale = _vorticityScale;
+    _stableFluidsParams.wallBoundaryCondition = _wallBoundaryCondition;
 
     if (INPUT->GetButton(KEY_TYPE::LBUTTON)) {
         _stableFluidsParams.i = static_cast<uint32>(INPUT->GetMousePos().x);
@@ -198,6 +207,7 @@ void StableFluids::Sourcing() {
 
     _velocity->BindUAVToCompute(UAV_REGISTER::u0);
     _density->BindUAVToCompute(UAV_REGISTER::u1);
+    _boundaryCondition->BindUAVToCompute(UAV_REGISTER::u2);
 
     GEngine->GetComputeDescHeap()->CommitTable();
 
@@ -206,7 +216,9 @@ void StableFluids::Sourcing() {
     COMPUTE_CMD_LIST->Dispatch(static_cast<UINT>(ceil(_width / 32.0f)), static_cast<UINT>(ceil(_height / 32.0f)), 1);
 
     D3D12_RESOURCE_BARRIER uavBarriers[] = {CD3DX12_RESOURCE_BARRIER::UAV(_velocity->GetTex2D().Get()),
-                                            CD3DX12_RESOURCE_BARRIER::UAV(_density->GetTex2D().Get())};
+                                            CD3DX12_RESOURCE_BARRIER::UAV(_density->GetTex2D().Get()),
+                                            CD3DX12_RESOURCE_BARRIER::UAV(_boundaryCondition->GetTex2D().Get())
+    };
 
     COMPUTE_CMD_LIST->ResourceBarrier(_countof(uavBarriers), uavBarriers);
 }
@@ -285,6 +297,7 @@ void StableFluids::Diffuse() {
 void StableFluids::Projection() {
 
     // Compute divergence
+
     {
         _velocity->BindSRVToCompute(SRV_REGISTER::t0);
         _divergence->BindUAVToCompute(UAV_REGISTER::u0);
@@ -308,6 +321,8 @@ void StableFluids::Projection() {
     // Jacobi iteration
 
     {
+        _jacobiCS->Update(); // 한 번만 Shader Update
+
         for (int32 i = 0; i < 100; i++) {
             if (i % 2 == 0) {
                 _pressure->BindSRVToCompute(SRV_REGISTER::t0);
@@ -319,9 +334,10 @@ void StableFluids::Projection() {
                 _pressure->BindUAVToCompute(UAV_REGISTER::u0);
             }
             GEngine->GetComputeDescHeap()->CommitTable();
-            _jacobiCS->Update(); // update를 밖으로 빼서 한번만 실행시켜도 될까?
+
             COMPUTE_CMD_LIST->Dispatch(static_cast<UINT>(ceil(_width / 32.0f)),
                                        static_cast<UINT>(ceil(_height / 32.0f)), 1);
+
             if (i % 2 == 0) {
                 D3D12_RESOURCE_BARRIER uavBarriers[] = {CD3DX12_RESOURCE_BARRIER::UAV(_pressureTemp->GetTex2D().Get())};
                 COMPUTE_CMD_LIST->ResourceBarrier(_countof(uavBarriers), uavBarriers);

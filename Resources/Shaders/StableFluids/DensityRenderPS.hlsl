@@ -24,6 +24,10 @@ float4 main(PS_IN input) : SV_Target
     float4 output = density.Sample(linearWrapSampler, input.uv);
     
     output.xyz = LinearToneMapping(output.xyz);
+    float maximumColor = max(max(output.x, output.y), output.z);
+    
+    if (maximumColor >= 1.0)
+        output.xyz /= maximumColor;
     
     return output;
 }

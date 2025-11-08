@@ -1,14 +1,19 @@
 RWTexture2D<float2> velocity : register(u0);
 RWTexture2D<float4> density : register(u1);
+RWTexture2D<int> boundaryCondition : register(u2);
 
 cbuffer Consts : register(b0)
 {
     float dt;
     float viscosity;
     float2 sourcingVelocity;
+    
     float4 sourcingDensity;
+    
     uint i;
     uint j;
+    float vorticityScale;
+    int wallBoundaryCondition;
 }
 
 // https://en.wikipedia.org/wiki/Smoothstep
@@ -41,5 +46,23 @@ void main(int3 gID : SV_GroupID, int3 gtID : SV_GroupThreadID,
         velocity[dtID.xy] += sourcingVelocity * scale;
         //velocity[dtID.xy] += float2(-0.0, -0.1) * scale; 
         density[dtID.xy] += sourcingDensity * scale;
+    }
+    
+    //***************************
+    // Boundary Condition Setting
+    //***************************
+    
+    // 0: Normal Cell
+    // 1: Dirichlet Boundary Condition
+    // 2: Neumann Boundary Condition
+    // 3: Periodic Boundary Condition
+    
+    if (dtID.x == 0 || dtID.y == 0 || dtID.x == width - 1 || dtID.y == height - 1)
+    {
+        boundaryCondition[dtID.xy] = wallBoundaryCondition;
+    }
+    else
+    {
+        boundaryCondition[dtID.xy] = 0; // Normal Cell
     }
 }
