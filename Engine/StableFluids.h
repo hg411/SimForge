@@ -23,7 +23,7 @@ struct StableFluidsParams {
     uint32 i;
     uint32 j;
     float vorticityScale;
-    int wallBoundaryCondition;
+    int32 wallBoundaryCondition;
 };
 
 class StableFluids : public Simulation {

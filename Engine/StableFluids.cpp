@@ -153,8 +153,23 @@ void StableFluids::BuildUI() {
     // ImGui::End();
 
     ImGui::Begin("Stable Fluids");
+
+    // Fluid
     ImGui::SetNextItemOpen(true, ImGuiCond_Once);
+    ImGui::TreeNode("Fluid");
     ImGui::InputFloat("Vorticity Scale", &_vorticityScale, 1.0, 1.0, "%.1f");
+    ImGui::TreePop();
+
+    // Wall Boundary Condition
+    ImGui::SetNextItemOpen(true, ImGuiCond_Once);
+    ImGui::TreeNode("Wall Boundary Condition");
+    ImGui::RadioButton("Dirichlet", &_wallBoundaryCondition, static_cast<int32>(BoundaryCondition::DIRICHLET));
+    ImGui::SameLine();
+    ImGui::RadioButton("Neumann", &_wallBoundaryCondition, static_cast<int32>(BoundaryCondition::NEUMANN));
+    ImGui::SameLine();
+    ImGui::RadioButton("Periodic", &_wallBoundaryCondition, static_cast<int32>(BoundaryCondition::PERIODIC));
+    ImGui::TreePop();
+
     ImGui::End();
 }
 
