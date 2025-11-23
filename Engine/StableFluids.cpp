@@ -240,6 +240,8 @@ void StableFluids::Sourcing() {
 
 void StableFluids::ComputeVorticity() {
     // Vorticity calculation
+    _stableFluidsParamsCB->BindToCompute(CBV_REGISTER::b0);
+
     _velocity->BindSRVToCompute(SRV_REGISTER::t0);
     _vorticity->BindUAVToCompute(UAV_REGISTER::u0);
 
