@@ -343,13 +343,13 @@ void StableFluids::Projection() {
     // Jacobi iteration
 
     {
-        _stableFluidsParamsCB->BindToCompute(CBV_REGISTER::b0);
-
-        _boundaryMap->BindSRVToCompute(SRV_REGISTER::t2);
-
         _jacobiCS->Update(); // ÇÑ ¹ø¸¸ Shader Update
 
         for (int32 i = 0; i < 100; i++) {
+            _stableFluidsParamsCB->BindToCompute(CBV_REGISTER::b0);
+
+            _boundaryMap->BindSRVToCompute(SRV_REGISTER::t2);
+
             if (i % 2 == 0) {
                 _pressure->BindSRVToCompute(SRV_REGISTER::t0);
                 _divergence->BindSRVToCompute(SRV_REGISTER::t1);

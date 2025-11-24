@@ -60,11 +60,11 @@ void main(int3 gID : SV_GroupID, int3 gtID : SV_GroupThreadID,
             {
                 if (boundaryMap[dtID.xy + offset[i]] == 1) // Dirichlet
                 {
-                    temp += -pressureTemp[dtID.xy];
+                    temp += -pressureOut[dtID.xy];
                 }
                 else if (boundaryMap[dtID.xy + offset[i]] == 2) // Neumann
                 {
-                    temp += pressureTemp[dtID.xy];
+                    temp += pressureOut[dtID.xy];
                 }
                 else // Normal Cell
                 {
@@ -72,8 +72,7 @@ void main(int3 gID : SV_GroupID, int3 gtID : SV_GroupThreadID,
                 }
             }
 
-        // TODO:
-            pressureOut[dtID.xy] = (-divergence[dtID.xy] + temp) / 4.0;
+            pressureOut[dtID.xy] = (-divergence[dtID.xy] + temp) * 0.25;
         }
     }
 }
