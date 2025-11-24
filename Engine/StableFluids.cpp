@@ -126,7 +126,7 @@ void StableFluids::InitTextures() {
     // 1: Dirichlet Boundary Condition 
     // 2: Neumann Boundary Condition
     // 3: Periodic Boundary Condition (Wrap-around)
-    _boundaryCondition = CreateRWTexture2D(DXGI_FORMAT_R32_SINT);
+    _boundaryMap = CreateRWTexture2D(DXGI_FORMAT_R32_SINT);
 }
 
 void StableFluids::InitSimulationObjects() {
@@ -163,11 +163,11 @@ void StableFluids::BuildUI() {
     // Wall Boundary Condition
     ImGui::SetNextItemOpen(true, ImGuiCond_Once);
     ImGui::TreeNode("Wall Boundary Condition");
-    ImGui::RadioButton("Dirichlet", &_wallBoundaryCondition, static_cast<int32>(BoundaryCondition::DIRICHLET));
+    ImGui::RadioButton("Dirichlet", &_wallBoundaryCondition, static_cast<int32>(BoundaryType::DIRICHLET));
     ImGui::SameLine();
-    ImGui::RadioButton("Neumann", &_wallBoundaryCondition, static_cast<int32>(BoundaryCondition::NEUMANN));
+    ImGui::RadioButton("Neumann", &_wallBoundaryCondition, static_cast<int32>(BoundaryType::NEUMANN));
     ImGui::SameLine();
-    ImGui::RadioButton("Periodic", &_wallBoundaryCondition, static_cast<int32>(BoundaryCondition::PERIODIC));
+    ImGui::RadioButton("Periodic", &_wallBoundaryCondition, static_cast<int32>(BoundaryType::PERIODIC));
     ImGui::TreePop();
 
     ImGui::End();
@@ -222,7 +222,7 @@ void StableFluids::Sourcing() {
 
     _velocity->BindUAVToCompute(UAV_REGISTER::u0);
     _density->BindUAVToCompute(UAV_REGISTER::u1);
-    _boundaryCondition->BindUAVToCompute(UAV_REGISTER::u2);
+    _boundaryMap->BindUAVToCompute(UAV_REGISTER::u2);
 
     GEngine->GetComputeDescHeap()->CommitTable();
 
@@ -232,7 +232,7 @@ void StableFluids::Sourcing() {
 
     D3D12_RESOURCE_BARRIER uavBarriers[] = {CD3DX12_RESOURCE_BARRIER::UAV(_velocity->GetTex2D().Get()),
                                             CD3DX12_RESOURCE_BARRIER::UAV(_density->GetTex2D().Get()),
-                                            CD3DX12_RESOURCE_BARRIER::UAV(_boundaryCondition->GetTex2D().Get())
+                                            CD3DX12_RESOURCE_BARRIER::UAV(_boundaryMap->GetTex2D().Get())
     };
 
     COMPUTE_CMD_LIST->ResourceBarrier(_countof(uavBarriers), uavBarriers);
@@ -292,6 +292,8 @@ void StableFluids::Diffuse() {
             _density->BindUAVToCompute(UAV_REGISTER::u1);
         }
 
+        _boundaryMap->BindSRVToCompute(SRV_REGISTER::t2);
+
         GEngine->GetComputeDescHeap()->CommitTable();
 
         _diffuseCS->Update();
@@ -316,7 +318,10 @@ void StableFluids::Projection() {
     // Compute divergence
 
     {
+        _stableFluidsParamsCB->BindToCompute(CBV_REGISTER::b0);
+
         _velocity->BindSRVToCompute(SRV_REGISTER::t0);
+        _boundaryMap->BindSRVToCompute(SRV_REGISTER::t1);
         _divergence->BindUAVToCompute(UAV_REGISTER::u0);
         _pressure->BindUAVToCompute(UAV_REGISTER::u1);
         _pressureTemp->BindUAVToCompute(UAV_REGISTER::u2);
@@ -338,6 +343,10 @@ void StableFluids::Projection() {
     // Jacobi iteration
 
     {
+        _stableFluidsParamsCB->BindToCompute(CBV_REGISTER::b0);
+
+        _boundaryMap->BindSRVToCompute(SRV_REGISTER::t2);
+
         _jacobiCS->Update(); // ÇÑ ¹ø¸¸ Shader Update
 
         for (int32 i = 0; i < 100; i++) {
@@ -368,7 +377,11 @@ void StableFluids::Projection() {
     // Apply pressure
 
     {
+        _stableFluidsParamsCB->BindToCompute(CBV_REGISTER::b0);
+
         _pressure->BindSRVToCompute(SRV_REGISTER::t0);
+        _boundaryMap->BindSRVToCompute(SRV_REGISTER::t1);
+
         _velocity->BindUAVToCompute(UAV_REGISTER::u0);
 
         GEngine->GetComputeDescHeap()->CommitTable();

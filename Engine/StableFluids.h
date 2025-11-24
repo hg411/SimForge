@@ -6,7 +6,7 @@ class Texture;
 class Shader;
 class ConstantBuffer;
 
-enum class BoundaryCondition : int32 {
+enum class BoundaryType : int32 {
     NORMAL,
     DIRICHLET,
     NEUMANN,
@@ -83,10 +83,10 @@ class StableFluids : public Simulation {
     shared_ptr<Texture> _densityTemp;
     shared_ptr<Texture> _vorticity;
     shared_ptr<Texture> _divergence;
-    shared_ptr<Texture> _boundaryCondition;
+    shared_ptr<Texture> _boundaryMap;
 
     // Stable Fluids Simulation Constant
     float _viscosity = 0.001f;
     float _vorticityScale = 10.0f;
-    int32 _wallBoundaryCondition = static_cast<int32>(BoundaryCondition::PERIODIC);
+    int32 _wallBoundaryCondition = static_cast<int32>(BoundaryType::PERIODIC);
 };

@@ -1,6 +1,6 @@
 RWTexture2D<float2> velocity : register(u0);
 RWTexture2D<float4> density : register(u1);
-RWTexture2D<int> boundaryCondition : register(u2);
+RWTexture2D<int> boundaryMap : register(u2);
 
 cbuffer Consts : register(b0)
 {
@@ -33,7 +33,7 @@ void main(int3 gID : SV_GroupID, int3 gtID : SV_GroupThreadID,
     density.GetDimensions(width, height);
 
     // 약간의 Dissipation
-    density[dtID.xy] = max(0.0, density[dtID.xy] - 0.001);
+    //density[dtID.xy] = max(0.0, density[dtID.xy] - 0.001);
     
     // unsigned int라서 마우스 입력이 없을 경우 CPU 코드에서 i = -1
     // 오버플로우로 인해 width 보다 큰 값으로 설정
@@ -44,12 +44,12 @@ void main(int3 gID : SV_GroupID, int3 gtID : SV_GroupThreadID,
         float scale = smootherstep(1.0 - dist);
 
         velocity[dtID.xy] += sourcingVelocity * scale;
-        //velocity[dtID.xy] += float2(-0.0, -0.1) * scale; 
+        velocity[dtID.xy] += float2(1.0, -0.0) * scale; 
         density[dtID.xy] += sourcingDensity * scale;
     }
     
     //***************************
-    // Boundary Condition Setting
+    // Boundary Map Setting
     //***************************
     
     // 0: Normal Cell
@@ -59,10 +59,15 @@ void main(int3 gID : SV_GroupID, int3 gtID : SV_GroupThreadID,
     
     if (dtID.x == 0 || dtID.y == 0 || dtID.x == width - 1 || dtID.y == height - 1)
     {
-        boundaryCondition[dtID.xy] = wallBoundaryCondition;
+        boundaryMap[dtID.xy] = wallBoundaryCondition;
+        
+        if (wallBoundaryCondition != 3)
+        {
+            velocity[dtID.xy] = float2(0.0, 0.0);
+        }
     }
     else
     {
-        boundaryCondition[dtID.xy] = 0; // Normal Cell
+        boundaryMap[dtID.xy] = 0; // Normal Cell
     }
 }
