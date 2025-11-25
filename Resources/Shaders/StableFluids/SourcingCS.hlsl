@@ -44,7 +44,7 @@ void main(int3 gID : SV_GroupID, int3 gtID : SV_GroupThreadID,
         float scale = smootherstep(1.0 - dist);
 
         velocity[dtID.xy] += sourcingVelocity * scale;
-        //velocity[dtID.xy] += float2(1.0, -0.0) * scale; 
+        //velocity[dtID.xy] += float2(0.0, -1.0) * scale; 
         density[dtID.xy] += sourcingDensity * scale;
     }
     
