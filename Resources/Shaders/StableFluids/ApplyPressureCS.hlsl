@@ -39,11 +39,11 @@ void main(int3 gID : SV_GroupID, int3 gtID : SV_GroupThreadID,
         uint2 up = uint2(dtID.x, dtID.y == height - 1 ? 0 : dtID.y + 1);
         uint2 down = uint2(dtID.x, dtID.y == 0 ? height - 1 : dtID.y - 1);
     
-    // TODO: 압력의 gradient 계산
+        // 압력의 gradient 계산
         float2 dp = float2(pressure[right] - pressure[left], pressure[up] - pressure[down]);
         float2 gradient = dp * 0.5;
 
-    // TODO: velocity 업데이트
+        // velocity 업데이트
         velocity[dtID.xy] -= gradient;
     }
     else
@@ -63,7 +63,7 @@ void main(int3 gID : SV_GroupID, int3 gtID : SV_GroupThreadID,
                 {
                     p[i] = pressure[dtID.xy];
                 }
-                else
+                else // Normal Cell
                     p[i] = pressure[dtID.xy + offset[i]];
             }
 

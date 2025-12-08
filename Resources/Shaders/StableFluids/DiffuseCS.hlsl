@@ -4,9 +4,6 @@ Texture2D<int> boundaryMap : register(t2);
 RWTexture2D<float2> velocity : register(u0);
 RWTexture2D<float4> density : register(u1);
 
-//SamplerState pointWrapSS : register(s0);
-//SamplerState linearWrapSS : register(s1);
-
 cbuffer Consts : register(b0)
 {
     float dt;

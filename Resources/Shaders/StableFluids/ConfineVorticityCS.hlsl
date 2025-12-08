@@ -41,8 +41,7 @@ void main(int3 gID : SV_GroupID, int3 gtID : SV_GroupThreadID,
     
         float3 psi = float3(normalize(eta), 0.0);
         float3 omega = float3(0.0, 0.0, vorticity[dtID.xy]);
-
-        //const float eps = 10; // C-buffer: vorticityScale로 대체.
+        
         velocity[dtID.xy] += vorticityScale * cross(psi, omega).xy * dt;
     }
     else
@@ -57,8 +56,7 @@ void main(int3 gID : SV_GroupID, int3 gtID : SV_GroupThreadID,
     
             float3 psi = float3(normalize(eta), 0.0);
             float3 omega = float3(0.0, 0.0, vorticity[dtID.xy]);
-
-            //const float eps = 10; // C-buffer: vorticityScale로 대체.
+            
             velocity[dtID.xy] += vorticityScale * cross(psi, omega).xy * dt;
         }
     }

@@ -22,6 +22,10 @@ void StableFluids::Init() {
     _width = 1024;
     _height = 1024;
 
+    _viscosity = 0.001f;
+    _vorticityScale = 10.0f;
+    _wallBoundaryCondition = static_cast<int32>(BoundaryType::PERIODIC);
+
     Simulation::InitImgui();
     InitShaders();
     InitConstantBuffers();

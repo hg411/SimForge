@@ -86,7 +86,7 @@ class StableFluids : public Simulation {
     shared_ptr<Texture> _boundaryMap;
 
     // Stable Fluids Simulation Constant
-    float _viscosity = 0.001f;
-    float _vorticityScale = 10.0f;
-    int32 _wallBoundaryCondition = static_cast<int32>(BoundaryType::PERIODIC);
+    float _viscosity = 0.0f;
+    float _vorticityScale = 0.0f;
+    int32 _wallBoundaryCondition = 0;
 };

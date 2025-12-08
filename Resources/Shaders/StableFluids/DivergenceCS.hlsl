@@ -26,9 +26,6 @@ static int2 offset[4] =
     int2(0, -1)   // down
 };
 
-//SamplerState pointWrapSS : register(s0);
-//SamplerState linearWrapSS : register(s1);
-
 [numthreads(32, 32, 1)]
 void main(int3 gID : SV_GroupID, int3 gtID : SV_GroupThreadID,
           uint3 dtID : SV_DispatchThreadID)
