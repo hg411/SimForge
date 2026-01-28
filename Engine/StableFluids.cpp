@@ -22,6 +22,10 @@ void StableFluids::Init() {
     _width = 1024;
     _height = 1024;
 
+    _viscosity = 0.001f;
+    _vorticityScale = 10.0f;
+    _wallBoundaryCondition = static_cast<int32>(BoundaryType::PERIODIC);
+
     Simulation::InitImgui();
     InitShaders();
     InitConstantBuffers();
@@ -126,7 +130,7 @@ void StableFluids::InitTextures() {
     // 1: Dirichlet Boundary Condition 
     // 2: Neumann Boundary Condition
     // 3: Periodic Boundary Condition (Wrap-around)
-    _boundaryCondition = CreateRWTexture2D(DXGI_FORMAT_R32_SINT);
+    _boundaryMap = CreateRWTexture2D(DXGI_FORMAT_R32_SINT);
 }
 
 void StableFluids::InitSimulationObjects() {
@@ -153,8 +157,23 @@ void StableFluids::BuildUI() {
     // ImGui::End();
 
     ImGui::Begin("Stable Fluids");
+
+    // Fluid
     ImGui::SetNextItemOpen(true, ImGuiCond_Once);
+    ImGui::TreeNode("Fluid");
     ImGui::InputFloat("Vorticity Scale", &_vorticityScale, 1.0, 1.0, "%.1f");
+    ImGui::TreePop();
+
+    // Wall Boundary Condition
+    ImGui::SetNextItemOpen(true, ImGuiCond_Once);
+    ImGui::TreeNode("Wall Boundary Condition");
+    ImGui::RadioButton("Dirichlet", &_wallBoundaryCondition, static_cast<int32>(BoundaryType::DIRICHLET));
+    ImGui::SameLine();
+    ImGui::RadioButton("Neumann", &_wallBoundaryCondition, static_cast<int32>(BoundaryType::NEUMANN));
+    ImGui::SameLine();
+    ImGui::RadioButton("Periodic", &_wallBoundaryCondition, static_cast<int32>(BoundaryType::PERIODIC));
+    ImGui::TreePop();
+
     ImGui::End();
 }
 
@@ -207,7 +226,7 @@ void StableFluids::Sourcing() {
 
     _velocity->BindUAVToCompute(UAV_REGISTER::u0);
     _density->BindUAVToCompute(UAV_REGISTER::u1);
-    _boundaryCondition->BindUAVToCompute(UAV_REGISTER::u2);
+    _boundaryMap->BindUAVToCompute(UAV_REGISTER::u2);
 
     GEngine->GetComputeDescHeap()->CommitTable();
 
@@ -217,7 +236,7 @@ void StableFluids::Sourcing() {
 
     D3D12_RESOURCE_BARRIER uavBarriers[] = {CD3DX12_RESOURCE_BARRIER::UAV(_velocity->GetTex2D().Get()),
                                             CD3DX12_RESOURCE_BARRIER::UAV(_density->GetTex2D().Get()),
-                                            CD3DX12_RESOURCE_BARRIER::UAV(_boundaryCondition->GetTex2D().Get())
+                                            CD3DX12_RESOURCE_BARRIER::UAV(_boundaryMap->GetTex2D().Get())
     };
 
     COMPUTE_CMD_LIST->ResourceBarrier(_countof(uavBarriers), uavBarriers);
@@ -225,6 +244,8 @@ void StableFluids::Sourcing() {
 
 void StableFluids::ComputeVorticity() {
     // Vorticity calculation
+    _stableFluidsParamsCB->BindToCompute(CBV_REGISTER::b0);
+
     _velocity->BindSRVToCompute(SRV_REGISTER::t0);
     _vorticity->BindUAVToCompute(UAV_REGISTER::u0);
 
@@ -275,6 +296,8 @@ void StableFluids::Diffuse() {
             _density->BindUAVToCompute(UAV_REGISTER::u1);
         }
 
+        _boundaryMap->BindSRVToCompute(SRV_REGISTER::t2);
+
         GEngine->GetComputeDescHeap()->CommitTable();
 
         _diffuseCS->Update();
@@ -299,7 +322,10 @@ void StableFluids::Projection() {
     // Compute divergence
 
     {
+        _stableFluidsParamsCB->BindToCompute(CBV_REGISTER::b0);
+
         _velocity->BindSRVToCompute(SRV_REGISTER::t0);
+        _boundaryMap->BindSRVToCompute(SRV_REGISTER::t1);
         _divergence->BindUAVToCompute(UAV_REGISTER::u0);
         _pressure->BindUAVToCompute(UAV_REGISTER::u1);
         _pressureTemp->BindUAVToCompute(UAV_REGISTER::u2);
@@ -324,6 +350,10 @@ void StableFluids::Projection() {
         _jacobiCS->Update(); // ÇÑ ¹ø¸¸ Shader Update
 
         for (int32 i = 0; i < 100; i++) {
+            _stableFluidsParamsCB->BindToCompute(CBV_REGISTER::b0);
+
+            _boundaryMap->BindSRVToCompute(SRV_REGISTER::t2);
+
             if (i % 2 == 0) {
                 _pressure->BindSRVToCompute(SRV_REGISTER::t0);
                 _divergence->BindSRVToCompute(SRV_REGISTER::t1);
@@ -351,7 +381,11 @@ void StableFluids::Projection() {
     // Apply pressure
 
     {
+        _stableFluidsParamsCB->BindToCompute(CBV_REGISTER::b0);
+
         _pressure->BindSRVToCompute(SRV_REGISTER::t0);
+        _boundaryMap->BindSRVToCompute(SRV_REGISTER::t1);
+
         _velocity->BindUAVToCompute(UAV_REGISTER::u0);
 
         GEngine->GetComputeDescHeap()->CommitTable();

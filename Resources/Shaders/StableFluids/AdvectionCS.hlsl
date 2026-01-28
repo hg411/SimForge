@@ -49,13 +49,13 @@ void main(int3 gID : SV_GroupID, int3 gtID : SV_GroupThreadID,
     // 3. 그 위치에서 샘플링 해오기
     if (wallBoundaryCondition == 3)
     {
-        velocity[dtID.xy] = velocityTemp.SampleLevel(linearWrapSS, posBack, 0);
-        density[dtID.xy] = densityTemp.SampleLevel(linearWrapSS, posBack, 0);
+        velocity[dtID.xy] = velocityTemp.SampleLevel(linearWrapSS, posBack, 0) * 0.999;
+        density[dtID.xy] = densityTemp.SampleLevel(linearWrapSS, posBack, 0) * 0.999;
     }
     else
     {
-        velocity[dtID.xy] = velocityTemp.SampleLevel(linearClampSS, posBack, 0);
-        density[dtID.xy] = densityTemp.SampleLevel(linearClampSS, posBack, 0);
+        velocity[dtID.xy] = velocityTemp.SampleLevel(linearClampSS, posBack, 0) * 0.999;
+        density[dtID.xy] = densityTemp.SampleLevel(linearClampSS, posBack, 0) * 0.999;
     }
     
     //velocity[dtID.xy] = velocityTemp.SampleLevel(linearWrapSS, posBack, 0);
