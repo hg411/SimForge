@@ -263,6 +263,7 @@ void StableFluids::ComputeVorticity() {
 void StableFluids::ConfineVorticity() {
     _stableFluidsParamsCB->BindToCompute(CBV_REGISTER::b0);
 
+
     // Vorticity confinemenet
     _vorticity->BindSRVToCompute(SRV_REGISTER::t0);
     _velocity->BindUAVToCompute(UAV_REGISTER::u0);
